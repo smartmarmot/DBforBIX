@@ -33,9 +33,10 @@ public class SimpleItem extends AbstractItem {
 	private String query;
 	private String noData = "";
 	
-	public SimpleItem(String name, String query) {
+	public SimpleItem(String name, String query, String nodata) {
 		this.name = name;
 		this.query = query;
+		this.noData = nodata;
 	}
 	
 	@Override
@@ -59,7 +60,7 @@ public class SimpleItem extends AbstractItem {
 					colNum = rs.findColumn("value");
 				}
 				catch (SQLException sqlex) {
-					colNum = meta.getColumnCount(); // last column
+					colNum = meta.getColumnCount(); // to retrieve the last column
 				}
 				String fetchedVal = rs.getString(colNum);
 				if (fetchedVal != null)
@@ -75,6 +76,11 @@ public class SimpleItem extends AbstractItem {
 
 		if (val == null)
 			val = "";
+		if (val == noData){
+			String realName = name;
+			values.add(new ZabbixItem(realName, val, hostname));
+			}
+			
 
 		return values.toArray(new ZabbixItem[0]);
 	}

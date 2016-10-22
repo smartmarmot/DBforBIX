@@ -300,7 +300,7 @@ public class DBforBix implements Daemon {
 					break;
 					
 					case "query": {
-						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), itmE.getTextTrim());
+						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), itmE.getTextTrim(),itmE.attributeValue("nodata"));
 						itemSch.addItem(itemFile, item);
 					}
 					break;
@@ -349,7 +349,7 @@ public class DBforBix implements Daemon {
 					break;
 					
 					case "query": {
-						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), itmE.getTextTrim());
+						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), itmE.getTextTrim(), itmE.attributeValue("nodata"));
 						itemSch.addItem(itemFile, item);
 					}
 					break;
