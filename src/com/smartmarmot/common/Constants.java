@@ -20,7 +20,7 @@
 package com.smartmarmot.common;
 
 public class Constants {
-	public static final String VERSION = "Version 2.0-beta";
+	private static final String VERSION = "Version 2.1-beta";
 	public static final String BANNER = Constants.PROJECT_NAME + " " + VERSION;
-	public static final String PROJECT_NAME = "DBforBIX";
+	private static final String PROJECT_NAME = "DBforBIX";
 }

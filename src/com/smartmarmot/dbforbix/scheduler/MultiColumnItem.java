@@ -35,6 +35,7 @@ public class MultiColumnItem extends AbstractMultiItem {
 
 	@Override
 	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {
+		Long clock = new Long(System.currentTimeMillis() / 1000L);
 		PreparedStatement pstmt = con.prepareStatement(query);
 		pstmt.setQueryTimeout(timeout);
 		ResultSet rs = pstmt.executeQuery();
@@ -71,7 +72,7 @@ public class MultiColumnItem extends AbstractMultiItem {
 		if (val == null)
 			val = "";
 
-		return new ZabbixItem[]{new ZabbixItem(name, val, hostname)};
+		return new ZabbixItem[]{new ZabbixItem(hostname, name, val,clock)};
 	}
 
 

@@ -17,16 +17,19 @@
 
 package com.smartmarmot.dbforbix.config;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -35,7 +38,7 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixSender.PROTOCOL;
 
 public class Config {
 	
-	public interface Validable {
+	private interface Validable {
 		
 		public boolean isValid();
 	}
@@ -85,10 +88,11 @@ public class Config {
 		private String	user;
 		private String	password;
 		private String	instance;
-		private Integer maxactive;
-		private Integer maxidle;
-		private Integer maxwaitmillis;
+		private Integer maxactive = new Integer(15);
+		private Integer maxidle = new Integer(2);
+		private Integer maxwaitmillis = new Integer (10000);
 		private String  itemfile;
+		private Boolean persistent = false;
 		private int		queryTimeout;
 		
 		public DBType getType() {
@@ -102,6 +106,7 @@ public class Config {
 		public String getURL() {
 			return url;
 		}
+		
 		
 		public String getUser() {
 			return user;
@@ -153,6 +158,15 @@ public class Config {
 			this.itemfile = itemfile;
 		}
 
+		public void setPersistence(String pers) {
+			if (pers.equalsIgnoreCase("true")) {
+				this.persistent = true;
+			}
+		}
+		public Boolean getPersistence(){
+			return this.persistent;
+		}
+
 		public void setMaxActive(Integer maxactive) {
 			this.maxactive= maxactive;
 			
@@ -176,26 +190,27 @@ public class Config {
 	
 	private static Config			instance;
 	
-	public static final String		GLOBAL_NAME			= "DBforBix";
-	public static final String		GLOBAL_POOL			= "Pool";
-	public static final String		GLOBAL_ZBXSRV		= "ZabbixServer";
-	public static final String		GLOBAL_DB			= "DB";
+	private static final String		GLOBAL_NAME			= "DBforBix";
+	private static final String		GLOBAL_POOL			= "Pool";
+	private static final String		GLOBAL_ZBXSRV		= "ZabbixServer";
+	private static final String		GLOBAL_DB			= "DB";
 	
 	private Map<String, ZServer>	zbxservers;
 	private Map<String, Database>	databases;
 	
 	private String					basedir;
 	
-	public static final String		SET_LOGLEVEL	= GLOBAL_NAME + ".LogLevel";
+	private static final String		SET_LOGLEVEL	= GLOBAL_NAME + ".LogLevel";
 	private Level					logLevel		= Level.WARN;
-	public static final String		SET_LOGFILE	= GLOBAL_NAME + ".LogFile";
+	private static final String		SET_LOGFILE	= GLOBAL_NAME + ".LogFile";
 	private String					logFile			= "./logs/dbforbix.log";
-	public static final String		SET_LOGFILESIZE	= GLOBAL_NAME + ".LogFileSize";
+	private String					sspDir		 	= "./temp/";
+	private static final String		SET_LOGFILESIZE	= GLOBAL_NAME + ".LogFileSize";
 	private String					logFileSize		= "1MB";
 	
-	public static final String		SET_POOL_MAXACTIVE	= GLOBAL_POOL + ".MaxActive";
+	private static final String		SET_POOL_MAXACTIVE	= GLOBAL_POOL + ".MaxActive";
 	private int						maxActive		= 10;
-	public static final String		SET_POOL_MAXIDLE	= GLOBAL_POOL + ".TimeOut";
+	private static final String		SET_POOL_MAXIDLE	= GLOBAL_POOL + ".TimeOut";
 
 	private static final String 	SET_QUERY_TIMEOUT = GLOBAL_POOL+ ".QueryTimeOut";
 	private int			queryTimeout= 60;
@@ -225,9 +240,9 @@ public class Config {
 		LOG.debug("Parsing config file: " + file);
 		int queryTimeout = 60;
 		
-		try {
-			PropertiesConfiguration pcfg = new PropertiesConfiguration(file);
-			
+		try (FileReader reader = new FileReader(file)){
+	     		PropertiesConfiguration pcfg = new PropertiesConfiguration();
+		     	pcfg.read(reader);
 			if (pcfg.containsKey(SET_LOGLEVEL))
 				logLevel = Level.toLevel(pcfg.getString(SET_LOGLEVEL), Level.INFO);
 			if (pcfg.containsKey(SET_LOGFILE))
@@ -289,22 +304,15 @@ public class Config {
 		zbxservers.put(name, zsrv);
 	}
 	
-	/**
-	 * Read configuration value as database config
-	 * DB.DB2.MaxWait=10
-DB.DB2.MaxSize=10
-DB.DB2.MaxIdle=1
-DB.DB2.ItemFile=oracle
-	 */
+
 	private void readConfigDB(String group, String name, String key, String value) {
 		Database dbsrv = databases.get(name);
 		if (dbsrv == null)
 			dbsrv = new Database();
 		/* set defaults
 		 */
-		dbsrv.setMaxActive(15);
-		dbsrv.setMaxWaitMillis(10000);
-		dbsrv.setMaxIdle(2);
+		
+		
 		if ("Type".equalsIgnoreCase(key))
 			dbsrv.type = DBType.fromString(value);
 		else if ("Name".equalsIgnoreCase(key))
@@ -325,6 +333,8 @@ DB.DB2.ItemFile=oracle
 			dbsrv.setMaxIdle(Integer.parseInt(value));
 		else if ("ItemFile".equalsIgnoreCase(key))
 			dbsrv.setItemfile(value);
+		else if ("Persistence".equalsIgnoreCase(key))
+			dbsrv.setPersistence(value);
 		else
 			LOG.info("Invalid config item: " + group + "." + name + "." + key);
 		databases.put(name, dbsrv);
@@ -346,6 +356,10 @@ DB.DB2.ItemFile=oracle
 		return logFile;
 	}
 	
+	public String getSSPDir() {
+		return sspDir;
+	}
+	
 	public String getLogFileSize() {
 		return logFileSize;
 	}
@@ -363,10 +377,10 @@ DB.DB2.ItemFile=oracle
 	 */
 	public Collection<ZServer> getZabbixServers() {
 		Collection<ZServer> validServers = zbxservers.values();
-		CollectionUtils.filter(validServers, new Predicate() {
+		CollectionUtils.filter(validServers, new Predicate <Config.ZServer>() {
 			
 			@Override
-			public boolean evaluate(Object object) {
+			public boolean evaluate(Config.ZServer object) {
 				return ((ZServer) object).isValid();
 			}
 		});
@@ -378,10 +392,10 @@ DB.DB2.ItemFile=oracle
 	 */
 	public Collection<Database> getDatabases() {
 		Collection<Database> validDatabases = databases.values();
-		CollectionUtils.filter(validDatabases, new Predicate() {
+		CollectionUtils.filter(validDatabases, new Predicate<Database>() {
 			
 			@Override
-			public boolean evaluate(Object object) {
+			public boolean evaluate(Database object) {
 				return ((Database) object).isValid();
 			}
 		});

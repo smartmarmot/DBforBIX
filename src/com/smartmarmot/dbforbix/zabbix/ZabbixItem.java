@@ -26,12 +26,11 @@ public final class ZabbixItem implements Serializable {
 	private String				key;
 	private String				value;
 	private String				host;
-	private String				clock;
+	private Long				clock;
 	private String				lastlogsize;
 
-	public ZabbixItem() {}
 
-	public ZabbixItem(String key, String value, String host) {
+	public ZabbixItem(String host, String key, String value, Long clock) {
 		if (key == null || "".equals(key.trim()))
 			throw new IllegalArgumentException("empty key");
 		if (value == null)
@@ -42,6 +41,8 @@ public final class ZabbixItem implements Serializable {
 		this.key = key;
 		this.value = value;
 		this.host = host;
+		this.clock = clock;
+		
 	}
 
 	/**
@@ -65,7 +66,7 @@ public final class ZabbixItem implements Serializable {
 		return value;
 	}
 	
-	public String getClock() {
+	public Long getClock() {
 		return clock;
 	}
 

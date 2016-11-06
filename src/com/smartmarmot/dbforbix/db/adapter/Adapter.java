@@ -42,7 +42,9 @@ public interface Adapter {
 	public boolean hasDatabaseItems();
 	public boolean hasSchemaItems();
 	public boolean hasTablespaceItems();
+	public boolean getPersistence();
 	
 	public Connection getConnection() throws SQLException, ClassNotFoundException;
+	
 	
 }

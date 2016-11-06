@@ -17,13 +17,13 @@
 
 package com.smartmarmot.dbforbix.scheduler;
 
-public abstract class AbstractMultiItem extends AbstractItem {
+abstract class AbstractMultiItem extends AbstractItem {
 
 	protected String[] items;
 	protected String query;
 	protected String noData = "";
 	
-	public AbstractMultiItem(String prefix, String[] items, String query) {
+	AbstractMultiItem(String prefix, String[] items, String query) {
 		this.name = prefix;
 		this.items = items;
 		this.query = query;

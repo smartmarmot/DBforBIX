@@ -32,6 +32,7 @@ public class SimpleItem extends AbstractItem {
 
 	private String query;
 	private String noData = "";
+
 	
 	public SimpleItem(String name, String query, String nodata) {
 		this.name = name;
@@ -42,11 +43,12 @@ public class SimpleItem extends AbstractItem {
 	@Override
 	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {
 	 	List<ZabbixItem> values = new ArrayList<ZabbixItem>();
-		
-		PreparedStatement pstmt = con.prepareStatement(query);
+	 	PreparedStatement pstmt = con.prepareStatement(query);
 		pstmt.setQueryTimeout(timeout);
 		ResultSet rs = pstmt.executeQuery();
 		String val = noData;
+		Long clock = new Long(System.currentTimeMillis() / 1000L);
+		
 		while (rs.next()) {
 			ResultSetMetaData meta = rs.getMetaData();
 			if (meta.getColumnCount() == 1) {
@@ -69,7 +71,7 @@ public class SimpleItem extends AbstractItem {
 			String realName = name;
 			for(int i = 1; i<= meta.getColumnCount(); i++)
 				realName = realName.replace("%"+i, rs.getString(i));
-			values.add(new ZabbixItem(realName, val, hostname));
+			values.add(new ZabbixItem(hostname, realName, val,clock));
 		}
 		rs.close();
 		pstmt.close();
@@ -78,11 +80,13 @@ public class SimpleItem extends AbstractItem {
 			val = "";
 		if (val == noData){
 			String realName = name;
-			values.add(new ZabbixItem(realName, val, hostname));
+			values.add(new ZabbixItem(hostname, realName, val,clock));
 			}
 			
 
 		return values.toArray(new ZabbixItem[0]);
 	}
+
+	
 
 }

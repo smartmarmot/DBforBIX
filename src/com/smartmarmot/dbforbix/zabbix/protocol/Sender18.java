@@ -17,7 +17,9 @@
 
 package com.smartmarmot.dbforbix.zabbix.protocol;
 
-import org.apache.commons.lang.NotImplementedException;
+import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.codec.binary.Base64;
 
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
@@ -27,42 +29,58 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
  * @author Andrea Dalle Vacche
  */
 public class Sender18 implements SenderProtocol {
+	 private static final String data = "</key><data>";
+ 	
+	 private static final String time = "</data><timestamp>";
 
-	public Sender18() {
-		throw new NotImplementedException();
-	}
+	 private static final String tail = "</timestamp></req>";
 
 	@Override
 	public boolean isMultiValueSupported() {
 		return true;
 	}
 
-	private String buildJSonString(String host, String item, String value) {
-		return "{"
-				+ "\"request\":\"sender data\",\n"
-				+ "\"data\":[\n"
-				+ "{\n" + "\"host\":\""	+ host + "\",\n"
-				+ "\"key\":\"" + item+ "\",\n" 
-				+ "\"value\":\"" + value.replace("\\", "\\\\") 
-				+ "\"}]}\n";
+	   
+    /**
+	 * Encodes data for transmission to the server.
+	 * 
+	 * This method encodes the data in the ASCII encoding, defaulting to
+	 * the platform default encoding if that is somehow unavailable.
+	 * 	
+	 * @param data
+	 * @return byte[] containing the encoded data
+	 */
+	private byte[] encodeString(String data) {
+		try {
+			return data.getBytes("ASCII");
+		} catch (UnsupportedEncodingException e) {
+			return data.getBytes();
+		}
+	}
+	
+    private String base64Encode(String data) {
+		return new String(Base64.encodeBase64(encodeString(data)));
+	}
+
+	private String buildJSonString(String host, String item, String value, String clock) {
+		 String head = "<req><host>" + base64Encode(host) + "</host><key>";
+		 final StringBuilder message = new StringBuilder(head);
+	       
+	        message.append(base64Encode(item));
+	        message.append(data);
+	       
+	        message.append(base64Encode(value == null ? "" : value));
+	        message.append(time);
+	        message.append(base64Encode(clock));
+	        message.append(tail);
+
+		return message.toString();
 	}
 
 	@Override
 	public String encodeItem(ZabbixItem item) {
-		String payload = buildJSonString(item.getHost(), item.getKey(), item.getValue());
-		byte[] data = payload.getBytes();
-		int length = data.length;
-		
-		byte[] header = new byte[] {
-				'Z', 'B', 'X', 'D', 
-				'\1',
-				(byte)(length & 0xFF), 
-				(byte)((length >> 8) & 0x00FF), 
-				(byte)((length >> 16) & 0x0000FF), 
-				(byte)((length >> 24) & 0x000000FF),
-				'\0','\0','\0','\0'};
-		
-		return new String(header).concat(new String(data));
+		String payload = buildJSonString(item.getHost(), item.getKey(), item.getValue(),Long.toString(item.getClock()));
+		return payload;
 	}
 
 	@Override
@@ -73,8 +91,9 @@ public class Sender18 implements SenderProtocol {
 
 	@Override
 	public boolean isResponeOK(int readed, byte[] response) {
-		// TODO Auto-generated method stub
-		return false;
+		if (readed != 2 || response[0] != 'O' || response[1] != 'K')
+			return false;
+		return true;
 	}
 
 }

@@ -17,10 +17,6 @@
 
 package com.smartmarmot.dbforbix.db;
 
-import org.apache.commons.lang.NotImplementedException;
-
-import com.smartmarmot.dbforbix.db.DBConstants;
-
 /**
  * SQL database type
  * 
@@ -37,21 +33,21 @@ public enum DBType {
 	 */
 	
 	public static DBType fromString(String data) {
-		if ("db2".equalsIgnoreCase(data))
+		if (DBConstants.DB2.equalsIgnoreCase(data))
 			return DB2;
-		if ("oracle".equalsIgnoreCase(data))
+		if (DBConstants.ORACLE.equalsIgnoreCase(data))
 			return ORACLE;
-		if ("mssql".equalsIgnoreCase(data))
+		if (DBConstants.MSSQL.equalsIgnoreCase(data))
 			return MSSQL;
-		if ("mysql".equalsIgnoreCase(data))
+		if (DBConstants.MYSQL.equalsIgnoreCase(data))
 			return MYSQL;
-		if ("pgsql".equalsIgnoreCase(data) || "postgresql".equalsIgnoreCase(data))
+		if (DBConstants.PGSQL.equalsIgnoreCase(data))
 			return PGSQL;
-		if ("allbase".equalsIgnoreCase(data))
+		if (DBConstants.ALLBASE.equalsIgnoreCase(data))
 			return ALLBASE;
-		if ("sybase".equalsIgnoreCase(data))
+		if (DBConstants.SYBASE.equalsIgnoreCase(data))
 			return SYBASE;
-		if ("sqlany".equalsIgnoreCase(data))
+		if (DBConstants.SQLANY.equalsIgnoreCase(data))
 			return SQLANY;
 		return null;
 	}
@@ -71,7 +67,7 @@ public enum DBType {
 			case MYSQL:
 				return DBConstants.MYSQL_DRIVER;
 			case PGSQL:
-				return DBConstants.POSTGRESQL_DRIVER;
+				return DBConstants.PGSQL_DRIVER;
 			case ALLBASE :	
 				return DBConstants.ALLBASE_DRIVER;
 			case SYBASE :	
@@ -89,7 +85,7 @@ public enum DBType {
 	public String getAliveSQL() {
 		switch (this) {
 			case DB2:
-				throw new NotImplementedException();
+				return DBConstants.DB2_VALIDATION_QUERY;
 			case ORACLE:
 				return DBConstants.ORACLE_VALIDATION_QUERY;
 			case MSSQL:
@@ -97,7 +93,7 @@ public enum DBType {
 			case MYSQL:
 				return DBConstants.MYSQL_VALIDATION_QUERY;
 			case PGSQL:
-				return DBConstants.POSTGRESQL_VALIDATION_QUERY;
+				return DBConstants.PGSQL_VALIDATION_QUERY;
 			case ALLBASE :	
 				return DBConstants.ALLBASE_VALIDATION_QUERY;
 			case SYBASE :	
@@ -123,7 +119,7 @@ public enum DBType {
 			case MYSQL:
 				return DBConstants.MYSQL_WHOAMI_QUERY;
 			case PGSQL:
-				return DBConstants.POSTGRESQL_VALIDATION_QUERY;
+				return DBConstants.PGSQL_VALIDATION_QUERY;
 			case ALLBASE :	
 				return DBConstants.ALLBASE_WHOAMI_QUERY;
 			case SYBASE :	
@@ -149,7 +145,7 @@ public enum DBType {
 			case MYSQL:
 				return DBConstants.MYSQL_DBNAME_QUERY;
 			case PGSQL:
-				return DBConstants.POSTGRESQL_DBNAME_QUERY;
+				return DBConstants.PGSQL_DBNAME_QUERY;
 			case ALLBASE :	
 				return DBConstants.ALLBASE_DBNAME_QUERY;
 			case SYBASE :	

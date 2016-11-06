@@ -28,4 +28,5 @@ public interface Item {
 	public String getName();
 		
 	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException;
+
 }

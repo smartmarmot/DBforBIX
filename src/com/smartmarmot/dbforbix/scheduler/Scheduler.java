@@ -43,7 +43,7 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
  */
 public class Scheduler extends TimerTask {
 
-	public static final Logger		LOG		= Logger.getLogger(Scheduler.class);
+	private static final Logger		LOG		= Logger.getLogger(Scheduler.class);
 	private boolean					working	= false;
 	private int						pause;
 

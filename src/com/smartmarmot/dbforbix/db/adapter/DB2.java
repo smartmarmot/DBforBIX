@@ -22,7 +22,7 @@ import com.smartmarmot.dbforbix.db.DBType;
 
 public class DB2 extends AbstractAdapter {
 
-	public DB2(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle,Integer maxwaitmillis, String itemfile) {
+	public DB2(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle,Integer maxwaitmillis, String itemfile, Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -31,6 +31,7 @@ public class DB2 extends AbstractAdapter {
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis = maxwaitmillis.intValue();
 		this.itemfile = itemfile;
+		this.persistence = pers;
 				
 	}
 	

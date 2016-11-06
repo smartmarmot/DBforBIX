@@ -36,10 +36,10 @@ import java.util.Timer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.log4j.ConsoleAppender;
@@ -62,18 +62,19 @@ import com.smartmarmot.dbforbix.scheduler.MultiColumnItem;
 import com.smartmarmot.dbforbix.scheduler.MultiRowItem;
 import com.smartmarmot.dbforbix.scheduler.Scheduler;
 import com.smartmarmot.dbforbix.scheduler.SimpleItem;
+import com.smartmarmot.dbforbix.zabbix.PersistentStackSender;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
-import com.smartmarmot.dbforbix.zabbix.ZabbixSender.PROTOCOL;
 
 /**
  * DBforBix daemon main class
  */
 public class DBforBix implements Daemon {
 	
-	public static final Logger				LOG				= Logger.getLogger(DBforBix.class);
+	private static final Logger				LOG				= Logger.getLogger(DBforBix.class);
 	
 	private static Timer					workTimer;
 	private static ZabbixSender				zbxSender;
+	private static PersistentStackSender	persStackSender;           
 	private static Map<Integer, Scheduler>	scheduler		= new HashMap<Integer, Scheduler>();
 	
 	private static Options					options;
@@ -100,7 +101,7 @@ public class DBforBix implements Daemon {
 		
 		// handle command line parameters
 		try {
-			CommandLineParser cmdparser = new PosixParser();
+			CommandLineParser cmdparser = new DefaultParser();
 			CommandLine cmd = cmdparser.parse(options, args);
 			
 			if (cmd.hasOption("v")) {
@@ -187,10 +188,15 @@ public class DBforBix implements Daemon {
 						// writePid(_pid, _pidfile);
 						
 						workTimer = new Timer("QueryTimer");
-						zbxSender = new ZabbixSender(PROTOCOL.V14);
+						zbxSender = new ZabbixSender(ZabbixSender.PROTOCOL.V18);
 						
 						zbxSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
 						zbxSender.start();
+						
+						persStackSender = new PersistentStackSender(PersistentStackSender.PROTOCOL.V18);
+						persStackSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
+						persStackSender.start();
+						
 						
 						DBManager manager = DBManager.getInstance();
 						for (Config.Database db: config.getDatabases())
@@ -230,7 +236,7 @@ public class DBforBix implements Daemon {
 		}
 	}
 	
-	public static void displayUsage() {
+	private static void displayUsage() {
 		System.out.println(Constants.BANNER);
 		for (Option o: ((Collection<Option>) options.getOptions()))
 			System.out.println("\t-" + o.getOpt() + "\t" + o.getDescription());
@@ -375,6 +381,7 @@ public class DBforBix implements Daemon {
 	public static ZabbixSender getZSender() {
 		return zbxSender;
 	}
+	
 	
 	public static void writePid(String _pidfile) throws Exception {
 		RuntimeMXBean rmxb = ManagementFactory.getRuntimeMXBean();

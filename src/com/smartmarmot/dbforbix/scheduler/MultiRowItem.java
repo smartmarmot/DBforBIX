@@ -34,6 +34,8 @@ public class MultiRowItem extends AbstractMultiItem {
 
 	@Override
 	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {		
+		Long clock = new Long(System.currentTimeMillis() / 1000L);
+
 		PreparedStatement pstmt = con.prepareStatement(query);
 		
 		pstmt.setQueryTimeout(timeout);
@@ -42,14 +44,15 @@ public class MultiRowItem extends AbstractMultiItem {
 		
 		// fill with base items
 		for (String item: items)
-			values.put(item, new ZabbixItem(name+item, noData, hostname));
+			values.put(item, new ZabbixItem(hostname, name+item, noData,clock));
 		
 		// now check if we find better values
 		while (rs.next()) {
 			String fetchedName = rs.getString(1).toLowerCase();
 			String fetchedVal = rs.getString(2);
 			if (fetchedVal != null && values.containsKey(fetchedName)) {
-				values.put(fetchedName, new ZabbixItem(name+fetchedName, fetchedVal, hostname));
+				clock = new Long(System.currentTimeMillis() / 1000L);
+				values.put(fetchedName, new ZabbixItem(hostname, name+fetchedName, fetchedVal,clock));
 				
 			}
 		}

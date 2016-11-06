@@ -23,13 +23,17 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
+import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
-import com.smartmarmot.dbforbix.zabbix.protocol.Sender14;
+import com.smartmarmot.dbforbix.config.Config.Database;
+import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
 import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
 
 /**
@@ -40,7 +44,7 @@ import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
 public class ZabbixSender extends Thread {
 
 	public enum PROTOCOL {
-		V14, PROT18
+		V14, V18
 	}
 
 	private static final Logger	LOG					= Logger.getLogger(ZabbixSender.class);
@@ -54,7 +58,7 @@ public class ZabbixSender extends Thread {
 		super("ZabbixSender");
 		switch (protVer) {
 			default:
-				protocol = new Sender14();
+				protocol = new Sender18();
 			break;
 		}
 		setDaemon(true);
@@ -62,7 +66,7 @@ public class ZabbixSender extends Thread {
 
 	@Override
 	public void run() {
-		LOG.debug("starting sender thread");
+		LOG.debug("ZabbixSender - starting sender thread");
 		while (!terminate) {
 			if (items.peek() == null) {
 				try {
@@ -78,8 +82,18 @@ public class ZabbixSender extends Thread {
 					servers = configuredServers;
 				}
 
-				LOG.debug("Sending to " +nextItem.getHost() + " Item=" + nextItem.getKey() + " Value=" + nextItem.getValue());
-
+				LOG.debug("ZabbixSender - Sending to " +nextItem.getHost() + " Item=" + nextItem.getKey() + " Value=" + nextItem.getValue());
+				boolean persistent = false;
+				Config config = Config.getInstance();
+				Collection<Database> dbs = config.getDatabases();
+				Iterator<Database> iter = dbs.iterator();
+				while (iter.hasNext()){
+					Database myDBItem = iter.next();
+					if (myDBItem.getName().equals(nextItem.getHost())){
+						persistent=myDBItem.getPersistence();
+					}
+				}
+				
 				for (Config.ZServer serverConfig : servers) {
 					Socket zabbix = null;
 					OutputStreamWriter out = null;
@@ -100,12 +114,29 @@ public class ZabbixSender extends Thread {
 							in = zabbix.getInputStream();
 							final int read = in.read(response);
 							if (!protocol.isResponeOK(read, response))
-								LOG.warn("received unexpected response '" + new String(response).trim() + "' for key '" + nextItem.getKey()
+								LOG.warn("ZabbixSender - received unexpected response '" + new String(response).trim() + "' for key '" + nextItem.getKey()
 										+ "'");
 							break;
 						}
 						catch (Exception ex) {
-							LOG.error("Error contacting Zabbix server " + serverConfig.getHost() + " - " + ex.getMessage());
+							LOG.error("ZabbixSender - Error contacting Zabbix server " + serverConfig.getHost() + " - " + ex.getMessage());
+							if (!persistent){
+							LOG.debug("ZabbixSender - NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
+							}
+							if (persistent){
+								LOG.debug("ZabbixSender - Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+								LOG.info("ZabbixSender - Adding the item="+nextItem.getHost()+" key="+nextItem.getKey()+" value="+nextItem.getValue()+" clock="+nextItem.getClock()+ " to the persisent stack");
+								try {
+									StackSingletonPersistent.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
+									LOG.debug("ZabbixSender - Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+									
+								} catch (IOException e) {
+									LOG.debug("ZabbixSender - PeristentStack issue "+e);
+								
+								}
+									
+								
+							}
 						}
 						finally {
 							if (in != null)

@@ -20,11 +20,13 @@ package com.smartmarmot.dbforbix.db.adapter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.commons.dbcp.cpdsadapter.DriverAdapterCPDS;
-import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
+import org.apache.commons.dbcp2.cpdsadapter.DriverAdapterCPDS;
+import org.apache.commons.dbcp2.datasources.SharedPoolDataSource;
 import org.apache.log4j.Logger;
 
-public abstract class AbstractAdapter implements Adapter {
+import com.smartmarmot.dbforbix.config.Config;
+
+abstract class AbstractAdapter implements Adapter {
 
 	private static final Logger		LOG	= Logger.getLogger(AbstractAdapter.class);
 
@@ -38,12 +40,13 @@ public abstract class AbstractAdapter implements Adapter {
 	protected int 	 maxactive;
 	protected int    maxidle;
 	protected int    maxwaitmillis;
+	protected boolean persistence;
 
 	@Override
 	public Connection getConnection() throws SQLException, ClassNotFoundException {
 		if (datasrc == null) {
 			LOG.info("Creating new pool for database " + getName());
-
+			Config cfg=Config.getInstance();
 			DriverAdapterCPDS cpds = new DriverAdapterCPDS();
 			cpds.setDriver(getType().getJDBCDriverClass());
 			cpds.setUrl(getURL());
@@ -52,9 +55,11 @@ public abstract class AbstractAdapter implements Adapter {
 			datasrc = new SharedPoolDataSource();
 			datasrc.setConnectionPoolDataSource(cpds);
 			datasrc.setLoginTimeout(15);
-			datasrc.setMaxActive(getMaxActive());
-			datasrc.setMaxWait(getMaxWaitMillis());
-			datasrc.setMaxIdle(getMaxIdle());
+			
+			datasrc.setMaxTotal(cfg.getMaxActive());
+			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
+			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
+
 			datasrc.setValidationQuery(getType().getAliveSQL());
 		}
 		return datasrc.getConnection();
@@ -91,7 +96,9 @@ public abstract class AbstractAdapter implements Adapter {
 	public Integer getMaxWaitMillis() {
 		return maxwaitmillis;
 	}
-	
+	public boolean getPersistence() {
+		return persistence;
+	}
 
 	
 	@Override
@@ -113,7 +120,10 @@ public abstract class AbstractAdapter implements Adapter {
 	public boolean hasUserItems() {
 		return false;
 	}
-
+	
+	public boolean hasPersistence() {
+		return this.persistence;
+	}
 	@Override
 	public boolean hasDatabaseItems() {
 		return false;

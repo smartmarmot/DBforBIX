@@ -49,35 +49,35 @@ public class DBManager {
 		switch (cfg.getType()) {
 			case DB2:
 				databases.add(new DB2(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(), cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case ORACLE:
 				databases.add(new Oracle(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case MSSQL:
 				databases.add(new MSSQL(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case MYSQL:
 				databases.add(new MySQL(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case PGSQL:
 				databases.add(new PGSQL(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case ALLBASE:
 				databases.add(new ALLBASE(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case SYBASE:
 				databases.add(new SYBASE(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
 			break;
 			case SQLANY:
 				databases.add(new SQLANY(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(), cfg.getItemFile()));
+						,cfg.getMaxWaitMillis(), cfg.getItemFile(),cfg.getPersistence()));
 			break;
 		}
 	}

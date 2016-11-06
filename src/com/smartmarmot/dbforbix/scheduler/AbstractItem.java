@@ -17,12 +17,12 @@
 
 package com.smartmarmot.dbforbix.scheduler;
 
-public abstract class AbstractItem implements Item {
+abstract class AbstractItem implements Item {
 
 	protected String name;
 	
 	public String getName() {
 		return name;
 	}
-
+	
 }

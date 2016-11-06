@@ -53,6 +53,7 @@ public class Discovery implements Item {
 	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {
 		StringBuilder builder = new StringBuilder();
 		boolean first = true;
+		Long clock = new Long(System.currentTimeMillis() / 1000L);
 
 		PreparedStatement pstmt = con.prepareStatement(query);
 		pstmt.setQueryTimeout(timeout);
@@ -73,6 +74,8 @@ public class Discovery implements Item {
 		}
 
 		builder.append("]}");
-		return new ZabbixItem[] { new ZabbixItem(name, builder.toString(), hostname) };
+		return new ZabbixItem[] { new ZabbixItem(hostname, name, builder.toString(),clock) };
 	}
+
+
 }

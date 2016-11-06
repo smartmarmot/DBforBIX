@@ -22,7 +22,7 @@ import com.smartmarmot.dbforbix.db.DBType;
 
 public class Oracle extends AbstractAdapter {
 
-	public Oracle(String name, String url, String user, String passwd, Integer maxactive,Integer maxidle,Integer maxwaitmillis, String itemfile) {
+	public Oracle(String name, String url, String user, String passwd, Integer maxactive,Integer maxidle,Integer maxwaitmillis, String itemfile, Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -31,6 +31,7 @@ public class Oracle extends AbstractAdapter {
 		this.maxwaitmillis = maxwaitmillis;
 		this.maxidle = maxidle;
 		this.itemfile = itemfile;
+		this.persistence = pers;
 	}
 	
 
