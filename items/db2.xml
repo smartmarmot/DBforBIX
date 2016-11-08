@@ -1,0 +1,61 @@
+<!DOCTYPE parms SYSTEM "param.dtd">
+<parms type="db2" prefix="db2.">
+	<server>
+	<query time="300" item="databasesize" nodata="0">SELECT db_size FROM systools.stmg_dbsize_info;</query>
+	<query time="300" item="databasecapacity" nodata="0">SELECT db_capacity FROM systools.stmg_dbsize_info;</query>
+	<query time="300" item="version" nodata="0">select service_level concat ' FP' concat fixpack_num from sysibmadm.env_inst_info;</query>
+	<query time="300" item="instancename" nodata="0">select inst_name from sysibmadm.env_inst_info;</query>
+	<query time="300" item="productname" nodata="0">Select PRODUCT_NAME from sysibmadm.snapdbm;</query>
+	<query time="300" item="databasename" nodata="0">Select DB_NAME from sysibmadm.snapdb;</query>
+	
+	<query time="300" item="servicelevel" nodata="0">Select SERVICE_LEVEL from sysibmadm.snapdbm;</query>
+	<!-- Number of connections to the instance -->
+	<query time="300" item="instanceconnections" nodata="0">Select REM_CONS_IN + LOCAL_CONS  from sysibmadm.snapdbm;</query>
+	<!--  Used memory for instance -->
+	<query time="300" item="instanceusedmemory" nodata="0">Select sum(POOL_CUR_SIZE) from sysibmadm.SNAPDBM_MEMORY_POOL;</query>
+	<!--  Total number of connections to the database since database start-->
+	<query time="300" item="databaseconnections" nodata="0">Select TOTAL_CONS from sysibmadm.snapdb;</query>
+	<!-- % of used log -->
+	<query time="300" item="usedlog" nodata="0">Select TOTAL_LOG_USED *1. / TOTAL_LOG_AVAILABLE * 100. from sysibmadm.snapdb;</query>
+	<!-- Number of transactions in doubt (which hold locks) -->
+	<query time="60" item="transactionsindoubt" nodata="0">Select NUM_INDOUBT_TRANS from sysibmadm.snapdb;</query>
+	<!-- Number of lock escalation in exclusive mode -->
+	<query time="60" item="xlocksescalations" nodata="0">Select X_LOCK_ESCALS from sysibmadm.snapdb;</query>
+	<!-- Number of lock escalations -->
+	<query time="60" item="xlocksescalations" nodata="0">Select LOCK_ESCALS from sysibmadm.snapdb;</query>
+	<!-- number of locks timeouts -->
+	<query time="60" item="lockstimeouts" nodata="0">Select LOCK_TIMEOUTS from sysibmadm.snapdb;</query>
+	<!--  number of deadlocks -->
+	<query time="60" item="deadlocks" nodata="0">Select DEADLOCKS from sysibmadm.snapdb;</query>
+	<!-- Time of the last database backup -->
+	<query time="300" item="lastbackuptime" nodata="0">Select LAST_BACKUP from sysibmadm.snapdb;</query>
+	<!--  Database Status -->
+	<query time="300" item="databasestatus" nodata="0">select DB_STATUS from sysibmadm.snapdb;</query>
+	<!-- instance status -->
+	<query time="300" item="instancestatus" nodata="0">select DB2_STATUS from sysibmadm.snapdbm;</query>
+	<!-- Overall bufferpool index  hit ratio -->
+	<query time="60" item="bpindexhitratio" >select case POOL_INDEX_L_READS when  0 then 1 else (POOL_INDEX_L_READS * 1.  - POOL_INDEX_P_READS * 1.) / POOL_INDEX_L_READS end * 100.  from sysibmadm.snapdb;</query>
+	<!-- Overall bufferpool data hit ratio -->
+	<query time="60" item="bpdatahitratio">select case POOL_DATA_L_READS when 0 then 1 else (POOL_DATA_L_READS * 1.  - POOL_DATA_P_READS * 1.) / POOL_DATA_L_READS end *100. from sysibmadm.snapdb;</query>
+	<!-- Percentage of sorts in overflow -->
+	<query time="60" item="sortsinoverflow">select case TOTAL_SORTS when 0 then 0 else SORT_OVERFLOWS *1. / TOTAL_SORTS *1. end * 100. from sysibmadm.snapdb;</query>
+	<!-- Number of agent waiting to be able to work -->
+	<query time="60" item="agentswaiting">select COALESCE(AGENTS_WAITING_TOP,0) from sysibmadm.snapdbm;</query>
+	<!-- number of updates rows -->
+	<query time="60" item="updatedrows">Select ROWS_UPDATED from sysibmadm.snapdb;</query>
+	<query time="60" item="insertedrows">Select ROWS_INSERTED from sysibmadm.snapdb;</query>
+	<query time="60" item="selectedrows">Select ROWS_SELECTED from sysibmadm.snapdb;</query>
+	<query time="60" item="deletedrows">Select ROWS_DELETED from sysibmadm.snapdb;</query>
+	<query time="120" item="selects">Select SELECT_SQL_STMTS from sysibmadm.snapdb;</query>
+	<query time="120" item="staticsqls">Select STATIC_SQL_STMTS from sysibmadm.snapdb;</query>
+	<query time="120" item="dynamicsqls">Select DYNAMIC_SQL_STMTS  from sysibmadm.snapdb;</query>
+	<query time="120" item="rollbacks">Select ROLLBACK_SQL_STMTS  from sysibmadm.snapdb;</query>
+	<query time="120" item="commits">Select COMMIT_SQL_STMTS from sysibmadm.snapdb;</query>	
+	<!-- Overall bufferpool temporary index hit ratio -->
+	<query time="120" item="bptempindexhitratio">select case POOL_TEMP_INDEX_L_READS when 0 then 1 else (POOL_TEMP_INDEX_L_READS * 1. - POOL_TEMP_INDEX_P_READS * 1.) / POOL_TEMP_INDEX_L_READS end * 100 from sysibmadm.snapdb;</query>	
+	<!-- Overall bufferpool temporary data hit ratio -->
+	<query time="120" item="bptempdatahitratio">select case POOL_TEMP_DATA_L_READS when 0 then 1 else (POOL_TEMP_DATA_L_READS * 1. - POOL_TEMP_DATA_P_READS * 1.) /  POOL_TEMP_DATA_L_READS end * 100. from sysibmadm.snapdb;</query>	
+	</server>
+	<schema>
+	</schema>
+</parms>

@@ -1,0 +1,97 @@
+<!DOCTYPE parms SYSTEM "param.dtd">
+<parms type="oracle" prefix="oracle.">
+	<server>
+	   <discovery time="600" item="instance.discovery" names="INSTANCE">SELECT DISTINCT instance_name FROM v$instance</discovery>
+		<query time="120" item="instance.status[%1]">SELECT DISTINCT instance_name,status FROM v$instance</query>
+		
+		<discovery time="600" item="tablespace.discovery" names="TABLESPACE">SELECT DISTINCT name FROM v$tablespace WHERE name NOT IN ('TEMP')</discovery>
+		<query time="300" item="tablespace.bytes[%1]">SELECT tablespace_name,SUM(NVL(bytes,0)) AS bytes FROM dba_data_files GROUP BY tablespace_name</query>
+		<query time="300" item="tablespace.maxbytes[%1]">SELECT tablespace_name,SUM(NVL(bytes,0)) AS bytes, SUM(maxbytes) AS maxbytes FROM dba_data_files GROUP BY tablespace_name</query>
+
+		<query time="60" item="uptime" nodata="0">SELECT ROUND((sysdate-startup_time)*86400) retvalue FROM v$instance</query>
+		<query time="60" item="uptime" nodata="0">SELECT ROUND((sysdate-startup_time)*86400) retvalue FROM v$instance</query>
+		
+		<query time="60" item="users_locked" nodata="none">SELECT username||' '|| lock_date ||' '|| account_status 
+			FROM dba_users 
+			where ACCOUNT_STATUS like 'EXPIRED(GRACE)' or ACCOUNT_STATUS like 'LOCKED(TIMED)'
+        </query>
+		<query time="60" item="procnum">SELECT COUNT(*) procnum from v$process</query>
+		<query time="60" item="audit" nodata="none">select username "username",
+	to_char(timestamp,'DD-MON-YYYY HH24:MI:SS') "time_stamp",
+	action_name "statement",
+	os_username "os_username",
+	userhost "userhost",
+	returncode||decode(returncode,'1004','-Wrong Connection','1005','-NULL Password','1017','-Wrong Password','1045','-Insufficient Priviledge','0','-Login Accepted','--') "returncode"
+	from sys.dba_audit_session
+	where (sysdate - timestamp)*24 &lt; 1 and returncode  &lt;&gt; 0
+	order by timestamp
+	</query>
+		<query time="120" item="miss_latch">SELECT SUM(misses) FROM V$LATCH</query>
+		<query time="120" item="hitratio[%1]">SELECT namespace, gethitratio*100 get_pct FROM v$librarycache</query>
+		<query time="120" item="pinhitratio[%1]">SELECT namespace, pins/(pins+reloads)*100 "pin_hit_ratio" FROM v$librarycache WHERE (pins+reloads)!=0</query>
+
+		<query time="120" item="locked_users" nodata="0">SELECT COUNT(*) AS c FROM dba_users WHERE account_status IN('EXPIRED(GRACE)','LOCKED(TIMED)')</query>
+		<query time="120" item="sessions" nodata="0">SELECT COUNT(*) FROM v$session</query>
+		<query time="120" item="session_system" nodata="0">SELECT COUNT(*) FROM v$session WHERE type='BACKGROUND'</query>
+		<query time="120" item="session_active" nodata="0">SELECT COUNT(*) FROM v$session WHERE type!='BACKGROUND' AND status='ACTIVE'</query>
+ 		<query time="120" item="stats[%1]">SELECT REPLACE(name,' ','_'),value FROM sys.v_$sysstat WHERE name IN ('user I/O wait time','physical read total bytes','physical write total bytes','lob reads','lob writes')</query>
+		<query time="120" item="locks" nodata="none">SELECT sn.USERNAME ||'@'||sn.machine,
+								'|SID->' || m.SID,
+								'|Serial->'|| sn.SERIAL#,
+								'|Lock Type->'||m.TYPE,
+								decode(LMODE,
+									1, 'Null',
+									2, 'Row-S (SS)',
+									3, 'Row-X (SX)',
+									4, 'Share',
+									5, 'S/Row-X (SSX)',
+									6, 'Exclusive') lock_type,
+								decode(REQUEST,
+									0, 'None',
+									1, 'Null',
+									2, 'Row-S (SS)',
+									3, 'Row-X (SX)',
+								    4, 'Share',
+									5, 'S/Row-X (SSX)',
+									6, 'Exclusive') lock_requested,
+								'|Time (Sec)->'||m.CTIME "Time(sec)",
+								'|ID1->'||m.ID1,
+								'|ID2->'||m.ID2,
+								'|SQL Text->'||t.SQL_TEXT
+								from 	v$session sn,
+									v$lock m ,
+									v$sqltext t
+								where 	t.ADDRESS =sn.SQL_ADDRESS
+								and 	t.HASH_VALUE =sn.SQL_HASH_VALUE
+								and 	((sn.SID =m.SID and m.REQUEST !=0)
+								or 	(sn.SID =m.SID and m.REQUEST =0 and LMODE !=4 and (ID1, ID2) in
+								    (select s.ID1, s.ID2
+							    	 from 	v$lock S
+							     	where 	REQUEST !=0
+								 	and  s.ctime > 5
+							     	and 	s.ID1 =m.ID1
+							     	and 	s.ID2 =m.ID2)))
+								order by sn.USERNAME, sn.SID, t.PIECE 
+		</query>
+
+ 		<query time="600" item="maxcount[%1]">SELECT name,value FROM v$parameter WHERE name IN ('processes','sessions')</query>
+		<query time="600" item="dbfilesize">SELECT SUM(NVL(bytes,0)) val FROM dba_data_files</query>
+		<query time="600" item="dbsize">
+			SELECT SUM(NVL(a.bytes, 0) - NVL(f.bytes, 0)) val FROM sys.dba_tablespaces d, 
+			(SELECT tablespace_name, SUM(bytes) bytes FROM dba_data_files GROUP BY tablespace_name) a, 
+			(SELECT tablespace_name, SUM(bytes) bytes FROM dba_free_space GROUP BY tablespace_name) f 
+			WHERE d.tablespace_name = a.tablespace_name(+)
+				AND d.tablespace_name = f.tablespace_name(+) 
+				AND NOT (
+					d.extent_management LIKE 'LOCAL'
+					AND d.contents LIKE 'TEMPORARY'
+				)
+		</query>
+	    <query time="900" item="parameter[%1]">SELECT name,value FROM v$parameter WHERE name IN ('sga_max_size','memory_target','memory_max_target','shared_pool_reserved_size','db_block_size','log_buffer','db_files','parallel_server_instances','cluster_database_instances','db_flashback_retention_target','distributed_lock_timeout','create_bitmap_area_size','bitmap_merge_area_size','hash_area_size','sort_area_size')</query>
+		<query time="900" item="banner">SELECT ' - DB_NAME = &lt;b&gt;'||SYS_CONTEXT ('USERENV', 'DB_NAME') ||'&lt;/b&gt; - INSTANCE_NAME = &lt;b&gt;' ||SYS_CONTEXT ('USERENV', 'INSTANCE_NAME')||'&lt;/b&gt;' FROM dual
+		</query>
+		<query time="900" item="name">SELECT ' - DB_NAME = &lt;b&gt;'||SYS_CONTEXT ('USERENV', 'DB_NAME') ||'&lt;/b&gt; - INSTANCE_NAME = &lt;b&gt;' ||SYS_CONTEXT ('USERENV', 'INSTANCE_NAME')||'&lt;/b&gt;' FROM dual
+		</query>
+		
+	</server>
+</parms>
