@@ -238,8 +238,7 @@ public class Config {
 	 */
 	public void readConfig(String file) throws IOException {
 		LOG.debug("Parsing config file: " + file);
-		int queryTimeout = 60;
-		
+				
 		try (FileReader reader = new FileReader(file)){
 	     		PropertiesConfiguration pcfg = new PropertiesConfiguration();
 		     	pcfg.read(reader);

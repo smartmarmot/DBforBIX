@@ -28,8 +28,6 @@ import org.apache.log4j.Logger;
 
 import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
-import com.smartmarmot.dbforbix.zabbix.ZabbixSender.PROTOCOL;
-import com.smartmarmot.dbforbix.zabbix.protocol.Sender14;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
 import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
 

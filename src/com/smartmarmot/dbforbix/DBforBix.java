@@ -188,8 +188,8 @@ public class DBforBix implements Daemon {
 						// writePid(_pid, _pidfile);
 						
 						workTimer = new Timer("QueryTimer");
-						zbxSender = new ZabbixSender(ZabbixSender.PROTOCOL.V18);
 						
+						zbxSender = new ZabbixSender(ZabbixSender.PROTOCOL.V18);
 						zbxSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
 						zbxSender.start();
 						
@@ -214,12 +214,17 @@ public class DBforBix implements Daemon {
 				}
 				break;
 				case "stop": {
-					LOG.info("Stopping dbforbix");
+					LOG.info("Stopping "+Constants.BANNER);
 					if (workTimer != null)
 						workTimer.cancel();
 					if (zbxSender != null) {
 						zbxSender.terminate();
 						while (zbxSender.isAlive())
+							Thread.yield();
+					}
+					if (persStackSender != null) {
+						persStackSender.terminate();
+						while (persStackSender.isAlive())
 							Thread.yield();
 					}
 				}

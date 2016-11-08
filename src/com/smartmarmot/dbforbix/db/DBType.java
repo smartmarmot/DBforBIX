@@ -119,7 +119,7 @@ public enum DBType {
 			case MYSQL:
 				return DBConstants.MYSQL_WHOAMI_QUERY;
 			case PGSQL:
-				return DBConstants.PGSQL_VALIDATION_QUERY;
+				return DBConstants.PGSQL_WHOAMI_QUERY;
 			case ALLBASE :	
 				return DBConstants.ALLBASE_WHOAMI_QUERY;
 			case SYBASE :	
