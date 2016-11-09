@@ -11,6 +11,6 @@ The github repository is organized as follow:
 3 template: contains all the templeates developed (also included in the distribution package)
 4 conf: contains a sample configuration (also included in the distribution package)
 5 src: contains all the source code
-## notes about the the structure
+## Notes about the the structure
 In the dists directory you find the source code package that has generated a specific distribution. In this way you have all the code who generated a distribution.
 The template and items are available within the distributions files but also in a separate location to make it easy to pull change requests as well as the src and conf.
