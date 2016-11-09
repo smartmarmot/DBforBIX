@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-03-05T15:05:43Z</date>
+    <date>2016-11-09T14:09:22Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -11,6 +11,7 @@
         <template>
             <template>Template App Oracle Instance</template>
             <name>Template App Oracle Instance</name>
+            <description/>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -63,6 +64,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance db size</name>
@@ -105,6 +107,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance lob reads</name>
@@ -147,6 +150,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance lob writes</name>
@@ -189,6 +193,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance locked users</name>
@@ -232,6 +237,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance max processes</name>
@@ -274,6 +280,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance max sessions</name>
@@ -316,6 +323,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance memory target</name>
@@ -358,6 +366,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance memory target max</name>
@@ -400,6 +409,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance missed latches</name>
@@ -442,6 +452,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance physical read</name>
@@ -484,6 +495,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance physical write</name>
@@ -526,6 +538,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance proccess count</name>
@@ -568,6 +581,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance sessions</name>
@@ -610,6 +624,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance sessions active</name>
@@ -652,6 +667,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance sessions system</name>
@@ -694,6 +710,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance uptime</name>
@@ -736,6 +753,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance user connections</name>
@@ -778,6 +796,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Instance user iowait</name>
@@ -820,6 +839,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
             </items>
             <discovery_rules>
@@ -848,7 +868,18 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                     <publickey/>
                     <privatekey/>
                     <port/>
-                    <filter>{#TABLESPACE}:</filter>
+                    <filter>
+                        <evaltype>0</evaltype>
+                        <formula/>
+                        <conditions>
+                            <condition>
+                                <macro>{#TABLESPACE}</macro>
+                                <value/>
+                                <operator>8</operator>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
                     <lifetime>30</lifetime>
                     <description/>
                     <item_prototypes>
@@ -893,6 +924,7 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                                 </application>
                             </applications>
                             <valuemap/>
+                            <logtimefmt/>
                         </item_prototype>
                         <item_prototype>
                             <name>Size of {#TABLESPACE}</name>
@@ -935,10 +967,56 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                                 </application>
                             </applications>
                             <valuemap/>
+                            <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes/>
-                    <graph_prototypes/>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>size of {#TABLESPACE}</name>
+                            <width>900</width>
+                            <height>200</height>
+                            <yaxismin>0.0000</yaxismin>
+                            <yaxismax>100.0000</yaxismax>
+                            <show_work_period>1</show_work_period>
+                            <show_triggers>1</show_triggers>
+                            <type>0</type>
+                            <show_legend>1</show_legend>
+                            <show_3d>0</show_3d>
+                            <percent_left>0.0000</percent_left>
+                            <percent_right>0.0000</percent_right>
+                            <ymin_type_1>0</ymin_type_1>
+                            <ymax_type_1>0</ymax_type_1>
+                            <ymin_item_1>0</ymin_item_1>
+                            <ymax_item_1>0</ymax_item_1>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>0</sortorder>
+                                    <drawtype>2</drawtype>
+                                    <color>EE0000</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>2</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App Oracle Instance</host>
+                                        <key>oracle.tablespace.maxbytes[{#TABLESPACE}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <drawtype>1</drawtype>
+                                    <color>00DD00</color>
+                                    <yaxisside>0</yaxisside>
+                                    <calc_fnc>2</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App Oracle Instance</host>
+                                        <key>oracle.tablespace.bytes[{#TABLESPACE}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
                     <host_prototypes/>
                 </discovery_rule>
             </discovery_rules>
