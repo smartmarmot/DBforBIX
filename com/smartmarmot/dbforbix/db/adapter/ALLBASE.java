@@ -1,0 +1,26 @@
+package com.smartmarmot.dbforbix.db.adapter;
+
+import com.smartmarmot.dbforbix.db.DBType;
+
+
+public class ALLBASE extends AbstractAdapter {
+
+	public ALLBASE(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle,Integer maxwaitmillis,String itemGroupName, Boolean pers) {
+		this.name = name;
+		this.url = url;
+		this.user = user;
+		this.passwd = passwd;
+		this.maxactive = maxactive.intValue();
+		this.maxidle = maxidle.intValue();
+		this.maxwaitmillis=maxwaitmillis.intValue();
+		this.persistence = pers;
+		this.itemGroupName=itemGroupName;
+	}
+	
+	@Override
+	public DBType getType() {
+		return DBType.ALLBASE;
+	}
+
+	
+}
