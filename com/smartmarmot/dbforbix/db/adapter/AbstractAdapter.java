@@ -19,6 +19,8 @@ package com.smartmarmot.dbforbix.db.adapter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.dbcp2.cpdsadapter.DriverAdapterCPDS;
 import org.apache.commons.dbcp2.datasources.SharedPoolDataSource;
@@ -40,13 +42,13 @@ abstract class AbstractAdapter implements Adapter {
 	protected int    maxidle;
 	protected int    maxwaitmillis;
 	protected boolean persistence;
-	protected String itemGroupName;
+	protected Set<String> itemGroupName=new HashSet<String>();
 
-	public String getItemGroupName() {
+	public Set<String> getItemGroupNames() {
 		return itemGroupName;
 	}
 
-	public void setItemGroupName(String itemGroupName) {
+	public void addItemGroupName(Set<String> itemGroupName) {
 		this.itemGroupName = itemGroupName;
 	}
 
@@ -71,6 +73,17 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc.setValidationQuery(getType().getAliveSQL());
 		}
 		return datasrc.getConnection();
+	}
+	
+	@Override
+	public void abort(){
+		try {
+			datasrc.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		datasrc=null;
 	}
 	
 	@Override

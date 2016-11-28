@@ -38,6 +38,7 @@ public class MultiRowItem extends AbstractMultiItem {
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 
 		PreparedStatement pstmt = con.prepareStatement(query);
+			
 		
 		pstmt.setQueryTimeout(timeout);
 		ResultSet rs = pstmt.executeQuery();
@@ -57,7 +58,7 @@ public class MultiRowItem extends AbstractMultiItem {
 				
 			}
 		}
-		rs.close();
+		rs.close();		
 		pstmt.close();
 
 		return values.values().toArray(new ZabbixItem[0]);
