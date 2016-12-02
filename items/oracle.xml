@@ -4,7 +4,7 @@
 	   <discovery time="600" item="instance.discovery" names="INSTANCE">SELECT DISTINCT instance_name FROM v$instance</discovery>
 		<query time="120" item="instance.status[%1]">SELECT DISTINCT instance_name,status FROM v$instance</query>
 		
-		<discovery time="600" item="tablespace.discovery" names="TABLESPACE">SELECT DISTINCT name FROM v$tablespace WHERE name NOT IN ('TEMP')</discovery>
+		<discovery time="600" item="tablespace.discovery" names="TABLESPACE">SELECT tablespace_name FROM dba_tablespaces WHERE contents NOT IN ('TEMPORARY')</discovery>
 		<query time="300" item="tablespace.bytes[%1]">SELECT tablespace_name,SUM(NVL(bytes,0)) AS bytes FROM dba_data_files GROUP BY tablespace_name</query>
 		<query time="300" item="tablespace.maxbytes[%1]">SELECT tablespace_name,SUM(NVL(bytes,0)) AS bytes, SUM(maxbytes) AS maxbytes FROM dba_data_files GROUP BY tablespace_name</query>
 
