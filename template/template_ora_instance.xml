@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2016-11-09T14:09:22Z</date>
+    <date>2016-11-10T12:14:54Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -970,7 +970,17 @@ SELECT username||' '|| lock_date ||' '|| account_status FROM dba_users WHERE acc
                             <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
-                    <trigger_prototypes/>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template App Oracle Instance:oracle.tablespace.maxbytes[{#TABLESPACE}].last()}*0.95&lt;{Template App Oracle Instance:oracle.tablespace.bytes[{#TABLESPACE}].last()}</expression>
+                            <name>95% of tablespace {#TABLESPACE} used on {HOST.NAME}</name>
+                            <url/>
+                            <status>0</status>
+                            <priority>2</priority>
+                            <description/>
+                            <type>0</type>
+                        </trigger_prototype>
+                    </trigger_prototypes>
                     <graph_prototypes>
                         <graph_prototype>
                             <name>size of {#TABLESPACE}</name>

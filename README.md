@@ -6,11 +6,13 @@ The project's documentation is available here: http://www.smartmarmot.com/wiki/i
 
 # Github directory structure
 The github repository is organized as follow:
-1 dists: contains the packages ready to be used
-2 items: contains all the itemfiles developed (also included in the distribution package)
-3 template: contains all the templeates developed (also included in the distribution package)
-4 conf: contains a sample configuration (also included in the distribution package)
-5 src: contains all the source code
+* dists: contains the packages ready to be used
+* items: contains all the itemfiles developed (also included in the distribution package)
+* template: contains all the templeates developed (also included in the distribution package)
+* conf: contains a sample configuration (also included in the distribution package)
+* src: contains all the source code
+
+
 ## Notes about the the structure
 In the dists directory you find the source code package that has generated a specific distribution. In this way you have all the code who generated a distribution.
 The template and items are available within the distributions files but also in a separate location to make it easy to pull change requests as well as the src and conf.
