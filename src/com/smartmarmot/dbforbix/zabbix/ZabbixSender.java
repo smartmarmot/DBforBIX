@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
+import com.smartmarmot.common.PersistentDB;
 import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.config.Config.Database;
@@ -124,18 +125,10 @@ public class ZabbixSender extends Thread {
 							LOG.debug("ZabbixSender - NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
 							}
 							if (persistent){
-								LOG.debug("ZabbixSender - Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+								LOG.debug("ZabbixSender - Current PersistentDB size ="+PersistentDB.getInstance().size());
 								LOG.info("ZabbixSender - Adding the item="+nextItem.getHost()+" key="+nextItem.getKey()+" value="+nextItem.getValue()+" clock="+nextItem.getClock()+ " to the persisent stack");
-								try {
-									StackSingletonPersistent.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
-									LOG.debug("ZabbixSender - Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
-									
-								} catch (IOException e) {
-									LOG.debug("ZabbixSender - PeristentStack issue "+e);
-								
-								}
-									
-								
+								PersistentDB.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
+								LOG.debug("ZabbixSender - Current PersistentDB size ="+PersistentDB.getInstance().size());		
 							}
 						}
 						finally {

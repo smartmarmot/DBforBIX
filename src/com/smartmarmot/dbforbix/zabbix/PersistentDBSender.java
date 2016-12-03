@@ -17,7 +17,6 @@
 
 package com.smartmarmot.dbforbix.zabbix;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -26,7 +25,7 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
-import com.smartmarmot.common.StackSingletonPersistent;
+import com.smartmarmot.common.PersistentDB;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
 import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
@@ -36,20 +35,20 @@ import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
  * 
  * @author Andrea Dalle Vacche
  */
-public class PersistentStackSender extends Thread {
+public class PersistentDBSender extends Thread {
 
 	public enum PROTOCOL {
 		V14, V18
 	}
 
-	private static final Logger	LOG					= Logger.getLogger(PersistentStackSender.class);
+	private static final Logger	LOG					= Logger.getLogger(PersistentDBSender.class);
 	private boolean				terminate			= false;
 	private Config.ZServer[]	configuredServers	= new Config.ZServer[0];
 	private SenderProtocol		protocol;
 
 	
-	public PersistentStackSender(PROTOCOL protVer) {
-		super("PersistentStackSender");
+	public PersistentDBSender(PROTOCOL protVer) {
+		super("PersistentDBSender");
 		switch (protVer) {
 		default:
 			protocol = new Sender18();
@@ -60,11 +59,11 @@ public class PersistentStackSender extends Thread {
 
 	@Override
 	public void run() {
-		LOG.debug("PersistentStackSender - starting sender thread");
+		LOG.debug("PersistentDBSender - starting sender thread");
 		while (!terminate) {
 			try {
-				if (StackSingletonPersistent.getInstance().peek() == null) {
-					Thread.sleep(10000);
+				if (PersistentDB.getInstance().size() == 0L) {
+					Thread.sleep(60000);
 				}
 				else {
 					Config.ZServer[] servers;
@@ -72,10 +71,10 @@ public class PersistentStackSender extends Thread {
 						servers = configuredServers;
 					}
 
-					LOG.info("PersitenceStackSender - retrieving the first element to send");
-					while (StackSingletonPersistent.getInstance().size() != 0 ){
-						LOG.debug("PersistentStackSender - found "+StackSingletonPersistent.getInstance().size()+" persistent items to send");
-						ZabbixItem zx = (ZabbixItem) StackSingletonPersistent.getInstance().pop();
+					LOG.info("PersistentDBSender - retrieving the first element to send");
+					while (PersistentDB.getInstance().size() != 0L ){
+						LOG.debug("PersistentDBSender - found "+PersistentDB.getInstance().size()+" persistent items to send");
+						ZabbixItem zx = (ZabbixItem) PersistentDB.getInstance().pop();
 						for (Config.ZServer serverConfig : servers) {
 							try {
 								Socket zabbix = null;
@@ -87,7 +86,7 @@ public class PersistentStackSender extends Thread {
 								zabbix.setSoTimeout(5000);
 								zabbix.connect(new InetSocketAddress(serverConfig.getHost(), serverConfig.getPort()));
 								OutputStream os = zabbix.getOutputStream();
-								LOG.debug("PersistentStackSender - Sending to " +zx.getHost() + " Item=" + zx.getKey() + " Value=" + zx.getValue());
+								LOG.debug("PersistentDBSender - Sending to " +zx.getHost() + " Item=" + zx.getKey() + " Value=" + zx.getValue());
 								String data = protocol.encodeItem(zx);
 								out = new OutputStreamWriter(os);
 								out.write(data);
@@ -96,18 +95,18 @@ public class PersistentStackSender extends Thread {
 								in = zabbix.getInputStream();
 								final int read = in.read(response);
 								if (!protocol.isResponeOK(read, response))
-									LOG.warn("PersistentStackSender - Received unexpected response '" + new String(response).trim() + "' for key '" + zx.getKey()
+									LOG.warn("PersistentDBSender - Received unexpected response '" + new String(response).trim() + "' for key '" + zx.getKey()
 									+ "'");
 								in.close();
 								out.close();
 								zabbix.close();
 							}			 
 							catch (Exception ex) {
-								LOG.error("PersistentStackSender - Error contacting Zabbix server " + configuredServers[0].getHost() +" port "+ configuredServers[0].getPort()+ " - " + ex.getMessage());
-								LOG.debug("PersistentStackSender - Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
-								LOG.info("PersistentStackSender - Adding the item Adding the item="+zx.getHost()+" key="+zx.getKey()+" value="+zx.getValue()+" clock="+zx.getClock()+ " back to the persisent stack");
-								StackSingletonPersistent.getInstance().push(zx);
-								LOG.info("PersistentStackSender - going to sleep for 1 minute");
+								LOG.error("PersistentDBSender - Error contacting Zabbix server " + configuredServers[0].getHost() +" port "+ configuredServers[0].getPort()+ " - " + ex.getMessage());
+								LOG.debug("PersistentDBSender - Current PersistentDB size ="+PersistentDB.getInstance().size());
+								LOG.info("PersistentDBSender - Adding the item Adding the item="+zx.getHost()+" key="+zx.getKey()+" value="+zx.getValue()+" clock="+zx.getClock()+ " back to the persisent stack");
+								PersistentDB.getInstance().push(zx);
+								LOG.info("PersistentDBSender - going to sleep for 1 minute");
 								Thread.sleep(60000);	
 							}
 
@@ -116,7 +115,7 @@ public class PersistentStackSender extends Thread {
 				}
 			}
 			catch (Exception e) {
-				LOG.debug("PeristentStack issue "+e);
+				LOG.debug("PersistentDBSender - issue "+e);
 			}
 		}
 	}

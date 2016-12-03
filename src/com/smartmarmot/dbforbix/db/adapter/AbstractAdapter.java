@@ -61,7 +61,10 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
 
 			datasrc.setValidationQuery(getType().getAliveSQL());
-		}
+			datasrc.setDefaultTestOnBorrow(true);
+			datasrc.setDefaultTestOnCreate(true);
+			datasrc.setDefaultTestOnReturn(true);
+		}		
 		return datasrc.getConnection();
 	}
 	

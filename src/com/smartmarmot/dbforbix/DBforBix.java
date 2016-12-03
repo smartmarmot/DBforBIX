@@ -62,6 +62,7 @@ import com.smartmarmot.dbforbix.scheduler.MultiColumnItem;
 import com.smartmarmot.dbforbix.scheduler.MultiRowItem;
 import com.smartmarmot.dbforbix.scheduler.Scheduler;
 import com.smartmarmot.dbforbix.scheduler.SimpleItem;
+import com.smartmarmot.dbforbix.zabbix.PersistentDBSender;
 import com.smartmarmot.dbforbix.zabbix.PersistentStackSender;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
 
@@ -74,7 +75,7 @@ public class DBforBix implements Daemon {
 	
 	private static Timer					workTimer;
 	private static ZabbixSender				zbxSender;
-	private static PersistentStackSender	persStackSender;           
+	private static PersistentDBSender	persSender;           
 	private static Map<Integer, Scheduler>	scheduler		= new HashMap<Integer, Scheduler>();
 	
 	private static Options					options;
@@ -193,9 +194,9 @@ public class DBforBix implements Daemon {
 						zbxSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
 						zbxSender.start();
 						
-						persStackSender = new PersistentStackSender(PersistentStackSender.PROTOCOL.V18);
-						persStackSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
-						persStackSender.start();
+						persSender = new PersistentDBSender(PersistentDBSender.PROTOCOL.V18);
+						persSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
+						persSender.start();
 						
 						
 						DBManager manager = DBManager.getInstance();
@@ -222,9 +223,9 @@ public class DBforBix implements Daemon {
 						while (zbxSender.isAlive())
 							Thread.yield();
 					}
-					if (persStackSender != null) {
-						persStackSender.terminate();
-						while (persStackSender.isAlive())
+					if (persSender != null) {
+						persSender.terminate();
+						while (persSender.isAlive())
 							Thread.yield();
 					}
 				}

@@ -114,7 +114,7 @@ public class Scheduler extends TimerTask {
 			}
 		}
 		catch (Throwable th) {
-			LOG.error(th.getMessage(), th);
+			LOG.error("Scheduler - Error "+th.getMessage(), th);
 		}
 		working = false;
 	}
