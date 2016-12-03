@@ -73,7 +73,7 @@ public class PersistentDBSender extends Thread {
 
 					LOG.info("PersistentDBSender - retrieving the first element to send");
 					while (PersistentDB.getInstance().size() != 0L ){
-						LOG.debug("PersistentDBSender - found "+PersistentDB.getInstance().size()+" persistent items to send");
+						LOG.info("PersistentDBSender - found "+PersistentDB.getInstance().size()+" persistent items to send");
 						ZabbixItem zx = (ZabbixItem) PersistentDB.getInstance().pop();
 						for (Config.ZServer serverConfig : servers) {
 							try {

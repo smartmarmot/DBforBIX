@@ -123,10 +123,6 @@ abstract class AbstractAdapter implements Adapter {
 	public boolean hasUserItems() {
 		return false;
 	}
-	
-	public boolean hasPersistence() {
-		return this.persistence;
-	}
 	@Override
 	public boolean hasDatabaseItems() {
 		return false;
