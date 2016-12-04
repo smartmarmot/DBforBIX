@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Map;
 
 import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
@@ -32,8 +33,8 @@ public class Discovery extends AbstractItem {
 	private String		query;
 	private String[]	altNames;
 
-	public Discovery(String name, String query, ZServer zs) {
-		super(zs);
+	public Discovery(String name, String query, Map<String, String> itemConfig, ZServer zs) {
+		super(itemConfig,zs);
 		this.name = name;
 		this.query = query;
 	}
@@ -52,7 +53,7 @@ public class Discovery extends AbstractItem {
 	}
 
 	@Override
-	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {
+	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
 		StringBuilder builder = new StringBuilder();
 		boolean first = true;
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
@@ -76,7 +77,7 @@ public class Discovery extends AbstractItem {
 		}
 
 		builder.append("]}");
-		return new ZabbixItem[] { new ZabbixItem(hostname, name, builder.toString(),clock, this) };
+		return new ZabbixItem[] { new ZabbixItem(name, builder.toString(),clock, this) };
 	}
 
 

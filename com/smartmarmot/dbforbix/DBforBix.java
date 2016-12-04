@@ -23,15 +23,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Timer;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -48,11 +43,8 @@ import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.SimpleLayout;
 import com.smartmarmot.common.Constants;
 import com.smartmarmot.dbforbix.config.Config;
-import com.smartmarmot.dbforbix.config.Config.Database;
 import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.db.DBManager;
-import com.smartmarmot.dbforbix.db.adapter.Adapter;
-import com.smartmarmot.dbforbix.scheduler.Scheduler;
 import com.smartmarmot.dbforbix.zabbix.PersistentStackSender;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
 
@@ -67,7 +59,7 @@ public class DBforBix implements Daemon {
 	/**
 	 * <itemGroupName,Timer>
 	 */
-	private static Map<String,Timer>		workTimers = new HashMap<String, Timer>();
+
 	private static ZabbixSender				zbxSender;
 	private static PersistentStackSender	persStackSender;  
 	private static boolean debug = false;
@@ -192,7 +184,8 @@ public class DBforBix implements Daemon {
 //		if (!"stop".equalsIgnoreCase(action))
 //			config.loadItemConfigFromZabbix();
 		
-		while(true){			
+
+		while(true){
 			try {
 				switch (action.toLowerCase()) {
 					case "start": {						
@@ -209,29 +202,16 @@ public class DBforBix implements Daemon {
 //						persStackSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
 //						persStackSender.start();							
 						
-						DBManager manager = DBManager.getInstance();
-						for (Database db:config.getDatabases()){
-							manager.addDatabase(db);
-							for(String itemGroupName:db.getItemGroupNames()){
-								Timer workTimer=new Timer(itemGroupName);
-								workTimers.put(itemGroupName,workTimer);
-								int i = 0;								
-								for (Entry<Integer, Scheduler> element: config.getScheduler(itemGroupName).entrySet()) {
-									LOG.info("creating worker("+itemGroupName+") for timing: " + element.getKey());
-									i++;
-									workTimer.scheduleAtFixedRate(element.getValue(), 500 + i * 500, (long)(element.getKey() * 1000));									
-								}
-							}
-						}
+						config.startChecks();
 						action="update";
 					}
 					break;
 					case "update": {
-						Thread.sleep(120000);// TODO: take update period from config in seconds
-						if(config.isConfigFileChanged()) action="stop";
+						Thread.sleep(5000);// TODO: take update period from config in seconds
+						if(config.checkConfigChanges()) action="stop";
 						else {
 							for (ZServer zs:config.getZabbixServers()){
-								for(HashMap<String, String> itemConfig:zs.getItemConfigs()){
+								for(Map<String, String> itemConfig:zs.getItemConfigs()){
 									
 								}
 							}							
@@ -239,11 +219,8 @@ public class DBforBix implements Daemon {
 					}
 					break;
 					case "stop": {
-						LOG.info("Stopping dbforbix");						
-						if (workTimers != null)
-							for(Entry<String, Timer> element:workTimers.entrySet())	element.getValue().cancel();
-						Thread.sleep(100);
-						workTimers.clear();						
+						LOG.info("Stopping dbforbix");
+						config=config.reset();
 						if (zbxSender != null) {
 							zbxSender.terminate();
 							while (zbxSender.isAlive())
@@ -251,10 +228,9 @@ public class DBforBix implements Daemon {
 						}
 						//workTimers=new HashMap<String, Timer>();
 						zbxSender=null;
-						config=config.reinit();
 						
 						DBManager dbman=DBManager.getInstance();
-						dbman=dbman.reinit();				
+						dbman=dbman.reinit();			
 						
 						action="start";
 					}

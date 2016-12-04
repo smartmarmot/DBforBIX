@@ -95,7 +95,7 @@ public class Scheduler extends TimerTask {
 						try {
 							for (Item item : set.getValue()) {
 								try {
-									ZabbixItem[] result = item.getItemData(con, db.getName(),config.getQueryTimeout());
+									ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
 									if (result != null)
 										for (ZabbixItem i : result)
 											sender.addItem(i);
