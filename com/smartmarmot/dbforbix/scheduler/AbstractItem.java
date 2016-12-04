@@ -17,6 +17,8 @@
 
 package com.smartmarmot.dbforbix.scheduler;
 
+import java.util.Map;
+
 import com.smartmarmot.dbforbix.config.Config.ZServer;
 
 abstract class AbstractItem implements Item {
@@ -29,8 +31,11 @@ abstract class AbstractItem implements Item {
 	
 	
 	private ZServer zServer = null;
+	private Map<String,String> itemConfig = null;
 	
-	public AbstractItem(ZServer zs){
+	
+	public AbstractItem(Map<String, String> itemConfig, ZServer zs){
+		this.setItemConfig(itemConfig);
 		zServer=zs;
 	}
 	
@@ -44,6 +49,19 @@ abstract class AbstractItem implements Item {
 	
 	public ZServer getZServer(){
 		return zServer;
+	}
+
+	public Map<String,String> getItemConfig() {
+		return itemConfig;
+	}
+
+	public boolean setItemConfig(Map<String,String> itemConfig) {
+		if(this.itemConfig!=null) return false;
+		else{
+			this.itemConfig = itemConfig;
+			return true;
+		}
+		
 	}
 	
 }

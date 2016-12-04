@@ -24,6 +24,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
@@ -35,15 +36,15 @@ public class SimpleItem extends AbstractItem {
 	private String noData = "";
 
 	
-	public SimpleItem(String name, String query, String nodata, ZServer zs) {
-		super(zs);
+	public SimpleItem(String name, String query, String nodata, Map<String, String> itemConfig, ZServer zs) {
+		super(itemConfig,zs);
 		this.name = name;
 		this.query = query;
 		this.noData = nodata;
 	}
 	
 	@Override
-	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {
+	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
 	 	List<ZabbixItem> values = new ArrayList<ZabbixItem>();
 	 	PreparedStatement pstmt = con.prepareStatement(query);
 		pstmt.setQueryTimeout(timeout);
@@ -73,7 +74,7 @@ public class SimpleItem extends AbstractItem {
 			String realName = name;
 			for(int i = 1; i<= meta.getColumnCount(); i++)
 				realName = realName.replace("%"+i, rs.getString(i));
-			values.add(new ZabbixItem(hostname, realName, val,clock, this));
+			values.add(new ZabbixItem(realName, val,clock, this));
 		}
 		rs.close();
 		pstmt.close();
@@ -82,7 +83,7 @@ public class SimpleItem extends AbstractItem {
 			val = "";
 		if (val == noData){
 			String realName = name;
-			values.add(new ZabbixItem(hostname, realName, val,clock, this));
+			values.add(new ZabbixItem(realName, val,clock, this));
 			}
 			
 

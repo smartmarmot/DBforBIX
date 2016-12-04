@@ -19,7 +19,7 @@ package com.smartmarmot.dbforbix.scheduler;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.util.Map;
 
 import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
@@ -29,8 +29,9 @@ public interface Item {
 
 	public String getName();
 		
-	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException;
+	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException;
 
 	public boolean setZServer(ZServer zs);
 	public ZServer getZServer();
+	public Map<String,String> getItemConfig();
 }

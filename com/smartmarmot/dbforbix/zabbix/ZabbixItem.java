@@ -33,20 +33,18 @@ public final class ZabbixItem implements Serializable {
 	private Item				confItem;
 
 
-	public ZabbixItem(String host, String key, String value, Long clock, Item confItem) {
+	public ZabbixItem(String key, String value, Long clock, Item confItem) {
 		if (key == null || "".equals(key.trim()))
 			throw new IllegalArgumentException("empty key");
 		if (value == null)
 			throw new IllegalArgumentException("null value for key '" + key + "'");
-		if (host == null)
-			throw new IllegalArgumentException("null host for key '" + key + "'");
 		if (confItem == null)
 			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
 		this.key = key;
 		this.value = value;
-		this.host = host;
 		this.clock = clock;
+		this.host=confItem.getItemConfig().get("host");
 		this.setConfItem(confItem);
 		
 	}

@@ -30,12 +30,12 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
 public class MultiColumnItem extends AbstractMultiItem {
 
-	public MultiColumnItem(String prefix, String[] items, String query, ZServer zs) {
-		super(prefix, items, query, zs);
+	public MultiColumnItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
+		super(prefix, items, query, itemConfig, zs);
 	}
 
 	@Override
-	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {
+	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 		PreparedStatement pstmt = con.prepareStatement(query);
 		pstmt.setQueryTimeout(timeout);
@@ -73,7 +73,7 @@ public class MultiColumnItem extends AbstractMultiItem {
 		if (val == null)
 			val = "";
 
-		return new ZabbixItem[]{new ZabbixItem(hostname, name, val,clock, this)};
+		return new ZabbixItem[]{new ZabbixItem(name, val,clock, this)};
 	}
 
 
