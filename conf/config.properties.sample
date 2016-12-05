@@ -9,6 +9,9 @@ DBforBix.LogFile=./logs/dbforbix.log
 # Maximum log file size
 DBforBix.LogFileSize=1MB
 
+# Persistence Database Directory
+DBforBix.PersistenceDir=./persistentdb/
+
 ### Configuration of Connection pool ###
 
 # Maximum number of active connection inside pool
@@ -28,6 +31,7 @@ ZabbixServer.1.Port=10051
 
 # Define your database connections
 # Please note that possible database type are: DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY;
+# Please remember to set the for the properties .Persistence to TRUE or FALSE 
 # You can replace every "DB<Number>" in DB.DB<NUMBER>.property with the database name or any mnemonic string you like
 # NOTE: you can specify DB.<DATABASE>.Instance=<INSTANCE NAME> this is an optional instance parameter. This parameter is used to replace %INSTANCE% parameters in item queries.
 
@@ -40,6 +44,7 @@ ZabbixServer.1.Port=10051
 #DB.DB1.MaxSize=10
 #DB.DB1.MaxIdle=1
 #DB.DB1.ItemFile=oracle
+#DB.DB1.Persistence=TRUE
 
 #DB.DB3.Type=mssql
 #DB.DB3.Name=MSSQLSRV
@@ -50,6 +55,7 @@ ZabbixServer.1.Port=10051
 #DB.DB3.MaxSize=10
 #DB.DB3.MaxIdle=1
 #DB.DB3.ItemFile=mssql
+#DB.DB3.Persistence=FALSE
 
 #DB.DB4.Type=mysql
 #DB.DB4.Name=MYSQLSrv
@@ -60,3 +66,4 @@ ZabbixServer.1.Port=10051
 #DB.DB4.MaxSize=10
 #DB.DB4.MaxIdle=1
 #DB.DB4.ItemFile=mysql
+#DB.DB4.Persistence=FALSE
