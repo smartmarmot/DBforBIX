@@ -38,6 +38,7 @@ import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.config.Config.Database;
 import com.smartmarmot.dbforbix.config.Config.ZServer;
+import com.smartmarmot.dbforbix.scheduler.Discovery;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender32;
 import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
@@ -84,16 +85,16 @@ public class ZabbixSender extends Thread {
 				//take bulk of items to send
 				int maxItems=100;
 				//ZabbixItem[] itemsReady=new ZabbixItem[maxItems];
-				Map<Config.ZServer,Collection<ZabbixItem>> mZS2Items = new HashMap<Config.ZServer, Collection<ZabbixItem> >();
+				Map<Config.ZServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<Config.ZServer, Collection<ZabbixItem> >();
 				for(int i=0;(i<maxItems)&&(items.peek()!=null);++i){
-					ZabbixItem nextItem=items.poll();
+					ZabbixItem nextItem=items.poll();					
 					if(nextItem.getValue().isEmpty()) {
 						LOG.warn("Item "+nextItem+" has empty value!");
 						continue;
 					}
 					Config.ZServer zs=nextItem.getConfItem().getZServer();
-					if(mZS2Items.get(zs)==null) mZS2Items.put(zs, new HashSet<ZabbixItem>());
-					mZS2Items.get(zs).add(nextItem);
+					if(mZServer2ZItems.get(zs)==null) mZServer2ZItems.put(zs, new HashSet<ZabbixItem>());
+					mZServer2ZItems.get(zs).add(nextItem);
 				}
 
 //				Config.ZServer[] servers;
@@ -103,7 +104,7 @@ public class ZabbixSender extends Thread {
 				
 				
 
-				for(Entry<ZServer, Collection<ZabbixItem>> m:mZS2Items.entrySet()){
+				for(Entry<ZServer, Collection<ZabbixItem>> m:mZServer2ZItems.entrySet()){
 					LOG.debug("ZabbixSender: Sending to " + m.getKey() + " Items[" + m.getValue().size() + "]=" + m.getValue());
 				}
 				boolean persistent = false;
@@ -117,11 +118,43 @@ public class ZabbixSender extends Thread {
 //					}
 //				}
 				
-				for (Config.ZServer zs : mZS2Items.keySet()) {
+				for (Entry<ZServer, Collection<ZabbixItem>> entry : mZServer2ZItems.entrySet()) {					
+					ZServer zs=entry.getKey();
+					Collection<ZabbixItem> zItems=entry.getValue();
+					Collection<ZabbixItem> zDiscoveries= new HashSet<ZabbixItem>();
+					Collection<ZabbixItem> zHistories = new HashSet<ZabbixItem>();
+
+					// separate Discovery and History data: they should be run in different requests with different types 
+					for(ZabbixItem zItem:zItems){
+						if(zItem.getConfItem() instanceof Discovery){
+							zDiscoveries.add(zItem);
+						}else{
+							zHistories.add(zItem);
+						}
+					}					
+					
+					//Send discovery
+					for (ZabbixItem zDiscovery:zDiscoveries){
+						for (int i = 0; i < 3; ++i) {
+							String resp=new String();
+							try {							
+								String data = protocol.encodeItem(zDiscovery);						
+								LOG.debug("ZabbixSender[data]: "+data);
+								resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
+								LOG.debug("ZabbixSender[resp]: "+resp);
+								break;
+							}
+							catch (Exception ex) {
+								LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());																
+							}
+						}
+					}
+					
+					//Send history bulk
 					for (int i = 0; i < 3; ++i) {
 						String resp=new String();
-						try {							
-							String data = protocol.encodeItem(mZS2Items.get(zs).toArray(new ZabbixItem[0]));						
+						try {
+							String data = protocol.encodeItems(zHistories.toArray(new ZabbixItem[0]));						
 							LOG.debug("ZabbixSender[data]: "+data);
 							resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
 							LOG.debug("ZabbixSender[resp]: "+resp);

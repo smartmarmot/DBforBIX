@@ -25,7 +25,7 @@ public interface SenderProtocol {
 
 	public String encodeItem(ZabbixItem item);
 	
-	public String encodeItem(ZabbixItem[] item);
+	public String encodeItems(ZabbixItem[] item);
 	
 	public boolean isResponeOK(int readed, byte[] response);
 }

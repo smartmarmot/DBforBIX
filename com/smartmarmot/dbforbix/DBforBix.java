@@ -209,7 +209,7 @@ public class DBforBix implements Daemon {
 					}
 					break;
 					case "update": {
-						Thread.sleep(5000);// TODO: take update period from config in seconds
+						Thread.sleep(100000);// TODO: take update period from config in seconds
 						if(config.checkConfigChanges()) action="stop";
 						else {
 							for (ZServer zs:config.getZabbixServers()){
