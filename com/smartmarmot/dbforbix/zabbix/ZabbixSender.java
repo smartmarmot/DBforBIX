@@ -134,49 +134,105 @@ public class ZabbixSender extends Thread {
 					}					
 					
 					//Send discovery
-					for (ZabbixItem zDiscovery:zDiscoveries){
+//					for (ZabbixItem zDiscovery:zDiscoveries){
+//						for (int i = 0; i < 3; ++i) {
+//							String resp=new String();
+//							try {							
+//								String data = protocol.encodeItem(zDiscovery);						
+//								LOG.debug("ZabbixSender[data]: "+data);
+//								resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
+//								LOG.debug("ZabbixSender[resp]: "+resp);
+//								break;
+//							}
+//							catch (Exception ex) {
+//								LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());																
+//							}
+//						}
+//					}
+					
+					//Discovery bulk
+//					if (zDiscoveries.size()>0){
+//						for (int i = 0; i < 3; ++i) {
+//							String resp=new String();
+//							try {
+//								String data = protocol.encodeItems(zDiscoveries.toArray(new ZabbixItem[0]));						
+//								LOG.debug("ZabbixSender[data]: "+data);
+//								resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
+//								LOG.debug("ZabbixSender[resp]: "+resp);
+//								break;
+//							}
+//							catch (Exception ex) {
+//								LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());
+//								if (!persistent){
+//									//LOG.debug("ZabbixSender: NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
+//								}
+//								if (persistent){
+//									LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());						
+//								}
+//							}						
+//						}
+//					}
+					
+					//Send history bulk
+//					if(zHistories.size()>0){
+//						for (int i = 0; i < 3; ++i) {
+//							String resp=new String();
+//							try {
+//								String data = protocol.encodeItems(zHistories.toArray(new ZabbixItem[0]));						
+//								LOG.debug("ZabbixSender[data]: "+data);
+//								resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
+//								LOG.debug("ZabbixSender[resp]: "+resp);
+//								break;
+//							}
+//							catch (Exception ex) {
+//								LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());
+//								if (!persistent){
+//									//LOG.debug("ZabbixSender: NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
+//								}
+//								if (persistent){
+//									LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+//									//LOG.info("ZabbixSender: Adding the item="+nextItem.getHost()+" key="+nextItem.getKey()+" value="+nextItem.getValue()+" clock="+nextItem.getClock()+ " to the persisent stack");
+//	//								try {
+//	//									StackSingletonPersistent.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
+//	//									LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+//	//								} catch (IOException e) {
+//	//									LOG.debug("ZabbixSender: PeristentStack issue "+e);
+//	//								}								
+//								}
+//							}						
+//						}
+//					}
+					
+
 						for (int i = 0; i < 3; ++i) {
 							String resp=new String();
-							try {							
-								String data = protocol.encodeItem(zDiscovery);						
+							try {
+								String data = protocol.encodeItems(zItems.toArray(new ZabbixItem[0]));						
 								LOG.debug("ZabbixSender[data]: "+data);
 								resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
 								LOG.debug("ZabbixSender[resp]: "+resp);
 								break;
 							}
 							catch (Exception ex) {
-								LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());																
-							}
+								LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());
+								if (!persistent){
+									//LOG.debug("ZabbixSender: NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
+								}
+								if (persistent){
+									LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+									//LOG.info("ZabbixSender: Adding the item="+nextItem.getHost()+" key="+nextItem.getKey()+" value="+nextItem.getValue()+" clock="+nextItem.getClock()+ " to the persisent stack");
+	//								try {
+	//									StackSingletonPersistent.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
+	//									LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+	//								} catch (IOException e) {
+	//									LOG.debug("ZabbixSender: PeristentStack issue "+e);
+	//								}								
+								}
+							}						
 						}
-					}
 					
-					//Send history bulk
-					for (int i = 0; i < 3; ++i) {
-						String resp=new String();
-						try {
-							String data = protocol.encodeItems(zHistories.toArray(new ZabbixItem[0]));						
-							LOG.debug("ZabbixSender[data]: "+data);
-							resp=config.requestZabbix(zs.getHost(),zs.getPort(),data);
-							LOG.debug("ZabbixSender[resp]: "+resp);
-							break;
-						}
-						catch (Exception ex) {
-							LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getHost() + " - " + ex.getMessage());
-							if (!persistent){
-								//LOG.debug("ZabbixSender: NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
-							}
-							if (persistent){
-								LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
-								//LOG.info("ZabbixSender: Adding the item="+nextItem.getHost()+" key="+nextItem.getKey()+" value="+nextItem.getValue()+" clock="+nextItem.getClock()+ " to the persisent stack");
-//								try {
-//									StackSingletonPersistent.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
-//									LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
-//								} catch (IOException e) {
-//									LOG.debug("ZabbixSender: PeristentStack issue "+e);
-//								}								
-							}
-						}						
-					}
+					
+					
 				}
 			}
 		}

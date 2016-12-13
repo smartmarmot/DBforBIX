@@ -219,6 +219,16 @@ public class Config {
 			return host;
 		}
 
+		public String getHostMacroValue(String hostid, String db) {
+			for(int hm=0;hm<hostmacro.get("hostid").size();++hm){
+				if(hostmacro.get("hostid").get(hm).equals(hostid) 
+					&& hostmacro.get("macro").get(hm).equals(db)){
+					return hostmacro.get("value").get(hm);
+				}
+			}
+			return null;
+		}
+
 		
 	}
 	
@@ -983,8 +993,11 @@ public class Config {
 							String params=items.get("params").get(it);
 							String macro=hostmacro.get("macro").get(hm);
 							String value=hostmacro.get("value").get(hm);
-							items.get("key_").set(it, key.replace(macro, value));
-							items.get("params").set(it, params.replace(macro, value));
+							/*
+							 * Do not replace original key with macros values. We need it in original state!
+							 */
+							//items.get("key_").set(it, key.replace(macro, value));
+							//items.get("params").set(it, params.replace(macro, value));
 						}
 					}
 				}
@@ -1038,8 +1051,13 @@ public class Config {
 						 * 2. очищаем от возможного знака закрывающей квадратной скобки в конце строки
 						 * 3. удаляем возможные пробелы в начале или в конце полученной строки
 						 * 4. переводим в большие символы
+						 * 5. Проверяем, а не макрос ли это?
 						 */
-						String db=key.split(",")[1].split("]")[0].trim().toUpperCase();						
+						String db=key.split(",")[1].split("]")[0].trim().toUpperCase();
+						if(db.substring(0,2).contains("{$")
+							&& db.substring(db.length()-1).contains("}") ){
+							db=zs.getHostMacroValue(hostid,db);
+						}
 						if(zs.definedDBNames.contains(db)){
 							Map<String,String> m = new HashMap<String,String>();
 							String param=items.get("params").get(it);
