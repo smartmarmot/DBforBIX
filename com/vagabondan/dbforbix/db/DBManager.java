@@ -1,0 +1,122 @@
+/*
+ * This file is part of DBforBix.
+ *
+ * DBforBix is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * DBforBix is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * DBforBix. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.vagabondan.dbforbix.db;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+
+import com.vagabondan.dbforbix.config.Config;
+import com.vagabondan.dbforbix.db.adapter.ALLBASE;
+import com.vagabondan.dbforbix.db.adapter.Adapter;
+import com.vagabondan.dbforbix.db.adapter.DB2;
+import com.vagabondan.dbforbix.db.adapter.MSSQL;
+import com.vagabondan.dbforbix.db.adapter.MySQL;
+import com.vagabondan.dbforbix.db.adapter.Oracle;
+import com.vagabondan.dbforbix.db.adapter.PGSQL;
+import com.vagabondan.dbforbix.db.adapter.SQLANY;
+import com.vagabondan.dbforbix.db.adapter.SYBASE;
+
+public class DBManager {
+
+	private static DBManager	instance;
+
+	protected DBManager() {}
+
+	private List<Adapter>	databases	= new ArrayList<Adapter>(8);
+
+	public static DBManager getInstance() {
+		if (instance == null)
+			instance = new DBManager();
+		return instance;
+	}
+//DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY;
+	public void addDatabase(Config.Database cfg) {
+		switch (cfg.getType()) {
+			case DB2:
+				databases.add(new DB2(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(), cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case ORACLE:
+				databases.add(new Oracle(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case MSSQL:
+				databases.add(new MSSQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case MYSQL:
+				databases.add(new MySQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case PGSQL:
+				databases.add(new PGSQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case ALLBASE:
+				databases.add(new ALLBASE(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case SYBASE:
+				databases.add(new SYBASE(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case SQLANY:
+				databases.add(new SQLANY(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(), cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+		}
+	}
+
+	public Adapter[] getDatabases(String groupName) {
+		ArrayList<Adapter> result = new ArrayList<Adapter>(databases.size());
+		for (Adapter db : databases) {
+			if (db.getItemGroupNames().contains(groupName))
+				result.add(db);
+		}
+		return result.toArray(new Adapter[result.size()]);
+	}
+
+	public Adapter[] getDatabases() {
+		return databases.toArray(new Adapter[databases.size()]);
+	}
+	
+	
+	
+	public DBManager reinit() {
+		for(Adapter db:getDatabases()){
+			db.abort();
+		}
+		databases.clear();
+		instance=null;		
+		return getInstance();
+	}
+	
+	
+	public Adapter getDatabaseByName(String dbNameFC) {
+		Adapter result=null;
+		for(Adapter db:databases){
+			if(db.getName().equals(dbNameFC)){
+				result=db;
+				break;
+			}
+		}
+		return result;
+	}
+}
