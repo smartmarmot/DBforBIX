@@ -20,15 +20,23 @@ package com.vagabondan.dbforbix.scheduler;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.vagabondan.dbforbix.config.Config;
 import com.vagabondan.dbforbix.config.Config.ZServer;
 import com.vagabondan.dbforbix.zabbix.ZabbixItem;
 
 
 public class MultiColumnItem extends AbstractMultiItem {
+	
+	private static final Logger		LOG				= Logger.getLogger(MultiColumnItem.class);
 
 	public MultiColumnItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
 		super(prefix, items, query, itemConfig, zs);
@@ -41,39 +49,42 @@ public class MultiColumnItem extends AbstractMultiItem {
 		pstmt.setQueryTimeout(timeout);
 		ResultSet rs = pstmt.executeQuery();
 		String val = noData;
-		Map<String,ZabbixItem> values = new HashMap<>();
+		List<ZabbixItem> values = new ArrayList<>();
+					
+		/**
+		 * <multiquery time="60" item="index[%1]|free[%1]" type="column">
+		 * SELECT table_schema "database", SUM(index_length) "size", SUM(data_free) "free" 
+		 * FROM INFORMATION_SCHEMA.TABLES 
+		 * WHERE table_schema NOT IN ('information_schema','performance_schema') GROUP BY table_schema
+		 * </multiquery>
+		 */	
 		
-//		// fill with base items
-//		for (String item: items)
-//			values.put(item, new ZabbixItem(name, "", hostname));
-//		
-//		// now check if we find better values
-		while (rs.next()) {
-//			String fetchedName = rs.getString(1);
-//			String fetchedVal = rs.getString(2);
-//				if (fetchedVal != null)
-//					val = fetchedVal;
-//			}
-//			else {
-//				int colNum = 1;
-//				try {
-//					colNum = rs.findColumn("value");
-//				}
-//				catch (SQLException sqlex) {
-//					colNum = meta.getColumnCount(); // last column
-//				}
-//				String fetchedVal = rs.getString(colNum);
-//				if (fetchedVal != null)
-//					val = fetchedVal;
-//			}
+		while (rs.next()) {//it can be multirows
+			ResultSetMetaData meta = rs.getMetaData();
+			if (meta.getColumnCount() < items.length) {
+				LOG.error("Number of columns in select of item "+name+items+"\nof item config: "+this.getItemConfig().keySet()+
+						"\nis less than in item config");
+				break;
+			}
+			else {
+				//from the last column to first
+				for (int it=items.length-1, column=meta.getColumnCount();it>=0;--it,--column){
+					//name[%1_%2_%5] -> name[one_two_three]
+					String realName = items[it];
+					for(int i = 1; i<= meta.getColumnCount(); i++)
+						realName = realName.replace("%"+i, rs.getString(i));
+					//get value
+					val=rs.getString(column);
+					values.add(new ZabbixItem(name+realName, val,clock, this));
+				}
+			}
 		}
+		
+		
 		rs.close();
 		pstmt.close();
 
-		if (val == null)
-			val = "";
-
-		return new ZabbixItem[]{new ZabbixItem(name, val,clock, this)};
+		return values.toArray(new ZabbixItem[0]);
 	}
 
 

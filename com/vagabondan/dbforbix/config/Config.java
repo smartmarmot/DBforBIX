@@ -355,7 +355,7 @@ public class Config {
 	}
 
 	/**
-	 * ���������
+	 * 
 	 */
 	private static final Logger		LOG				= Logger.getLogger(Config.class);
 	private static final String		GLOBAL_NAME			= "DBforBix";
@@ -400,17 +400,17 @@ public class Config {
 	
 	
 	/**
-	 * ���������, �������������� ��:
+	 * 
 	 * zbxServers:
-	 * 1. Config.readConfigZSRV: - ��������� ��������� + ��������� ���� � ������� Zabbix Server'�: 
-	 *    zbxServerHost=Address, zbxServerPort=Port, ProxyName, DBList=dbNames - �������� �� ����������������� �����
-	 * 2. main: zbxSender - ���������� ������ �������� ��� ���������� ����� ������������
-	 * 3. Config.getItemConfigFromZabbix: - ���������� ��������� ����������� � Zabbix Server,
+	 * 1. Config.readConfigZSRV: -  Zabbix Server: 
+	 *    zbxServerHost=Address, zbxServerPort=Port, ProxyName, DBList=dbNames - 
+	 * 2. main: zbxSender - 
+	 * 3. Config.getItemConfigFromZabbix: -  Zabbix Server,
 	 * 4. Config.getItemConfigFromZabbix: itemsJSON, hosts, items, hostmacro, itemConfigs
 	 * 5. 
 	 * 
 	 * databases:
-	 * 1. readConfigDB: ������������ ��������� �� ��������� �������
+	 * 1. readConfigDB: 
 	 * 2. loadItemConfigFromZabbix: itemGroupName
 	 * 2. main: add db to dbmanager
 	 * 3. 

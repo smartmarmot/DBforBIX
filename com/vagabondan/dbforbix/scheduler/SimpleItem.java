@@ -80,7 +80,7 @@ public class SimpleItem extends AbstractItem {
 		pstmt.close();
 
 		if (val == null)
-			val = "";
+			val = noData;
 		if (val == noData){
 			String realName = name;
 			values.add(new ZabbixItem(realName, val,clock, this));
