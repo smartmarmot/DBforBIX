@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2016 Andrey Denisov.
- * 
  * This file is part of DB4bix.
  *
  * DB4bix is free software: you can redistribute it and/or modify it under the
@@ -17,10 +15,30 @@
  * DB4bix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.vagabondan.common;
+package com.vagabondan.db4bix.db.adapter;
 
-public class Constants {
-	private static final String VERSION = "Version 1.2-alpha";
-	public static final String BANNER = Constants.PROJECT_NAME + " " + VERSION;
-	private static final String PROJECT_NAME = "DB4bix";
+import java.util.Set;
+
+import com.vagabondan.db4bix.db.DBType;
+
+
+public class PGSQL extends AbstractAdapter {
+
+	public PGSQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Set<String> set,Boolean pers) {
+		this.name = name;
+		this.url = url;
+		this.user = user;
+		this.passwd = passwd;
+		this.maxactive = maxactive.intValue();
+		this.maxidle = maxidle.intValue();
+		this.maxwaitmillis=maxwaitmillis.intValue();
+		this.itemGroupName = set;
+		this.persistence = pers;
+	}
+	
+	@Override
+	public DBType getType() {
+		return DBType.PGSQL;
+	}
+
 }

@@ -14,8 +14,8 @@ import java.io.Serializable;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.vagabondan.dbforbix.config.Config;
-import com.vagabondan.dbforbix.zabbix.ZabbixSender;
+import com.vagabondan.db4bix.config.Config;
+import com.vagabondan.db4bix.zabbix.ZabbixSender;
 
 public class StackSingletonPersistent {
 

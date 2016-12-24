@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2016 Andrey Denisov.
- * 
  * This file is part of DB4bix.
  *
  * DB4bix is free software: you can redistribute it and/or modify it under the
@@ -17,10 +15,23 @@
  * DB4bix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.vagabondan.common;
+package com.vagabondan.db4bix.scheduler;
 
-public class Constants {
-	private static final String VERSION = "Version 1.2-alpha";
-	public static final String BANNER = Constants.PROJECT_NAME + " " + VERSION;
-	private static final String PROJECT_NAME = "DB4bix";
+import java.util.Map;
+
+import com.vagabondan.db4bix.config.Config.ZServer;
+
+abstract class AbstractMultiItem extends AbstractItem {
+
+	protected String[] items;
+	protected String query;
+	protected String noData = "";
+	
+	AbstractMultiItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
+		super(itemConfig, zs);
+		this.name = prefix;
+		this.items = items;
+		this.query = query;
+	}
+	
 }
