@@ -85,7 +85,7 @@ public class ZabbixSender extends Thread {
 				//take bulk of items to send
 				int maxItems=100;
 				//ZabbixItem[] itemsReady=new ZabbixItem[maxItems];
-				Map<Config.ZServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<Config.ZServer, Collection<ZabbixItem> >();
+				Map<Config.ZServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<>();
 				for(int i=0;(i<maxItems)&&(items.peek()!=null);++i){
 					ZabbixItem nextItem=items.poll();					
 					if(nextItem.getValue().isEmpty()) {

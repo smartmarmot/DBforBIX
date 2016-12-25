@@ -379,14 +379,14 @@ public class Config {
 	
 	
 	/**
-	 * ���������, ������� ������ ���� �������������� ��� �������� ���������� ������ Config
+	 * Config
 	 */
 	private String					basedir;	
 	private String 					configFile						= null;
 	
 	
 	/**
-	 * ���������, ����������� �� ����������������� �����
+	 * 
 	 */
 	private String 					configFileHash					= null; 
 	private Level					logLevel						= Level.WARN;
@@ -840,8 +840,6 @@ public class Config {
 				
 				/**
 				 * Add/update Databases
-				 * fill Dbs config with itemGroupName - ����� ��������� �� ��������� � ������ ����� ����
-				 * ��� ����� ������ item ������, �� ���� ����. ��������� Set<String> itemGrouName'���.
 				 */
 				Database newDatabase=newconfig.getDatabaseByItemGroupName(newItemGroupName);
 				Database database = this.getDatabaseByNameFC(newDatabase.getDBNameFC());
@@ -868,12 +866,7 @@ public class Config {
 	 */
 	private void deleteItemConfigs(Set<String> itemGroupNames) {
 		/**
-		 * ���������, �������������� ��:
 		 * zbxServers:
-		 * 1. Config.readConfigZSRV: - ��������� ��������� + ��������� ���� � ������� Zabbix Server'�: 
-		 *    zbxServerHost=Address, zbxServerPort=Port, ProxyName, DBList=dbNames - �������� �� ����������������� �����
-		 * 2. main: zbxSender - ���������� ������ �������� ��� ���������� ����� ������������
-		 * 3. Config.getItemConfigFromZabbix: - ���������� ��������� ����������� � Zabbix Server,
 		 * 4. Config.getItemConfigFromZabbix: itemsJSON, hosts, items, hostmacro, itemConfigs
 		 * 5. 
 		 * 
@@ -987,7 +980,7 @@ public class Config {
 		}
 		
 		for(int i=0;i<8;++i) data[i+5]=leSize[i];
-		LOG.debug("getZabbixProxyRequest(): data: "+ new String(data));
+		//LOG.debug("getZabbixProxyRequest(): data: "+ new String(data));
 		return data;
 		
 	}
@@ -1034,7 +1027,7 @@ public class Config {
 	 * @return - body of response in json format
 	 */
 	public String requestZabbix(String host, int port, String json){
-		byte[] response = new byte[1024];
+		byte[] response = new byte[2048];
 		Socket zabbix = null;
 		OutputStreamWriter out = null;
 		InputStream in = null;			
@@ -1059,14 +1052,16 @@ public class Config {
 			
 			while(true){
 				final int read = in.read(response);
-				if(read<=0) break;					
+				//LOG.debug("read="+read+"\nresponse="+new String(response));
+				if(read<=0) break;			
 				resp+=new String(response).substring(0, read);
 			}
-			LOG.debug("requestZabbix(): resp: "+ resp);
+			//LOG.debug("requestZabbix(): resp: "+ resp);
+			resp=resp.substring(13);//remove binary header
 			
 		}
 		catch (Exception ex) {
-			LOG.error("requestZabbix(): Error contacting Zabbix server zabdomis02 - " + ex.getMessage());
+			LOG.error("requestZabbix(): Error contacting Zabbix server - " + ex.getMessage());
 		}
 		finally {
 			if (in != null)
@@ -1117,7 +1112,8 @@ public class Config {
 
 			
 			try{//parse json
-				resp=resp.substring(resp.indexOf("{"));
+				//resp=resp.substring(resp.indexOf("{"));
+				//resp=resp.substring(13);
 				LOG.debug(resp);
 				JSONObject o=JSON.parseObject(resp);
 
@@ -1227,8 +1223,7 @@ public class Config {
 							zs.addItemConfig(itemGroupName,m);// shortcut for itemConfig
 							
 							/**
-							 * fill Dbs config with itemGroupName - ����� ��������� �� ��������� � ������ ����� ����
-							 * ��� ����� ������ item ������, �� ���� ����. ��������� Set<String> itemGrouName'���.
+							 * fill Dbs config with itemGroupName Set<String> itemGrouName.
 							 */
 							this.getDatabaseByNameFC(db).addItemGroupName(itemGroupName);							
 						}
