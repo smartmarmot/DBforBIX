@@ -71,6 +71,7 @@ public class SimpleItem extends AbstractItem {
 				if (fetchedVal != null)
 					val = fetchedVal;
 			}
+			
 			String realName = name;
 			for(int i = 1; i<= meta.getColumnCount(); i++)
 				realName = realName.replace("%"+i, rs.getString(i));

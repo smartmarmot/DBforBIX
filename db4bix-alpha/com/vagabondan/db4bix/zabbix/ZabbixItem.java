@@ -18,6 +18,7 @@
 package com.vagabondan.db4bix.zabbix;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 import com.vagabondan.db4bix.scheduler.Item;
 
@@ -42,12 +43,27 @@ public final class ZabbixItem implements Serializable {
 			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
 		this.key = key;
-		this.value = value;
+		this.value = htmlSpecialChars(value);
 		this.clock = clock;
 		this.host=confItem.getItemConfig().get("host");
 		this.setConfItem(confItem);
 		
 	}
+
+	private String htmlSpecialChars(String string) {
+		String result=string;
+		if(null!=result){
+			result=result.replace("\\", "\\\\");//has to be the first one
+			result=result.replace("\n", "\\n");
+			result=result.replace("\"", "\\\"");			
+			result=result.replace("\b", "\\b");
+			result=result.replace("\f", "\\f");
+			result=result.replace("\r", "\\r");
+			result=result.replace("\t", "\\t");			
+		}
+		return result;
+	}
+
 
 	/**
 	 * @return The current hostname for this item.
