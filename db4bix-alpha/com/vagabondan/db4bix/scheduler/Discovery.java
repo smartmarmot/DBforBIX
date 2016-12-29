@@ -63,7 +63,7 @@ public class Discovery extends AbstractItem {
 		ResultSet rs = pstmt.executeQuery();
 		ResultSetMetaData meta = rs.getMetaData();
 
-		builder.append("{\\\"data\\\":[");
+		builder.append("{\"data\":[");
 		while (rs.next()) {
 			if (!first)
 				builder.append(",");
@@ -88,11 +88,11 @@ public class Discovery extends AbstractItem {
 				 */
 				
 				if (altNames == null)
-					builder.append("{\\\"{#" + meta.getColumnName(i).toUpperCase() + "}\\\":\\\"" + rs.getString(i) +							
-							"\\\"}");
+					builder.append("{\"{#" + meta.getColumnName(i).toUpperCase() + "}\":\"" + rs.getString(i) +							
+							"\"}");
 				else
-					builder.append("{\\\"{#" + altNames[i-1].toUpperCase() + "}\\\":\\\"" + rs.getString(i) +							
-							"\\\"}");
+					builder.append("{\"{#" + altNames[i-1].toUpperCase() + "}\":\"" + rs.getString(i) +							
+							"\"}");
 			}
 			first = false;
 		}

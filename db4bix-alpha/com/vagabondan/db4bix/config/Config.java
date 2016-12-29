@@ -1050,18 +1050,22 @@ public class Config {
 			//read response
 			in = zabbix.getInputStream();
 			
+			int pos1=13;
+			int bRead=0;
 			while(true){
-				final int read = in.read(response);
+				bRead = in.read(response);
 				//LOG.debug("read="+read+"\nresponse="+new String(response));
-				if(read<=0) break;			
-				resp+=new String(response).substring(0, read);
+				if(bRead<=0) break;			
+				//remove binary header
+				resp+=new String(Arrays.copyOfRange(response, pos1, bRead));
+				pos1=0;
 			}
 			//LOG.debug("requestZabbix(): resp: "+ resp);
-			resp=resp.substring(13);//remove binary header
+			//resp=resp.substring(13);//remove binary header
 			
 		}
 		catch (Exception ex) {
-			LOG.error("requestZabbix(): Error contacting Zabbix server - " + ex.getMessage());
+			LOG.error("requestZabbix(): Error getting data from Zabbix server - " + ex.getMessage());
 		}
 		finally {
 			if (in != null)
@@ -1142,7 +1146,7 @@ public class Config {
 				
 			}
 			catch (Exception ex){
-				System.out.println("Error parsing json objects - " + ex.getMessage());
+				System.out.println("Error parsing json objects - " + ex.getLocalizedMessage());
 			}
 			
 			//references
@@ -1232,7 +1236,7 @@ public class Config {
 				LOG.debug(zs.getItemConfigs());
 			}
 			catch (Exception ex){
-				LOG.error("Error configuring requests - " + ex.getMessage());
+				LOG.error("Error configuring requests - " + ex.getLocalizedMessage());
 			}
 		}		
 	}
@@ -1272,7 +1276,7 @@ public class Config {
 		
 		for (ZServer zs: zServers){			
 			for(Entry<String, Map<String, String>> ic:zs.getItemConfigs().entrySet()){
-				LOG.debug("loadItemConfigFromZabbix:"+zs);
+				LOG.debug("loadItemConfigFromZabbix: "+zs+" --> "+ic.getKey());
 				try {					
 					String param=ic.getValue().get("param");
 					//param="<!DOCTYPE parms SYSTEM \""+getBasedir()+"\\items\\param.dtd\">"+param;
