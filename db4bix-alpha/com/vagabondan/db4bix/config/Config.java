@@ -96,7 +96,9 @@ public class Config {
 		private Map<String,List<String> > hosts=null;
 		private Map<String,List<String> > items=null;
 		private Map<String,List<String> > hostmacro=null;
+		private Map<String,List<String>> hostsTemplates=null;
 		private Map<String,Map<String,String>> itemConfigs = new HashMap<String,Map<String,String>>();
+		
 		
 		
 		/////////////////////////////////////////////////////////
@@ -233,16 +235,51 @@ public class Config {
 			return host;
 		}
 
-		public String getHostMacroValue(String hostid, String db) {
+		public String getHostMacroValue(String hostid, String macro) {
 			for(int hm=0;hm<hostmacro.get("hostid").size();++hm){
 				if(hostmacro.get("hostid").get(hm).equals(hostid) 
-					&& hostmacro.get("macro").get(hm).equals(db)){
+					&& hostmacro.get("macro").get(hm).equals(macro)){
 					return hostmacro.get("value").get(hm);
 				}
 			}
 			return null;
 		}
+		
+		public String getTemplateMacroValue(String hostid, String macro) {
+			// TODO Check macro resolving method in Zabbix
+			String result=null;
+			/**
+			 * hostmacro:
+			 * "hostmacro":{"fields":["hostmacroid","hostid","macro","value"],"data":[[450,11082,"{$DSN}","APISQL"],[457,11084,"{$PERF_SCHEMA}","'performance_schema'"]]},
+			 * 
+			 * hosts_templates:
+			 * "hosts_templates":{"fields":["hosttemplateid","hostid","templateid"],"data":[[2195,11082,11084]]},
+			 * */
+			Set<String> templateIds=new HashSet<>();			
+			for(int hm=0;hm<hostsTemplates.get("hostid").size();++hm){
+				if(hostsTemplates.get("hostid").get(hm).equals(hostid)){					
+					templateIds.add(hostsTemplates.get("templateid").get(hm));
+				}
+			}
+			for (String tid:templateIds){
+				 result=getHostMacroValue(tid,macro);
+				 if(null!=result) break;
+			}
+			return result;
+		}
 
+		
+		
+
+		public void setHostsTemplates(Map<String, List<String>> hostsTemplates) {
+			this.hostsTemplates=hostsTemplates;			
+		}
+
+		public Map<String, List<String>> getHostsTemplates() {			
+			return hostsTemplates;
+		}
+
+		
 		
 	}
 	
@@ -835,6 +872,7 @@ public class Config {
 					zabbixServer.setHosts(newZabbixServer.getHosts());
 					zabbixServer.setItems(newZabbixServer.getItems());
 					zabbixServer.setHostmacro(newZabbixServer.getHostmacro());
+					zabbixServer.setHostsTemplates(newZabbixServer.getHostsTemplates());
 					zabbixServer.addItemConfig(newItemGroupName, newItemConfig);
 				}
 				
@@ -1137,12 +1175,18 @@ public class Config {
 				 * delay=[120, 120],
 				 * 
 				 * hostmacro:
-				 * {macro=[{$DSN}], hostmacroid=[450], hostid=[11082], value=[TEST_DATABASE]}
+				 * "hostmacro":{"fields":["hostmacroid","hostid","macro","value"],"data":[[450,11082,"{$DSN}","APISQL"],[457,11084,"{$PERF_SCHEMA}","'performance_schema'"]]},
+				 * 
+				 * hosts_templates:
+				 * "hosts_templates":{"fields":["hosttemplateid","hostid","templateid"],"data":[[2195,11082,11084]]},
+				 * 
+				 * 
 				 * */
 				
 				zs.setHosts(zJSONObject2Map(o.getJSONObject("hosts")));
 				zs.setItems(zJSONObject2Map(o.getJSONObject("items")));
 				zs.setHostmacro(zJSONObject2Map(o.getJSONObject("hostmacro")));
+				zs.setHostsTemplates(zJSONObject2Map(o.getJSONObject("hosts_templates")));
 				
 			}
 			catch (Exception ex){
@@ -1155,28 +1199,7 @@ public class Config {
 			Map<String,List<String> > hostmacro=zs.getHostmacro();
 
 			
-/*			try{// substitute macro
-				for(int hm=0;hm<hostmacro.get("macro").size();++hm){
-					for(int it=0;it<items.get("key_").size();++it){
-						if(items.get("hostid").get(it).equals(hostmacro.get("hostid").get(hm))){
-							String key=items.get("key_").get(it);
-							String params=items.get("params").get(it);
-							String macro=hostmacro.get("macro").get(hm);
-							String value=hostmacro.get("value").get(hm);
-							
-							 * Do not replace original key with macros values. We need it in original state!
-							 
-							//items.get("key_").set(it, key.replace(macro, value));
-							//items.get("params").set(it, params.replace(macro, value));
-						}
-					}
-				}
-				System.out.println(items.get("key_"));
-				System.out.println(items.get("params"));
-			}
-			catch (Exception ex){
-				LOG.error("Error substituting hostmacro - " + ex.getMessage());
-			}*/
+
 			try{
 				//result for hosts:
 				// hostid=[11082], host=[APISQL], nameFC=[APISQL], status=[0]
@@ -1318,9 +1341,41 @@ public class Config {
 					schedulers.put(time, new Scheduler(time));
 				}
 				Scheduler itemSch = schedulers.get(time);
+				String query=itmE.getTextTrim();
+				
+				try{// substitute macro in selects
+					String macroMask="^\\{\\$[a-zA-Z0-9_-]+\\}$";
+					int iStart=0;
+					int iEnd=0;
+					iStart=query.indexOf("{$");
+					while (-1!=iStart){
+						iEnd=query.indexOf('}', iStart);
+						if(-1!=iEnd){							
+							String macro=query.substring(iStart, ++iEnd);
+							if(macro.matches(macroMask)){
+								String macroValue=zs.getHostMacroValue(itemConfig.get("hostid"),macro);
+								if(null!=macroValue){
+									query=query.replace(macro, macroValue);
+									iEnd=iEnd-macro.length()+macroValue.length();
+								}							
+								else{
+									macroValue=zs.getTemplateMacroValue(itemConfig.get("hostid"),macro);
+									if(null!=macroValue){
+										query=query.replace(macro, macroValue);
+										iEnd=iEnd-macro.length()+macroValue.length();
+									}
+								}								
+							}							
+						} else	break;						
+						iStart=query.indexOf("{$",iEnd);
+					}
+				}
+				catch (Exception ex){
+					LOG.error("Error substituting macros - " + ex.getLocalizedMessage());
+				}
 				switch (itmE.getName()) {
 					case "discovery": {
-						Discovery item = new Discovery(prefix + itmE.attributeValue("item"), itmE.getTextTrim(), itemConfig, zs);
+						Discovery item = new Discovery(prefix + itmE.attributeValue("item"), query, itemConfig, zs);
 						String nameList = itmE.attributeValue("names", "");
 						String names[] = nameList.split("\\|");
 						if (names != null && names.length > 0)
@@ -1331,7 +1386,7 @@ public class Config {
 					break;
 					
 					case "query": {
-						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), itmE.getTextTrim(),itmE.attributeValue("nodata"), itemConfig, zs);
+						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), query,itmE.attributeValue("nodata"), itemConfig, zs);
 						itemSch.addItem(itemGroupName, item);
 					}
 					break;
@@ -1341,9 +1396,9 @@ public class Config {
 						String items[] = itemList.split("\\|");
 						Item item;
 						if (itmE.attributeValue("type", "column").equalsIgnoreCase("column"))
-							item = new MultiColumnItem(prefix, items, itmE.getTextTrim(), itemConfig, zs);
+							item = new MultiColumnItem(prefix, items, query, itemConfig, zs);
 						else
-							item = new MultiRowItem(prefix, items, itmE.getTextTrim(), itemConfig, zs);
+							item = new MultiRowItem(prefix, items, query, itemConfig, zs);
 						itemSch.addItem(itemGroupName, item);
 					}
 					break;

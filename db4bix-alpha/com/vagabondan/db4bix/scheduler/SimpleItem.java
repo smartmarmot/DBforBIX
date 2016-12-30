@@ -73,19 +73,22 @@ public class SimpleItem extends AbstractItem {
 			}
 			
 			String realName = name;
-			for(int i = 1; i<= meta.getColumnCount(); i++)
-				realName = realName.replace("%"+i, rs.getString(i));
+			for(int i = 1; i<= meta.getColumnCount(); i++){
+				if(null!=rs.getString(i))
+					realName = realName.replace("%"+i, rs.getString(i));
+			}
 			values.add(new ZabbixItem(realName, val,clock, this));
 		}
 		rs.close();
 		pstmt.close();
 
-		if (val == null)
-			val = noData;
-		if (val == noData){
-			String realName = name;
-			values.add(new ZabbixItem(realName, val,clock, this));
-			}
+		
+//		if (val == null)
+//			val = noData;
+//		if (val == noData){
+//			String realName = name;
+//			values.add(new ZabbixItem(realName, val,clock, this));
+//			}
 			
 
 		return values.toArray(new ZabbixItem[0]);
