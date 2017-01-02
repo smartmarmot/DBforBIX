@@ -20,7 +20,7 @@
 package com.vagabondan.common;
 
 public class Constants {
-	private static final String VERSION = "Version 1.2-alpha";
+	private static final String VERSION = "Version 1.3-alpha";
 	public static final String BANNER = Constants.PROJECT_NAME + " " + VERSION;
 	private static final String PROJECT_NAME = "DB4bix";
 }

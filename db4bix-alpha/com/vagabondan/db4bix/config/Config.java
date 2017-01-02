@@ -92,12 +92,12 @@ public class Config {
 		/**
 		 * reinit 
 		 */
-		private String itemsJSON		= null;
 		private Map<String,List<String> > hosts=null;
 		private Map<String,List<String> > items=null;
 		private Map<String,List<String> > hostmacro=null;
 		private Map<String,List<String>> hostsTemplates=null;
 		private Map<String,Map<String,String>> itemConfigs = new HashMap<String,Map<String,String>>();
+		private String hashZabbixConfig		=null;
 		
 		
 		
@@ -115,8 +115,8 @@ public class Config {
 			return itemConfigs;
 		}
 		
-		public String getItemsJSON() {
-			return itemsJSON;
+		public String getHashZabbixConfig() {
+			return hashZabbixConfig;
 		}
 		
 		public Map<String,List<String> > getHosts() {
@@ -131,10 +131,11 @@ public class Config {
 			return hostmacro;
 		}		
 		////////////////////////
-		public void setItemsJSON(String itemsJSON) {
-			this.itemsJSON = itemsJSON;
-		}		
+		public void setHashZabbixConfig(String inStr) {
+			this.hashZabbixConfig=inStr;
+		}
 		
+
 		public void setItemConfigs(Map<String,Map<String,String>> itemConfigs) {
 			this.itemConfigs=itemConfigs;
 		}
@@ -235,7 +236,7 @@ public class Config {
 			return host;
 		}
 
-		public String getHostMacroValue(String hostid, String macro) {
+		private String getHostMacroValue(String hostid, String macro) {
 			for(int hm=0;hm<hostmacro.get("hostid").size();++hm){
 				if(hostmacro.get("hostid").get(hm).equals(hostid) 
 					&& hostmacro.get("macro").get(hm).equals(macro)){
@@ -245,7 +246,7 @@ public class Config {
 			return null;
 		}
 		
-		public String getTemplateMacroValue(String hostid, String macro) {
+		private String getTemplateMacroValue(String hostid, String macro) {
 			// TODO Check macro resolving method in Zabbix
 			String result=null;
 			/**
@@ -279,8 +280,14 @@ public class Config {
 			return hostsTemplates;
 		}
 
-		
-		
+		public String getMacroValue(String hostid, String macro) {
+			String result=null;
+			result=getHostMacroValue(hostid,macro);
+			if(null==result){
+				result=this.getTemplateMacroValue(hostid, macro);
+			}
+			return result;
+		}	
 	}
 	
 	/**
@@ -732,7 +739,11 @@ public class Config {
 		 LOG.debug("Is config changed: "+configFileChanged);
 		 if(configFileChanged) return true;
 		 
-		 newconfig.loadItemConfigFromZabbix();
+		 /**
+		  * Update configuration from Zabbix Servers
+		  */
+		 newconfig.getItemConfigFromZabbix();
+		 
 		 
 		 Set<String> itemGroupNames=oldconfig.getSetOfItemGroupNames();
 		 Set<String> newItemGroupNames=newconfig.getSetOfItemGroupNames();
@@ -742,9 +753,9 @@ public class Config {
 		  * i.e. zbxServerHost:zbxServerPort, proxy, host, db, item key 
 		  * are the same
 		  */
-		 Set<String> toUpdate=new HashSet<String>(itemGroupNames);		 
+		 Set<String> toUpdate=new HashSet<>(itemGroupNames);		 
 		 toUpdate.retainAll(newItemGroupNames);
-		 Set<String> toRemoveFromUpdate=new HashSet<String>();
+		 Set<String> toRemoveFromUpdate=new HashSet<>();
 		 for (String itemGroupName:toUpdate){
 			ZServer zabbixServer=oldconfig.getZabbixServerByItemGroupName(itemGroupName);
 			ZServer newZabbixServer=newconfig.getZabbixServerByItemGroupName(itemGroupName);
@@ -752,7 +763,8 @@ public class Config {
 			Map<String,String> newItemConfig=newZabbixServer.getItemConfigByItemGroupName(itemGroupName);
 			String hashParam=itemConfig.get("hashParam");
 			String newHashParam=newItemConfig.get("hashParam");
-			if(hashParam.equals(newHashParam)) toRemoveFromUpdate.add(itemGroupName);			
+			if(hashParam.equals(newHashParam)) 
+				toRemoveFromUpdate.add(itemGroupName);
 		 }
 		 toUpdate.removeAll(toRemoveFromUpdate);
 		 
@@ -763,30 +775,33 @@ public class Config {
 		 toAdd.removeAll(itemGroupNames);
 		 
 		
-		 
-		 /**
-		  * delete items configs
-		  */
-		 stopSchedulers(toDelete);
-		 deleteItemConfigs(toDelete);
-		 
-		 /**
-		  * add item configs
-		  */
-		 addItemConfigs(newconfig,toAdd);
-
-		 /**
-		  * update item configs
-		  */
-		 stopSchedulers(toUpdate);
-		 updateItemConfigs(newconfig,toUpdate);
-		 
-		 
-		 /**
-		  * Launch schedulers
-		  */
-		 launchSchedulers(toAdd);
-		 launchSchedulers(toUpdate);
+		 if(!toUpdate.isEmpty()||!toAdd.isEmpty()||!toDelete.isEmpty()){
+			 newconfig.buildItems();
+			 
+			 /**
+			  * delete items configs
+			  */
+			 stopSchedulers(toDelete);
+			 deleteItemConfigs(toDelete);
+			 
+			 /**
+			  * add item configs
+			  */
+			 addItemConfigs(newconfig,toAdd);
+	
+			 /**
+			  * update item configs
+			  */
+			 stopSchedulers(toUpdate);
+			 updateItemConfigs(newconfig,toUpdate);
+			 
+			 
+			 /**
+			  * Launch schedulers
+			  */
+			 launchSchedulers(toAdd);
+			 launchSchedulers(toUpdate);
+		 }
 		 
 		 return false;
 	}
@@ -812,10 +827,6 @@ public class Config {
 			}
 			schedulers.remove(ign);			
 		}
-		
-		//TODO check if the following lines have to be executed
-		//DBManager dbman=DBManager.getInstance();
-		//dbman=dbman.reinit();
 	}
 
 	public void startChecks() {
@@ -868,7 +879,7 @@ public class Config {
 					zbxServers.add(zabbixServer);
 				}else{// update since pointer to existing ZServer may appear in code
 					Map<String,String> newItemConfig=newZabbixServer.getItemConfigByItemGroupName(newItemGroupName);
-					zabbixServer.setItemsJSON(newZabbixServer.getItemsJSON());
+					zabbixServer.setHashZabbixConfig(newZabbixServer.getHashZabbixConfig());
 					zabbixServer.setHosts(newZabbixServer.getHosts());
 					zabbixServer.setItems(newZabbixServer.getItems());
 					zabbixServer.setHostmacro(newZabbixServer.getHostmacro());
@@ -1131,15 +1142,8 @@ public class Config {
 	/**
 	 * Fill item configs for all configured Zabbix Servers
 	 */
-	private void getItemConfigFromZabbix(){
-		Collection<ZServer> zServers=null;
-		MessageDigest hasher = null;
-		try{
-			hasher = java.security.MessageDigest.getInstance("MD5");
-		}
-		catch(NoSuchAlgorithmException e){
-			LOG.error("Wrong algorithm nameFC provided while getiing instance of MessageDigest: " + e.getMessage());
-		}
+	public void getItemConfigFromZabbix(){
+		Collection<ZServer> zServers=null;		
 		try{
 			zServers = getZabbixServers();
 		}catch (Exception ex) {
@@ -1150,7 +1154,7 @@ public class Config {
 			String resp=new String();
 			resp=requestZabbix(zs.zbxServerHost, zs.zbxServerPort,zs.getProxyConfigRequest());
 
-			zs.setItemsJSON(resp);
+			zs.setHashZabbixConfig(Config.calculateMD5Sum(resp));
 
 			
 			try{//parse json
@@ -1187,6 +1191,7 @@ public class Config {
 				zs.setItems(zJSONObject2Map(o.getJSONObject("items")));
 				zs.setHostmacro(zJSONObject2Map(o.getJSONObject("hostmacro")));
 				zs.setHostsTemplates(zJSONObject2Map(o.getJSONObject("hosts_templates")));
+				
 				
 			}
 			catch (Exception ex){
@@ -1225,18 +1230,18 @@ public class Config {
 						/**
 						 * substitute macro for getting db name
 						 */
-						String db=key.split(",")[1].split("]")[0].trim().toUpperCase();
-						if(db.substring(0,2).contains("{$")	&& db.substring(db.length()-1).contains("}") ){
-							db=zs.getHostMacroValue(hostid,db);
+						String db=key.split(",")[1].split("]")[0].trim().toUpperCase();						
+						if(isMacro(db)){
+							db=zs.getMacroValue(hostid,db);
 						}
 						if(zs.definedDBNames.contains(db)){
 							Map<String,String> m = new HashMap<String,String>();
 							String param=items.get("params").get(it);//Map->List[it]
 							m.put("param", param);
 							/**
-							 * Getting text representation of md5 hash
-							 */
-							m.put("hashParam", (new HexBinaryAdapter()).marshal(hasher.digest(param.getBytes())));
+							 * Getting text representation of md5 hash of substituted
+							 */							
+							m.put("hashParam", Config.calculateMD5Sum(param)+Config.calculateMD5Sum(substituteMacros(param,zs,hostid)));
 							m.put("hostid", hostid);
 							m.put("host", host);
 							m.put("db", db);
@@ -1265,15 +1270,51 @@ public class Config {
 	}
 
 
+	public static String calculateMD5Sum(String inStr) {
+		MessageDigest hasher = null;
+		try{
+			hasher = java.security.MessageDigest.getInstance("MD5");
+		}
+		catch(NoSuchAlgorithmException e){
+			LOG.error("Wrong algorithm nameFC provided while getiing instance of MessageDigest: " + e.getLocalizedMessage());
+		}
+		return (new HexBinaryAdapter()).marshal(hasher.digest(inStr.getBytes()));
+	}
+
+	private String substituteMacros(String inStr, ZServer zs, String hostid) {
+		String result=new String(inStr);
+		try{// substitute macro
+			int iStart=0;
+			int iEnd=0;
+			iStart=result.indexOf("{$");
+			while (-1!=iStart){
+				iEnd=result.indexOf('}', iStart);
+				if(-1!=iEnd){							
+					String macro=result.substring(iStart, ++iEnd);
+					if(isMacro(macro)){
+						String macroValue=zs.getMacroValue(hostid,macro);
+						if(null!=macroValue){
+							result=result.replace(macro, macroValue);
+							iEnd=iEnd-macro.length()+macroValue.length();
+						}
+					}							
+				} else	break;						
+				iStart=result.indexOf("{$",iEnd);
+			}
+		}
+		catch (Exception ex){
+			LOG.error("Error substituting macros - " + ex.getLocalizedMessage());
+		}
+		return result;
+	}
+
 	private String constructItemGroupName(ZServer zs, String host, String db, String key) {
 		return new String(zs.toString()+"/"+zs.getProxy()+"/"+host+"/"+db+"/"+key);
 	}
 
 
-	public void loadItemConfigFromZabbix() {
-		
-		getItemConfigFromZabbix();// fill itemConfigs collection
-		
+	public void buildItems() {
+			
 		//result for hosts:
 		// hostid=[11082], host=[APISQL], nameFC=[APISQL], status=[0]
 		//result for items:
@@ -1294,21 +1335,20 @@ public class Config {
 		try{
 			zServers = getZabbixServers();
 		}catch (Exception ex) {
-			LOG.error("Error getting Zabbix server config - " + ex.getMessage());
+			LOG.error("Error getting Zabbix servers collection - " + ex.getLocalizedMessage());
 		}
 		
 		for (ZServer zs: zServers){			
 			for(Entry<String, Map<String, String>> ic:zs.getItemConfigs().entrySet()){
 				LOG.debug("loadItemConfigFromZabbix: "+zs+" --> "+ic.getKey());
 				try {					
-					String param=ic.getValue().get("param");
-					//param="<!DOCTYPE parms SYSTEM \""+getBasedir()+"\\items\\param.dtd\">"+param;
+					String param=ic.getValue().get("param");					
 					param="<!DOCTYPE parms SYSTEM \""+getBasedir()+"/items/param.dtd\">"+param;
 					Document doc = DocumentHelper.parseText(param);
 					Element root = doc.getRootElement();
 					String prefix = root.attributeValue("prefix");			
 					for (Object srv: root.elements("server")) {
-						if (srv instanceof Element) buildServerElements((Element) srv, ic.getValue(), prefix , zs);
+						if (srv instanceof Element) buildItemsAndSchedulers((Element) srv, ic.getValue(), prefix , zs);
 					}
 	//				for (Object db: root.elements("database")) {
 	//					if (db instanceof Element) buildDatabaseElements((Element) db, itemGroupName, prefix);
@@ -1323,7 +1363,7 @@ public class Config {
 	}
 	
 	
-	private void buildServerElements(Element e, Map<String,String> itemConfig, String prefix,ZServer zs) {
+	private void buildItemsAndSchedulers(Element e, Map<String,String> itemConfig, String prefix,ZServer zs) {
 		String itemGroupName=itemConfig.get("itemGroupName");
 		Map<Integer,Scheduler> schedulers=getSchedulersByItemGroupName(itemGroupName);
 		for (Object itm: e.elements()) {
@@ -1343,36 +1383,7 @@ public class Config {
 				Scheduler itemSch = schedulers.get(time);
 				String query=itmE.getTextTrim();
 				
-				try{// substitute macro in selects
-					String macroMask="^\\{\\$[a-zA-Z0-9_-]+\\}$";
-					int iStart=0;
-					int iEnd=0;
-					iStart=query.indexOf("{$");
-					while (-1!=iStart){
-						iEnd=query.indexOf('}', iStart);
-						if(-1!=iEnd){							
-							String macro=query.substring(iStart, ++iEnd);
-							if(macro.matches(macroMask)){
-								String macroValue=zs.getHostMacroValue(itemConfig.get("hostid"),macro);
-								if(null!=macroValue){
-									query=query.replace(macro, macroValue);
-									iEnd=iEnd-macro.length()+macroValue.length();
-								}							
-								else{
-									macroValue=zs.getTemplateMacroValue(itemConfig.get("hostid"),macro);
-									if(null!=macroValue){
-										query=query.replace(macro, macroValue);
-										iEnd=iEnd-macro.length()+macroValue.length();
-									}
-								}								
-							}							
-						} else	break;						
-						iStart=query.indexOf("{$",iEnd);
-					}
-				}
-				catch (Exception ex){
-					LOG.error("Error substituting macros - " + ex.getLocalizedMessage());
-				}
+				query=substituteMacros(query,zs,itemConfig.get("hostid"));
 				switch (itmE.getName()) {
 					case "discovery": {
 						Discovery item = new Discovery(prefix + itmE.attributeValue("item"), query, itemConfig, zs);
@@ -1405,6 +1416,11 @@ public class Config {
 				}
 			}
 		}
+	}
+
+	private boolean isMacro(String macro) {
+		String macroMask="^\\{\\$[a-zA-Z0-9_-]+\\}$";		
+		return macro.matches(macroMask);
 	}
 
 //	private void buildDatabaseElements(Element e, String groupName, String prefix) {

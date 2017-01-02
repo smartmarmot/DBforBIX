@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -116,7 +118,8 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 		LOG.debug(config);							
 		
 		// read config from Zabbix Server
-		config.loadItemConfigFromZabbix();
+		config.getItemConfigFromZabbix();// fill itemConfigs collection
+		config.buildItems();
 	} 
 
 	public static void main(final String[] args) {
@@ -201,19 +204,14 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 					}
 					break;
 					case "update": {
+						LOG.info("Sleeping before configuration update...");
 						Thread.sleep(config.getUpdateConfigTimeout()*1000);
-						if(config.checkConfigChanges()) action="stop";
-						else {
-							for (ZServer zs:config.getZabbixServers()){
-								for(Entry<String, Map<String, String>> itemConfig:zs.getItemConfigs().entrySet()){
-									
-								}
-							}							
-						}						
+						LOG.info("Updating DB4bix...");
+						if(config.checkConfigChanges()) action="stop";				
 					}
 					break;
 					case "stop": {
-						LOG.info("Stopping DB4bix");
+						LOG.info("Stopping DB4bix...");
 						config=config.reset();
 						if (zbxSender != null) {
 							zbxSender.terminate();
@@ -249,45 +247,40 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 			System.out.println("\t-" + o.getOpt() + "\t" + o.getDescription());
 	}
 	
-/*
-	private static void loadItemConfig(List<String> itemFileList) {
-		File paramDir = new File(Config.getInstance().getBasedir() + File.separator + "items");
-		File[] paramFiles = paramDir.listFiles(new FilenameFilter() {
-			
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(".xml");
-			}
-		});
-		
-		for (File f: paramFiles) {
-			if (itemFileList.contains(f.getName())){
-				LOG.info("reading items from " + f.getAbsolutePath().replace(File.separator+"."+File.separator, File.separator));
-				try {
-					String itemFile = f.getName();
-					SAXReader saxReader = new SAXReader();
-					Document doc = saxReader.read(f);
-					Element root = doc.getRootElement();
-					String prefix = root.attributeValue("prefix");
-	//				DBType dbType = DBType.fromString(root.attributeValue("type").toLowerCase());
-					for (Object srv: root.elements("server")) {
-						if (srv instanceof Element)
-							buildServerElements((Element) srv, itemFile, prefix );
-					}
-					for (Object db: root.elements("database")) {
-						if (db instanceof Element)
-							buildDatabaseElements((Element) db, itemFile, prefix);
-					}
-				}
-				catch (Exception ex) {
-				LOG.error("Error while loading " + f.getName(), ex);
-				}
-			}
-		}
-	}
-
 	
-*/
+	/**
+	 * Full restart of JVM
+	 */
+	public static void restartApplication()
+	{
+		 final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+		 File currentJar = null;
+			try {
+				currentJar = new File(DB4bix.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			} catch (URISyntaxException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	
+		  /* is it a jar file? */
+		  if(!currentJar.getName().endsWith(".jar"))
+		    return;
+	
+		  /* Build command: java -jar application.jar */
+		  final ArrayList<String> command = new ArrayList<String>();
+		  command.add(javaBin);
+		  command.add("-jar");
+		  command.add(currentJar.getPath());
+	
+		  final ProcessBuilder builder = new ProcessBuilder(command);
+		  try {
+			builder.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  System.exit(0);
+	}
 	
 	
 	public static ZabbixSender getZSender() {
