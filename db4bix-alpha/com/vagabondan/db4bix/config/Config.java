@@ -96,7 +96,7 @@ public class Config {
 		private Map<String,List<String> > items=null;
 		private Map<String,List<String> > hostmacro=null;
 		private Map<String,List<String>> hostsTemplates=null;
-		private Map<String,Map<String,String>> itemConfigs = new HashMap<String,Map<String,String>>();
+		private Map<String,Map<String,String>> itemConfigs = new HashMap<>();
 		private String hashZabbixConfig		=null;
 		
 		
@@ -825,7 +825,7 @@ public class Config {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			schedulers.remove(ign);			
+			schedulers.remove(ign);		
 		}
 	}
 
@@ -1160,7 +1160,7 @@ public class Config {
 			try{//parse json
 				//resp=resp.substring(resp.indexOf("{"));
 				//resp=resp.substring(13);
-				LOG.debug(resp);
+				//LOG.debug(resp);
 				JSONObject o=JSON.parseObject(resp);
 
 				/**result for hosts:
@@ -1216,7 +1216,18 @@ public class Config {
 				//key_=[DB4bix.config[mysql.database.discovery], db.odbc.select[sessions,{$DSN}]], 
 				//params=[<XML config>, sessions], 
 				//delay=[120, 120],
-				//							
+				//			
+				
+				/**
+				 * Get disabled hosts
+				 */
+				Set<String> hostFilter=new HashSet<>();
+				List<String> statuses=hosts.get("status");
+				for(int i=0;i<statuses.size();++i){
+					if(!"0".equals(statuses.get(i)))
+						hostFilter.add(hosts.get("hostid").get(i));
+				}
+				
 				
 				/**
 				 * fill itemConfigs collection
@@ -1225,8 +1236,9 @@ public class Config {
 					String key=items.get("key_").get(it);
 					if(key.contains(ZABBIX_ITEM_CONFIG_SUFFIX)){
 						String hostid=items.get("hostid").get(it);
-						String host=zs.getHostByHostId(hostid);
-						
+						if(hostFilter.contains(hostid)) 
+							continue;
+						String host=zs.getHostByHostId(hostid);						
 						/**
 						 * substitute macro for getting db name
 						 */
@@ -1261,10 +1273,10 @@ public class Config {
 						}
 					}
 				}
-				LOG.debug(zs.getItemConfigs());
+				LOG.debug("Got item config from Zabbix Server "+zs);
 			}
 			catch (Exception ex){
-				LOG.error("Error configuring requests - " + ex.getLocalizedMessage());
+				LOG.error("Error getting item Zabbix Config from "+zs+": " + ex.getLocalizedMessage());
 			}
 		}		
 	}
@@ -1340,7 +1352,7 @@ public class Config {
 		
 		for (ZServer zs: zServers){			
 			for(Entry<String, Map<String, String>> ic:zs.getItemConfigs().entrySet()){
-				LOG.debug("loadItemConfigFromZabbix: "+zs+" --> "+ic.getKey());
+				LOG.debug("buildItems: "+zs+" --> "+ic.getKey());
 				try {					
 					String param=ic.getValue().get("param");					
 					param="<!DOCTYPE parms SYSTEM \""+getBasedir()+"/items/param.dtd\">"+param;
