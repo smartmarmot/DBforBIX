@@ -222,7 +222,7 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 						zbxSender=null;
 						
 						DBManager dbman=DBManager.getInstance();
-						dbman=dbman.reinit();
+						dbman=dbman.cleanAll();
 						
 						action="start";
 					}

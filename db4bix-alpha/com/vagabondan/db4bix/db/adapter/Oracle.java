@@ -32,7 +32,7 @@ public class Oracle extends AbstractAdapter {
 		this.maxactive = maxactive;
 		this.maxwaitmillis = maxwaitmillis;
 		this.maxidle = maxidle;
-		this.itemGroupName = set;
+		this.itemGroupNames = set;
 		this.persistence = pers;
 	}
 	

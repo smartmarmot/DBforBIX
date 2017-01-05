@@ -19,10 +19,14 @@ package com.vagabondan.db4bix.db;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import com.vagabondan.db4bix.config.Config;
+import com.vagabondan.db4bix.config.Config.Database;
 import com.vagabondan.db4bix.db.adapter.ALLBASE;
 import com.vagabondan.db4bix.db.adapter.Adapter;
 import com.vagabondan.db4bix.db.adapter.DB2;
@@ -39,7 +43,7 @@ public class DBManager {
 
 	protected DBManager() {}
 
-	private List<Adapter>	databases	= new ArrayList<Adapter>(8);
+	private Set<Adapter>	databases	= new HashSet<>();
 
 	public static DBManager getInstance() {
 		if (instance == null)
@@ -48,6 +52,8 @@ public class DBManager {
 	}
 //DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY;
 	public void addDatabase(Config.Database cfg) {
+		if(databases.contains(cfg.getDBNameFC()))
+			return;
 		switch (cfg.getType()) {
 			case DB2:
 				databases.add(new DB2(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(), cfg.getMaxActive(),cfg.getMaxIdle()
@@ -99,12 +105,26 @@ public class DBManager {
 	
 	
 	
-	public DBManager reinit() {
+	public DBManager cleanAll() {
+		Set<String> itemGroupNames=new HashSet<>();		
 		for(Adapter db:getDatabases()){
-			db.abort();
+			itemGroupNames.addAll(db.getItemGroupNames());
+		}				
+		return clean(itemGroupNames);
+	}
+	
+	public DBManager clean(Collection<String> itemGroupNames) {
+		if(!itemGroupNames.isEmpty()){
+			for(Adapter db:getDatabases()){
+				db.getItemGroupNames().removeAll(itemGroupNames);
+				if(db.getItemGroupNames().isEmpty())
+					db.abort();
+			}
+			java.util.function.Predicate<Adapter> dbPredicate=(Adapter db)-> db.getItemGroupNames().isEmpty();
+			databases.removeIf(dbPredicate);
+			if(databases.isEmpty())
+				instance=null;
 		}
-		databases.clear();
-		instance=null;		
 		return getInstance();
 	}
 	

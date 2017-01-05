@@ -42,14 +42,14 @@ abstract class AbstractAdapter implements Adapter {
 	protected int    maxidle;
 	protected int    maxwaitmillis;
 	protected boolean persistence;
-	protected Set<String> itemGroupName=new HashSet<String>();
+	protected Set<String> itemGroupNames=new HashSet<String>();
 
 	public Set<String> getItemGroupNames() {
-		return itemGroupName;
+		return itemGroupNames;
 	}
 
 	public void addItemGroupName(Set<String> itemGroupName) {
-		this.itemGroupName = itemGroupName;
+		this.itemGroupNames = itemGroupName;
 	}
 
 	@Override

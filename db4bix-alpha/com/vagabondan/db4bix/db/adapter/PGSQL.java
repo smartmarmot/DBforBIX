@@ -32,7 +32,7 @@ public class PGSQL extends AbstractAdapter {
 		this.maxactive = maxactive.intValue();
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
-		this.itemGroupName = set;
+		this.itemGroupNames = set;
 		this.persistence = pers;
 	}
 	

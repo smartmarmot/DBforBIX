@@ -776,12 +776,21 @@ public class Config {
 		 
 		
 		 if(!toUpdate.isEmpty()||!toAdd.isEmpty()||!toDelete.isEmpty()){
+			 /**
+			  * stop schedulers that are to be deleted and updated
+			  */
+			 stopSchedulers(toDelete);
+			 stopSchedulers(toUpdate);
+			 
+			 /**
+			  * Build new Items
+			  */
 			 newconfig.buildItems();
+			 
 			 
 			 /**
 			  * delete items configs
-			  */
-			 stopSchedulers(toDelete);
+			  */			 
 			 deleteItemConfigs(toDelete);
 			 
 			 /**
@@ -791,18 +800,15 @@ public class Config {
 	
 			 /**
 			  * update item configs
-			  */
-			 stopSchedulers(toUpdate);
+			  */			 
 			 updateItemConfigs(newconfig,toUpdate);
 			 
 			 
 			 /**
-			  * Launch schedulers
+			  * Open new connections to new DBs and Launch schedulers
 			  */
-			 launchSchedulers(toAdd);
-			 launchSchedulers(toUpdate);
-		 }
-		 
+			 startChecks();
+		 }		 
 		 return false;
 	}
 
@@ -828,16 +834,18 @@ public class Config {
 			schedulers.remove(ign);		
 		}
 	}
-
+	
 	public void startChecks() {
 		DBManager manager = DBManager.getInstance();
 		for (Database db:getDatabases()){
-			manager.addDatabase(db);
-			Adapter adapter=manager.getDatabaseByName(db.getDBNameFC());
-			try {
-				adapter.createConnection();
-			} catch (ClassNotFoundException | SQLException e) {
-				e.printStackTrace();
+			if(null==manager.getDatabaseByName(db.getDBNameFC())){
+				manager.addDatabase(db);
+				Adapter adapter=manager.getDatabaseByName(db.getDBNameFC());
+				try {
+					adapter.createConnection();
+				} catch (ClassNotFoundException | SQLException e) {
+					e.printStackTrace();
+				}
 			}
 			launchSchedulers(db.getItemGroupNames());
 		}
@@ -913,7 +921,7 @@ public class Config {
 	 * Delete item group names entities from configuration 
 	 * @param itemGroupNames set of item group names to delete
 	 */
-	private void deleteItemConfigs(Set<String> itemGroupNames) {
+	private void deleteItemConfigs(Collection<String> itemGroupNames) {
 		/**
 		 * zbxServers:
 		 * 4. Config.getItemConfigFromZabbix: itemsJSON, hosts, items, hostmacro, itemConfigs
@@ -961,7 +969,20 @@ public class Config {
 			 */
 			Database db=this.getDatabaseByItemGroupName(ign);
 			db.removeItemGroupName(ign);
-		}		
+		}
+		
+		/**
+		 * Update DBManager
+		 */
+		DBManager.getInstance().clean(itemGroupNames);
+		
+		/**
+		 * find databases without any itemGroupName and remove them from collection
+		 */
+		java.util.function.Predicate<Database> dbPredicate=(Database db)-> db.getItemGroupNames().isEmpty();
+		databases.removeIf(dbPredicate);
+		
+	
 	}
 
 	private Database getDatabaseByItemGroupName(String itemGroupName) {

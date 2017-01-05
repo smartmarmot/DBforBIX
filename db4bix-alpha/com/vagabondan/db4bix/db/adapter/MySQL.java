@@ -23,7 +23,7 @@ import com.vagabondan.db4bix.db.DBType;
 
 public class MySQL extends AbstractAdapter {
 
-	public MySQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Set<String> set,Boolean pers) {
+	public MySQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Set<String> itemGroupNames,Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -31,7 +31,7 @@ public class MySQL extends AbstractAdapter {
 		this.maxactive = maxactive.intValue();
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
-		this.itemGroupName = set;
+		this.itemGroupNames = itemGroupNames;
 		this.persistence = pers;
 				
 	}

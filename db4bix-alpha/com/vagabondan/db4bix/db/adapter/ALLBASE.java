@@ -16,7 +16,7 @@ public class ALLBASE extends AbstractAdapter {
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
 		this.persistence = pers;
-		this.itemGroupName=set;
+		this.itemGroupNames=set;
 	}
 	
 	@Override
