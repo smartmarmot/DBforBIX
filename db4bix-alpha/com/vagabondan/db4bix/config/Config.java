@@ -1222,7 +1222,7 @@ public class Config {
 			//references
 			Map<String,List<String> > hosts=zs.getHosts();
 			Map<String,List<String> > items=zs.getItems();
-			Map<String,List<String> > hostmacro=zs.getHostmacro();
+			//Map<String,List<String> > hostmacro=zs.getHostmacro();
 
 			
 

@@ -53,6 +53,7 @@ public class SimpleItem extends AbstractItem {
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 		
 		while (rs.next()) {
+			val=noData;
 			ResultSetMetaData meta = rs.getMetaData();
 			if (meta.getColumnCount() == 1) {
 				String fetchedVal = rs.getString(1);

@@ -17,16 +17,11 @@
 
 package com.vagabondan.db4bix.db;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
-
 import com.vagabondan.db4bix.config.Config;
-import com.vagabondan.db4bix.config.Config.Database;
 import com.vagabondan.db4bix.db.adapter.ALLBASE;
 import com.vagabondan.db4bix.db.adapter.Adapter;
 import com.vagabondan.db4bix.db.adapter.DB2;

@@ -48,7 +48,7 @@ public class Scheduler extends TimerTask {
 	private int						pause;
 
 	private Map<String, Set<Item>>	globalItems;
-	private Map<String, Set<Item>>	serverItems;
+	//private Map<String, Set<Item>>	serverItems;
 
 	/**
 	 * Creates a new TimeTask for item fetching
@@ -62,7 +62,7 @@ public class Scheduler extends TimerTask {
 		this.pause = pause;
 
 		globalItems = new ConcurrentHashMap<String, Set<Item>>(9);
-		serverItems = new ConcurrentHashMap<String, Set<Item>>(9);
+		//serverItems = new ConcurrentHashMap<String, Set<Item>>(9);
 	}
 
 	public void addItem(String itemGroupName, Item item) {

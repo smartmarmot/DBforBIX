@@ -17,11 +17,6 @@
 
 package com.vagabondan.db4bix.zabbix.protocol;
 
-import java.io.UnsupportedEncodingException;
-
-import org.apache.commons.codec.binary.Base64;
-
-import com.vagabondan.db4bix.scheduler.Discovery;
 import com.vagabondan.db4bix.zabbix.ZabbixItem;
 
 /**
@@ -56,29 +51,7 @@ public class Sender32 implements SenderProtocol {
 	}
 
 	   
-    /**
-	 * Encodes data for transmission to the server.
-	 * 
-	 * This method encodes the data in the ASCII encoding, defaulting to
-	 * the platform default encoding if that is somehow unavailable.
-	 * 	
-	 * @param data
-	 * @return byte[] containing the encoded data
-	 */
-	private byte[] encodeString(String data) {
-		try {
-			return data.getBytes("ASCII");
-		} catch (UnsupportedEncodingException e) {
-			return data.getBytes();
-		}
-	}
-	
-    private String base64Encode(String data) {
-		return new String(Base64.encodeBase64(encodeString(data)));
-	}
-
-		
-	private String openJson(String type, String proxyName) {
+    private String openJson(String type, String proxyName) {
 		//{"request":(ZBX_PROTO_VALUE_HISTORY_DATA|ZBX_PROTO_VALUE_DISCOVERY_DATA|ZBX_PROTO_VALUE_AUTO_REGISTRATION_DATA),
 		//	"host":DB4bix, 
 		//	"data":[{"host":HOST_NAME,"key":KEY,"clock":CLOCK,"ns":NS},{},...],

@@ -17,16 +17,9 @@
 
 package com.vagabondan.db4bix.zabbix;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -36,10 +29,8 @@ import org.apache.log4j.Logger;
 
 import com.vagabondan.common.StackSingletonPersistent;
 import com.vagabondan.db4bix.config.Config;
-import com.vagabondan.db4bix.config.Config.Database;
 import com.vagabondan.db4bix.config.Config.ZServer;
 import com.vagabondan.db4bix.scheduler.Discovery;
-import com.vagabondan.db4bix.zabbix.protocol.Sender18;
 import com.vagabondan.db4bix.zabbix.protocol.Sender32;
 import com.vagabondan.db4bix.zabbix.protocol.SenderProtocol;
 

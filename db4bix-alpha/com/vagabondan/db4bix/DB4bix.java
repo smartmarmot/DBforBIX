@@ -28,17 +28,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.daemon.Daemon;
-import org.apache.commons.daemon.DaemonContext;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -50,15 +45,13 @@ import com.vagabondan.common.Constants;
 import com.vagabondan.db4bix.config.Config;
 import com.vagabondan.db4bix.config.Config.ZServer;
 import com.vagabondan.db4bix.db.DBManager;
-import com.vagabondan.db4bix.zabbix.PersistentStackSender;
 import com.vagabondan.db4bix.zabbix.ZabbixSender;
 
 
 /**
- * DB4bix daemon main class
+ * DB4bix main class
  */
-//public class DB4bix implements Daemon {
-	public class DB4bix {
+public class DB4bix {
 	
 	private static final Logger				LOG				= Logger.getLogger(DB4bix.class);
 	
@@ -67,7 +60,7 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 	 */
 
 	private static ZabbixSender				zbxSender;
-	private static PersistentStackSender	persStackSender;
+	//private static PersistentStackSender	persStackSender;
 	private static boolean debug = false;
 
 	
@@ -249,7 +242,7 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 	
 	
 	/**
-	 * Full restart of JVM
+	 * Full restart of JVM. Not used now.
 	 */
 	public static void restartApplication()
 	{
@@ -258,7 +251,6 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 			try {
 				currentJar = new File(DB4bix.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			} catch (URISyntaxException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 	
@@ -276,7 +268,6 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 		  try {
 			builder.start();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		  System.exit(0);
@@ -315,34 +306,5 @@ import com.vagabondan.db4bix.zabbix.ZabbixSender;
 			DB4bix.LOG.log(Level.ERROR, "Unable to write to file " + _pidfile + " error:" + e);
 		}
 	}
-	
-	//@Override
-	public void init(DaemonContext dc) throws Exception {
-		String[] args = dc.getArguments();
-		if (args == null || args.length == 0)
-			throw new IllegalStateException("BASEDIR missing");
-		Config.getInstance().setBasedir(args[0]);
-	}
-	
-	public static void start(String[] args) {
-		main(new String[] { "-a", "start" });
-	}
-
-	public static void stop(String[] args) {
-		main(new String[] { "-a", "stop" });
-	}
-	
-	//@Override
-	public void start() throws Exception {
-		main(new String[] { "-a", "start", "-b", Config.getInstance().getBasedir() });
-	}
-	
-	//@Override
-	public void stop() throws Exception {
-		main(new String[] { "-a", "stop" });
-	}
-	
-	//@Override
-	public void destroy() {}
 	
 }

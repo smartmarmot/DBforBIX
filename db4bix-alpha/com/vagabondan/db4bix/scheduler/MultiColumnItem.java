@@ -23,13 +23,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.vagabondan.db4bix.config.Config;
 import com.vagabondan.db4bix.config.Config.ZServer;
 import com.vagabondan.db4bix.zabbix.ZabbixItem;
 
@@ -74,7 +72,8 @@ public class MultiColumnItem extends AbstractMultiItem {
 					for(int i = 1; i<= meta.getColumnCount(); i++)
 						realName = realName.replace("%"+i, rs.getString(i));
 					//get value
-					val=rs.getString(column);
+					val = rs.getString(column);
+					val = (null == val) ? noData : val;
 					values.add(new ZabbixItem(name+realName, val,clock, this));
 				}
 			}

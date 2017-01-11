@@ -28,8 +28,6 @@ import org.apache.log4j.Logger;
 
 import com.vagabondan.common.StackSingletonPersistent;
 import com.vagabondan.db4bix.config.Config;
-import com.vagabondan.db4bix.zabbix.ZabbixSender.PROTOCOL;
-import com.vagabondan.db4bix.zabbix.protocol.Sender14;
 import com.vagabondan.db4bix.zabbix.protocol.Sender18;
 import com.vagabondan.db4bix.zabbix.protocol.SenderProtocol;
 

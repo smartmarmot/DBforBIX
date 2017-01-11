@@ -18,8 +18,6 @@
 package com.vagabondan.db4bix.zabbix;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-
 import com.vagabondan.db4bix.scheduler.Item;
 
 public final class ZabbixItem implements Serializable {
