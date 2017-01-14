@@ -24,19 +24,21 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
 public class MultiRowItem extends AbstractMultiItem {
 
-	public MultiRowItem(String prefix, String[] items, String query) {
-		super(prefix, items, query);
+	public MultiRowItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
+		super(prefix, items, query, itemConfig, zs);
 	}
 
 	@Override
-	public ZabbixItem[] getItemData(Connection con, String hostname, int timeout) throws SQLException {		
+	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {		
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 
 		PreparedStatement pstmt = con.prepareStatement(query);
+			
 		
 		pstmt.setQueryTimeout(timeout);
 		ResultSet rs = pstmt.executeQuery();
@@ -44,7 +46,7 @@ public class MultiRowItem extends AbstractMultiItem {
 		
 		// fill with base items
 		for (String item: items)
-			values.put(item, new ZabbixItem(hostname, name+item, noData,clock));
+			values.put(item, new ZabbixItem(name+item, noData,clock, this));
 		
 		// now check if we find better values
 		while (rs.next()) {
@@ -52,11 +54,11 @@ public class MultiRowItem extends AbstractMultiItem {
 			String fetchedVal = rs.getString(2);
 			if (fetchedVal != null && values.containsKey(fetchedName)) {
 				clock = new Long(System.currentTimeMillis() / 1000L);
-				values.put(fetchedName, new ZabbixItem(hostname, name+fetchedName, fetchedVal,clock));
+				values.put(fetchedName, new ZabbixItem(name+fetchedName, fetchedVal,clock,this));
 				
 			}
 		}
-		rs.close();
+		rs.close();		
 		pstmt.close();
 
 		return values.values().toArray(new ZabbixItem[0]);

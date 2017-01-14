@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -184,7 +185,9 @@ public class PersistentDB implements Persistence{
 		return maxIDX;
 	}
 
+	
 	public  ZabbixItem pop() {
+		//TODO redesign to support Zabbix Proxy label while sending the data to Zabbix. Now it's working...
 		Connection connection = getDBConnection();
 		PreparedStatement preparedStmt = null;
 		ZabbixItem zItem = null;
@@ -271,23 +274,31 @@ public class PersistentDB implements Persistence{
 	public static void main(String[] args) throws Exception {
 		try {
 			System.out.println("Size ="+PersistentDB.getInstance().size());
-			ZabbixItem zi= new ZabbixItem ("host","key","value",0L);
-			PersistentDB.getInstance().push(zi);
-			zi= new ZabbixItem ("host1","key1","value1",1L);
-			PersistentDB.getInstance().push(zi);
-			zi= new ZabbixItem ("host2","key2","value2",2L);
-			PersistentDB.getInstance().push(zi);
-			zi= new ZabbixItem ("host3","key3","value3",3L);
-			PersistentDB.getInstance().push(zi);
-			System.out.println("Size ="+PersistentDB.getInstance().size());
-			while (PersistentDB.getInstance().size() >0 ){
-				zi=PersistentDB.getInstance().pop();
-				System.out.println(" Host="+zi.getHost()+" Key="+zi.getKey()+" Value="+zi.getValue()+" Clock="+zi.getClock());
-			}
+//			ZabbixItem zi= new ZabbixItem ("host","key","value",0L);
+//			PersistentDB.getInstance().push(zi);
+//			zi= new ZabbixItem ("host1","key1","value1",1L);
+//			PersistentDB.getInstance().push(zi);
+//			zi= new ZabbixItem ("host2","key2","value2",2L);
+//			PersistentDB.getInstance().push(zi);
+//			zi= new ZabbixItem ("host3","key3","value3",3L);
+//			PersistentDB.getInstance().push(zi);
+//			System.out.println("Size ="+PersistentDB.getInstance().size());
+//			while (PersistentDB.getInstance().size() >0 ){
+//				zi=PersistentDB.getInstance().pop();
+//				System.out.println(" Host="+zi.getHost()+" Key="+zi.getKey()+" Value="+zi.getValue()+" Clock="+zi.getClock());
+//			}
 
 
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+
+
+	public void add(Collection<ZabbixItem> zItems) {
+		for(ZabbixItem zItem:zItems){
+			push(zItem);
 		}
 	}
 

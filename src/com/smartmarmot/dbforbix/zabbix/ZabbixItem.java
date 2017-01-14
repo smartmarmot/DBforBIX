@@ -19,6 +19,8 @@ package com.smartmarmot.dbforbix.zabbix;
 
 import java.io.Serializable;
 
+import com.smartmarmot.dbforbix.scheduler.Item;
+
 public final class ZabbixItem implements Serializable {
 
 	private static final long	serialVersionUID	= 1374520722821228793L;
@@ -28,22 +30,56 @@ public final class ZabbixItem implements Serializable {
 	private String				host;
 	private Long				clock;
 	private String				lastlogsize;
+	private Item				confItem;
 
 
+	//main case
+	public ZabbixItem(String key, String value, Long clock, Item confItem) {
+		if (key == null || "".equals(key.trim()))
+			throw new IllegalArgumentException("empty key");
+		if (value == null)
+			throw new IllegalArgumentException("null value for key '" + key + "'");
+		if (confItem == null)
+			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
+
+		this.key = htmlSpecialChars(key);
+		this.value = htmlSpecialChars(value);
+		this.clock = clock;
+		this.host=confItem.getItemConfig().get("host");
+		this.setConfItem(confItem);		
+	}
+
+	
+	//For persistence usage
 	public ZabbixItem(String host, String key, String value, Long clock) {
 		if (key == null || "".equals(key.trim()))
 			throw new IllegalArgumentException("empty key");
 		if (value == null)
 			throw new IllegalArgumentException("null value for key '" + key + "'");
-		if (host == null)
-			throw new IllegalArgumentException("null value for hostname '" + host + "'");
+		if (confItem == null)
+			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
-		this.key = key;
-		this.value = value;
-		this.host = host;
+		this.key = htmlSpecialChars(key);
+		this.value = htmlSpecialChars(value);
 		this.clock = clock;
-		
+		this.host=host;
+		confItem=null;
 	}
+
+	private String htmlSpecialChars(String string) {
+		String result=string;
+		if(null!=result){
+			result=result.replace("\\", "\\\\");//has to be the first one
+			result=result.replace("\n", "\\n");
+			result=result.replace("\"", "\\\"");			
+			result=result.replace("\b", "\\b");
+			result=result.replace("\f", "\\f");
+			result=result.replace("\r", "\\r");
+			result=result.replace("\t", "\\t");			
+		}
+		return result;
+	}
+
 
 	/**
 	 * @return The current hostname for this item.
@@ -78,5 +114,13 @@ public final class ZabbixItem implements Serializable {
 	@Override
 	public String toString() {
 		return getHost() + " " + getKey() + ": " + getValue();
+	}
+
+	public Item getConfItem() {
+		return confItem;
+	}
+
+	public void setConfItem(Item confItem) {	
+		this.confItem = confItem;
 	}
 }

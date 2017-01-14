@@ -17,13 +17,18 @@
 
 package com.smartmarmot.dbforbix.scheduler;
 
+import java.util.Map;
+
+import com.smartmarmot.dbforbix.config.Config.ZServer;
+
 abstract class AbstractMultiItem extends AbstractItem {
 
 	protected String[] items;
 	protected String query;
 	protected String noData = "";
 	
-	AbstractMultiItem(String prefix, String[] items, String query) {
+	AbstractMultiItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
+		super(itemConfig, zs);
 		this.name = prefix;
 		this.items = items;
 		this.query = query;
