@@ -1,69 +1,94 @@
 ### General settings ###
 
-# Log level (All|Debug|Info|Warning|Error)
-DBforBix.LogLevel=Info
+#
+## Log level (All|Debug|Info|Warning|Error)
+dbforbix.LogLevel=All
+#
+## Log file name
+dbforbix.LogFile=<path_to_log>/dbforbix.log
+#
+## Maximum log file size
+dbforbix.LogFileSize=10MB
 
-# Log file name
-DBforBix.LogFile=./logs/dbforbix.log
+#pidFile
+#frequency of item's refresh
+dbforbix.Sleep=30
 
-# Maximum log file size
-DBforBix.LogFileSize=1MB
+#frequency of update config in seconds
+dbforbix.UpdateConfigTimeout=120
 
-# Persistence Database Directory
-DBforBix.PersistenceDir=./persistentdb/
+#MaxThreadNumber should be >= than the number of your databases
+dbforbix.MaxThreadNumber=100
 
-### Configuration of Connection pool ###
-
-# Maximum number of active connection inside pool
+#
+#### Configuration of Connection pool ###
+#
+## Maximum number of active connection inside pool
 Pool.MaxActive=10
+#
+## Login Timeout
+Pool.QueryTimeOut=15
 
-# Login Timout
-Pool.TimeOut=15
-
+#
 ### Zabbix servers ###
+# A list of Zabbix servers, change the name after first dot to add more
+# Zabbix Server
+ZabbixServer.Zabbix1.Address=<zabbix_server_host>
+# Zabbix server port (trapper port)
+ZabbixServer.Zabbix1.Port=10051
+# Name of Zabbix proxy (you should create this name on your Zabbix Web Interface)
+# It will be used to get hosts and items configurations
+ZabbixServer.Zabbix1.ProxyName=dbforbix
+# List of comma separated databases
+# This names also should be defined in your Template/Host macros {$DSN} in Zabbix Web Interface
+# See zabbix templates attached for further details
+ZabbixServer.Zabbix1.DBList=MYSQLDB1,ORADB1
+###
+#
 
-# A list of Zabbix servers, increase the number to add more
-ZabbixServer.1.Address=zabbixsrv
-ZabbixServer.1.Port=10051
+
+
+
 
 ### Database servers ###
 
+###MySQL Server
+#define here your connection string for each database
+#on the following example we are treating MySQL
+DB.MYSQLDB1.Url=jdbc:mysql://<mysql_DB_host>:<mysql_DB_port>/<database>
+DB.MYSQLDB1.Instance=<database>
+DB.MYSQLDB1.User=<mysql_user>
+DB.MYSQLDB1.Password=<mysql_password>
+DB.MYSQLDB1.Type=mysql
+DB.MYSQLDB1.MaxActive=10
+DB.MYSQLDB1.MaxWaitMillis=10000
+DB.MYSQLDB1.MaxIdle=1
+
+###Oracle Server
+#define here your connection string for each database
+#on the following example we are treating Oracle
+DB.ORADB1.Type=oracle
+DB.ORADB1.Instance=<instance_name>
+DB.ORADB1.Url=jdbc:oracle:thin:@<oracle_DB_host>:<oracle_DB_port>:<instance_name>
+DB.ORADB1.User=<oracle_user>
+DB.ORADB1.Password=<oracle_password>
+DB.ORADB1.MaxActive=10
+DB.ORADB1.MaxWaitMillis=10000
+DB.ORADB1.MaxIdle=1
+
+
 
 # Define your database connections
-# Please note that possible database type are: DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY;
-# Please remember to set the for the properties .Persistence to TRUE or FALSE 
-# You can replace every "DB<Number>" in DB.DB<NUMBER>.property with the database name or any mnemonic string you like
-# NOTE: you can specify DB.<DATABASE>.Instance=<INSTANCE NAME> this is an optional instance parameter. This parameter is used to replace %INSTANCE% parameters in item queries.
-
+# Not tested yet
 #DB.DB1.Type=pgsql
 #DB.DB1.Name=PostgreSVR
 #DB.DB1.Url=jdbc:postgresql://localhost:5432/
 #DB.DB1.User=user
 #DB.DB1.Password=passwd
-#DB.DB1.MaxWait=10
-#DB.DB1.MaxSize=10
-#DB.DB1.MaxIdle=1
-#DB.DB1.ItemFile=oracle
-#DB.DB1.Persistence=TRUE
 
 #DB.DB3.Type=mssql
 #DB.DB3.Name=MSSQLSRV
 #DB.DB3.Url=jdbc:jtds:sqlserver://localhost:3678/INSTANCENAME
 #DB.DB3.User=user
 #DB.DB3.Password=passwd
-#DB.DB3.MaxWait=10
-#DB.DB3.MaxSize=10
-#DB.DB3.MaxIdle=1
-#DB.DB3.ItemFile=mssql
-#DB.DB3.Persistence=FALSE
 
-#DB.DB4.Type=mysql
-#DB.DB4.Name=MYSQLSrv
-#DB.DB4.Url=jdbc:mysql://localhost/
-#DB.DB4.User=user
-#DB.DB4.Password=passwd
-#DB.DB4.MaxWait=10
-#DB.DB4.MaxSize=10
-#DB.DB4.MaxIdle=1
-#DB.DB4.ItemFile=mysql
-#DB.DB4.Persistence=FALSE
