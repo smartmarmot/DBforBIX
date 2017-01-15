@@ -24,8 +24,12 @@ import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Map.Entry;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -34,6 +38,8 @@ import com.smartmarmot.common.PersistentDB;
 import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.config.Config.Database;
+import com.smartmarmot.dbforbix.config.Config.ZServer;
+import com.smartmarmot.dbforbix.scheduler.Discovery;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
 import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
 
@@ -45,7 +51,7 @@ import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
 public class ZabbixSender extends Thread {
 
 	public enum PROTOCOL {
-		V14, V18
+		V14, V18, V32
 	}
 
 	private static final Logger	LOG					= Logger.getLogger(ZabbixSender.class);
@@ -76,81 +82,66 @@ public class ZabbixSender extends Thread {
 				catch (InterruptedException e) {}
 			}
 			else {
-				ZabbixItem nextItem = items.poll();
-
-				Config.ZServer[] servers;
-				synchronized (configuredServers) {
-					servers = configuredServers;
+				//TODO maxItems should be taken from configuration file
+				//take bulk of items to send
+				int maxItems=100;
+				//ZabbixItem[] itemsReady=new ZabbixItem[maxItems];
+				Map<Config.ZServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<>();
+				for(int i=0;(i<maxItems)&&(items.peek()!=null);++i){
+					ZabbixItem nextItem=items.poll();					
+					if(nextItem.getValue().isEmpty()) {
+						LOG.warn("Item "+nextItem+" has empty value!");
+						continue;
+					}
+					Config.ZServer zs=nextItem.getConfItem().getZServer();
+					if(mZServer2ZItems.get(zs)==null) mZServer2ZItems.put(zs, new HashSet<ZabbixItem>());
+					mZServer2ZItems.get(zs).add(nextItem);
 				}
 
-				LOG.debug("ZabbixSender - Sending to " +nextItem.getHost() + " Item=" + nextItem.getKey() + " Value=" + nextItem.getValue());
-				boolean persistent = false;
-				Config config = Config.getInstance();
-				Collection<Database> dbs = config.getDatabases();
-				Iterator<Database> iter = dbs.iterator();
-				while (iter.hasNext()){
-					Database myDBItem = iter.next();
-					if (myDBItem.getName().equals(nextItem.getHost())){
-						persistent=myDBItem.getPersistence();
-					}
+				for(Entry<ZServer, Collection<ZabbixItem>> m:mZServer2ZItems.entrySet()){
+					LOG.debug("ZabbixSender: Sending to " + m.getKey() + " Items[" + m.getValue().size() + "]=" + m.getValue());
 				}
 				
-				for (Config.ZServer serverConfig : servers) {
-					Socket zabbix = null;
-					OutputStreamWriter out = null;
-					InputStream in = null;
-					byte[] response = new byte[1024];
-					for (int i = 0; i < 3; i++) {
-						try {
-							zabbix = new Socket();
-							zabbix.setSoTimeout(5000);
-							zabbix.connect(new InetSocketAddress(serverConfig.getHost(), serverConfig.getPort()));
-							OutputStream os = zabbix.getOutputStream();
-
-							String data = protocol.encodeItem(nextItem);
-							out = new OutputStreamWriter(os);
-							out.write(data);
-							out.flush();
-
-							in = zabbix.getInputStream();
-							final int read = in.read(response);
-							if (!protocol.isResponeOK(read, response))
-								LOG.warn("ZabbixSender - received unexpected response '" + new String(response).trim() + "' for key '" + nextItem.getKey()
-										+ "'");
+				Config config = Config.getInstance();
+				
+				for (Entry<ZServer, Collection<ZabbixItem>> entry : mZServer2ZItems.entrySet()) {					
+					ZServer zs=entry.getKey();
+					Collection<ZabbixItem> zItems=entry.getValue();
+//					Collection<ZabbixItem> zDiscoveries= new HashSet<ZabbixItem>();
+//					Collection<ZabbixItem> zHistories = new HashSet<ZabbixItem>();
+//
+//					// separate Discovery and History data: they should be run in different requests with different types 
+//					for(ZabbixItem zItem:zItems){
+//						if(zItem.getConfItem() instanceof Discovery){
+//							zDiscoveries.add(zItem);
+//						}else{
+//							zHistories.add(zItem);
+//						}
+//					}					
+					boolean persistent = true;
+					for (int i = 0; i < 3; ++i) {
+						String resp=new String();
+						try {								
+							String data = protocol.encodeItems(zItems.toArray(new ZabbixItem[0]));						
+							LOG.debug("ZabbixSender[data]: "+data);
+							resp=config.requestZabbix(zs.getZServerHost(),zs.getZServerPort(),data);
+							LOG.debug("ZabbixSender[resp]: "+resp);
 							break;
 						}
 						catch (Exception ex) {
-							LOG.error("ZabbixSender - Error contacting Zabbix server " + serverConfig.getHost() + " - " + ex.getMessage());
-							if (!persistent){
-							LOG.debug("ZabbixSender - NOTE: the item="+nextItem.getHost()+" is not marked to be persistent, the item will be lost");
-							}
+							LOG.error("ZabbixSender: Error contacting Zabbix server " + zs.getZServerHost() + " - " + ex.getMessage());
 							if (persistent){
-								LOG.debug("ZabbixSender - Current PersistentDB size ="+PersistentDB.getInstance().size());
-								LOG.info("ZabbixSender - Adding the item="+nextItem.getHost()+" key="+nextItem.getKey()+" value="+nextItem.getValue()+" clock="+nextItem.getClock()+ " to the persisent stack");
-								PersistentDB.getInstance().push(new ZabbixItem(nextItem.getHost(),nextItem.getKey(),nextItem.getValue(), nextItem.getClock()));
-								LOG.debug("ZabbixSender - Current PersistentDB size ="+PersistentDB.getInstance().size());		
+								LOG.debug("ZabbixSender: Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
+								LOG.info("ZabbixSender - Adding to the persisent stack items: "+zItems);
+								PersistentDB.getInstance().add(zItems);
+								LOG.debug("ZabbixSender - Current PersistentDB size ="+PersistentDB.getInstance().size());	
 							}
 						}
-						finally {
-							if (in != null)
-								try {
-									in.close();
-								}
-								catch (IOException e) {}
-							if (out != null)
-								try {
-									out.close();
-								}
-								catch (IOException e) {}
-							if (zabbix != null)
-								try {
-									zabbix.close();
-								}
-								catch (IOException e) {}
+						finally{
+							persistent = false;
 						}
 					}
 				}
-
 			}
 		}
 	}

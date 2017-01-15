@@ -19,6 +19,8 @@ package com.smartmarmot.dbforbix.db.adapter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.dbcp2.cpdsadapter.DriverAdapterCPDS;
 import org.apache.commons.dbcp2.datasources.SharedPoolDataSource;
@@ -36,14 +38,22 @@ abstract class AbstractAdapter implements Adapter {
 	protected String url;
 	protected String user;
 	protected String passwd;
-	protected String itemfile;
 	protected int 	 maxactive;
 	protected int    maxidle;
 	protected int    maxwaitmillis;
 	protected boolean persistence;
+	protected Set<String> itemGroupNames=new HashSet<String>();
+
+	public Set<String> getItemGroupNames() {
+		return itemGroupNames;
+	}
+
+	public void addItemGroupName(Set<String> itemGroupName) {
+		this.itemGroupNames = itemGroupName;
+	}
 
 	@Override
-	public Connection getConnection() throws SQLException, ClassNotFoundException {
+	public void createConnection() throws SQLException, ClassNotFoundException{
 		if (datasrc == null) {
 			LOG.info("Creating new pool for database " + getName());
 			Config cfg=Config.getInstance();
@@ -55,19 +65,31 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc = new SharedPoolDataSource();
 			datasrc.setConnectionPoolDataSource(cpds);
 			datasrc.setLoginTimeout(15);
-			
+		
 			datasrc.setMaxTotal(cfg.getMaxActive());
 			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
 			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
-
+	
 			datasrc.setValidationQuery(getType().getAliveSQL());
-			datasrc.setDefaultTestOnBorrow(true);
-			datasrc.setDefaultTestOnCreate(true);
-			datasrc.setDefaultTestOnReturn(true);
-		}		
+		}
+	}
+	
+	@Override
+	public Connection getConnection() throws SQLException, ClassNotFoundException {		
 		return datasrc.getConnection();
 	}
 	
+	@Override
+	public void abort(){
+		try {
+			datasrc.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		datasrc=null;
+	}
+		
 	@Override
 	public String getName() {
 		return name;
@@ -83,9 +105,6 @@ abstract class AbstractAdapter implements Adapter {
 		return user;
 	}
 	
-	public String getItemFile() {
-		return itemfile;
-	}
 	@Override
 	public String getPassword() {
 		return passwd;
@@ -123,6 +142,11 @@ abstract class AbstractAdapter implements Adapter {
 	public boolean hasUserItems() {
 		return false;
 	}
+	
+	public boolean hasPersistence() {
+		return this.persistence;
+	}
+	
 	@Override
 	public boolean hasDatabaseItems() {
 		return false;

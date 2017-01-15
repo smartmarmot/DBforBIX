@@ -17,11 +17,13 @@
 
 package com.smartmarmot.dbforbix.db.adapter;
 
+import java.util.Set;
+
 import com.smartmarmot.dbforbix.db.DBType;
 
 public class MySQL extends AbstractAdapter {
 
-	public MySQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, String itemfile,Boolean pers) {
+	public MySQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Set<String> itemGroupNames,Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -29,7 +31,7 @@ public class MySQL extends AbstractAdapter {
 		this.maxactive = maxactive.intValue();
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
-		this.itemfile = itemfile;
+		this.itemGroupNames = itemGroupNames;
 		this.persistence = pers;
 				
 	}

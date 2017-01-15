@@ -18,7 +18,9 @@
 package com.smartmarmot.dbforbix.db;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.adapter.ALLBASE;
@@ -37,55 +39,58 @@ public class DBManager {
 
 	protected DBManager() {}
 
-	private List<Adapter>	databases	= new ArrayList<Adapter>(8);
+	private Set<Adapter>	databases	= new HashSet<>();
 
 	public static DBManager getInstance() {
 		if (instance == null)
 			instance = new DBManager();
 		return instance;
 	}
+	
 //DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY;
 	public void addDatabase(Config.Database cfg) {
+		if(databases.contains(cfg.getDBNameFC()))
+			return;
 		switch (cfg.getType()) {
 			case DB2:
-				databases.add(new DB2(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(), cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new DB2(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(), cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case ORACLE:
-				databases.add(new Oracle(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new Oracle(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case MSSQL:
-				databases.add(new MSSQL(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new MSSQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case MYSQL:
-				databases.add(new MySQL(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new MySQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case PGSQL:
-				databases.add(new PGSQL(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new PGSQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case ALLBASE:
-				databases.add(new ALLBASE(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new ALLBASE(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case SYBASE:
-				databases.add(new SYBASE(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new SYBASE(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case SQLANY:
-				databases.add(new SQLANY(cfg.getName(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(), cfg.getItemFile(),cfg.getPersistence()));
+				databases.add(new SQLANY(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(), cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 		}
 	}
 
-	public Adapter[] getDatabases(String itemFile) {
+	public Adapter[] getDatabases(String groupName) {
 		ArrayList<Adapter> result = new ArrayList<Adapter>(databases.size());
 		for (Adapter db : databases) {
-			if (db.getItemFile().equals(itemFile))
+			if (db.getItemGroupNames().contains(groupName))
 				result.add(db);
 		}
 		return result.toArray(new Adapter[result.size()]);
@@ -94,4 +99,40 @@ public class DBManager {
 	public Adapter[] getDatabases() {
 		return databases.toArray(new Adapter[databases.size()]);
 	}
+	
+	public DBManager cleanAll() {
+		Set<String> itemGroupNames=new HashSet<>();		
+		for(Adapter db:getDatabases()){
+			itemGroupNames.addAll(db.getItemGroupNames());
+		}				
+		return clean(itemGroupNames);
+	}
+	
+	public DBManager clean(Collection<String> itemGroupNames) {
+		if(!itemGroupNames.isEmpty()){
+			for(Adapter db:getDatabases()){
+				db.getItemGroupNames().removeAll(itemGroupNames);
+				if(db.getItemGroupNames().isEmpty())
+					db.abort();
+			}
+			java.util.function.Predicate<Adapter> dbPredicate=(Adapter db)-> db.getItemGroupNames().isEmpty();
+			databases.removeIf(dbPredicate);
+			if(databases.isEmpty())
+				instance=null;
+		}
+		return getInstance();
+	}
+	
+	
+	public Adapter getDatabaseByName(String dbNameFC) {
+		Adapter result=null;
+		for(Adapter db:databases){
+			if(db.getName().equals(dbNameFC)){
+				result=db;
+				break;
+			}
+		}
+		return result;
+	}
+	
 }

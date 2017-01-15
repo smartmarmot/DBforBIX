@@ -48,7 +48,7 @@ public class Scheduler extends TimerTask {
 	private int						pause;
 
 	private Map<String, Set<Item>>	globalItems;
-	private Map<String, Set<Item>>	serverItems;
+//	private Map<String, Set<Item>>	serverItems;
 
 	/**
 	 * Creates a new TimeTask for item fetching
@@ -62,7 +62,7 @@ public class Scheduler extends TimerTask {
 		this.pause = pause;
 
 		globalItems = new ConcurrentHashMap<String, Set<Item>>(9);
-		serverItems = new ConcurrentHashMap<String, Set<Item>>(9);
+		//serverItems = new ConcurrentHashMap<String, Set<Item>>(9);
 	}
 
 	public void addItem(String itemFile, Item item) {
@@ -85,7 +85,9 @@ public class Scheduler extends TimerTask {
 		Config config = Config.getInstance();
 		try {
 			LOG.debug("Scheduler.run() " + getPause());
+			// <itemGroupName>:<ConfigItem>
 			for (Entry<String, Set<Item>> set : globalItems.entrySet()) {
+				// <itemGroupName> -> DBs monitored
 				Adapter[] targetDB = dbman.getDatabases(set.getKey());
 				if (targetDB != null && targetDB.length > 0) {
 					for (Adapter db : targetDB) {
@@ -93,7 +95,7 @@ public class Scheduler extends TimerTask {
 						try {
 							for (Item item : set.getValue()) {
 								try {
-									ZabbixItem[] result = item.getItemData(con, db.getName(),config.getQueryTimeout());
+									ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
 									if (result != null)
 										for (ZabbixItem i : result)
 											sender.addItem(i);

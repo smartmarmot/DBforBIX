@@ -85,7 +85,7 @@ public class PersistentStackSender extends Thread {
 
 								zabbix = new Socket();
 								zabbix.setSoTimeout(5000);
-								zabbix.connect(new InetSocketAddress(serverConfig.getHost(), serverConfig.getPort()));
+								zabbix.connect(new InetSocketAddress(serverConfig.getZServerHost(), serverConfig.getZServerPort()));
 								OutputStream os = zabbix.getOutputStream();
 								LOG.debug("PersistentStackSender - Sending to " +zx.getHost() + " Item=" + zx.getKey() + " Value=" + zx.getValue());
 								String data = protocol.encodeItem(zx);
@@ -103,7 +103,7 @@ public class PersistentStackSender extends Thread {
 								zabbix.close();
 							}			 
 							catch (Exception ex) {
-								LOG.error("PersistentStackSender - Error contacting Zabbix server " + configuredServers[0].getHost() +" port "+ configuredServers[0].getPort()+ " - " + ex.getMessage());
+								LOG.error("PersistentStackSender - Error contacting Zabbix server " + configuredServers[0].getZServerHost() +" port "+ configuredServers[0].getZServerPort()+ " - " + ex.getMessage());
 								LOG.debug("PersistentStackSender - Current PeristentStack size ="+StackSingletonPersistent.getInstance().size());
 								LOG.info("PersistentStackSender - Adding the item Adding the item="+zx.getHost()+" key="+zx.getKey()+" value="+zx.getValue()+" clock="+zx.getClock()+ " back to the persisent stack");
 								StackSingletonPersistent.getInstance().push(zx);

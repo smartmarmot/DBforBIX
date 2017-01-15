@@ -46,7 +46,7 @@ public class Sender14 implements SenderProtocol {
 	}
 
 	@Override
-	public String encodeItem(ZabbixItem[] item) {
+	public String encodeItems(ZabbixItem[] item) {
 		throw new UnsupportedOperationException();
 	}
 

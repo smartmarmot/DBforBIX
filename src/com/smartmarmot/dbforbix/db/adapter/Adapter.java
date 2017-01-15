@@ -19,6 +19,7 @@ package com.smartmarmot.dbforbix.db.adapter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import com.smartmarmot.dbforbix.db.DBType;
 
@@ -32,7 +33,8 @@ public interface Adapter {
 	public String  getPassword();
 	public Integer getMaxActive();
 	public Integer getMaxIdle();
-	public String getItemFile();
+	//public String getItemFile();
+	public Set<String> getItemGroupNames();
 	
 	public String[] getDiscoveryItems();
 	public Object getDiscovery(String key);
@@ -44,7 +46,8 @@ public interface Adapter {
 	public boolean hasTablespaceItems();
 	public boolean getPersistence();
 	
+	public void createConnection() throws SQLException, ClassNotFoundException;
 	public Connection getConnection() throws SQLException, ClassNotFoundException;
-	
+	public void abort();
 	
 }

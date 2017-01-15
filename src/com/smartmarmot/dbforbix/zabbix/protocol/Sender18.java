@@ -84,7 +84,7 @@ public class Sender18 implements SenderProtocol {
 	}
 
 	@Override
-	public String encodeItem(ZabbixItem[] item) {
+	public String encodeItems(ZabbixItem[] item) {
 		// TODO Auto-generated method stub
 		return null;
 	}
