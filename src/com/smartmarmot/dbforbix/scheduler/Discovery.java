@@ -88,10 +88,10 @@ public class Discovery extends AbstractItem {
 				 */
 				
 				if (altNames == null)
-					builder.append("{\"{#" + meta.getColumnName(i).toUpperCase() + "}\":\"" + rs.getString(i) +							
+					builder.append("{\"{#" + meta.getColumnName(i).toUpperCase() + "}\":\"" + rs.getString(i).replace("\\", "\\\\") +							
 							"\"}");
 				else
-					builder.append("{\"{#" + altNames[i-1].toUpperCase() + "}\":\"" + rs.getString(i) +							
+					builder.append("{\"{#" + altNames[i-1].toUpperCase() + "}\":\"" + rs.getString(i).replace("\\", "\\\\") +							
 							"\"}");
 			}
 			first = false;

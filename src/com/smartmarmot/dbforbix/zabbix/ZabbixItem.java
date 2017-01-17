@@ -42,8 +42,8 @@ public final class ZabbixItem implements Serializable {
 		if (confItem == null)
 			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
-		this.key = htmlSpecialChars(key);
-		this.value = htmlSpecialChars(value);
+		this.key = escapeSpecialChars(key);
+		this.value = escapeSpecialChars(value);
 		this.clock = clock;
 		this.host=confItem.getItemConfig().get("host");
 		this.setConfItem(confItem);		
@@ -59,14 +59,14 @@ public final class ZabbixItem implements Serializable {
 		if (confItem == null)
 			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
-		this.key = htmlSpecialChars(key);
-		this.value = htmlSpecialChars(value);
+		this.key = escapeSpecialChars(key);
+		this.value = escapeSpecialChars(value);
 		this.clock = clock;
 		this.host=host;
 		confItem=null;
 	}
 
-	private String htmlSpecialChars(String string) {
+	private String escapeSpecialChars(String string) {
 		String result=string;
 		if(null!=result){
 			result=result.replace("\\", "\\\\");//has to be the first one

@@ -840,16 +840,22 @@ public class Config {
 	public void startChecks() {
 		DBManager manager = DBManager.getInstance();
 		for (Database db:getDatabases()){
-			if(null==manager.getDatabaseByName(db.getDBNameFC())){
-				manager.addDatabase(db);
+			/**
+			 * Create adapter only if there are items for this DB
+			 */
+			if( 0 < db.getItemGroupNames().size() ){
 				Adapter adapter=manager.getDatabaseByName(db.getDBNameFC());
-				try {
-					adapter.createConnection();
-				} catch (ClassNotFoundException | SQLException e) {
-					e.printStackTrace();
+				if(null==adapter){
+					manager.addDatabase(db);
+					adapter=manager.getDatabaseByName(db.getDBNameFC());
+					try {
+						adapter.createConnection();
+					} catch (ClassNotFoundException | SQLException e) {
+						e.printStackTrace();
+					}
 				}
+				launchSchedulers(db.getItemGroupNames());
 			}
-			launchSchedulers(db.getItemGroupNames());
 		}
 	}
 
@@ -903,11 +909,11 @@ public class Config {
 				Database newDatabase=newconfig.getDatabaseByItemGroupName(newItemGroupName);
 				Database database = this.getDatabaseByNameFC(newDatabase.getDBNameFC());
 				if(null==database){//add
-					LOG.error("Can't find Database by nameFC: "+newDatabase.getDBNameFC());
+					LOG.debug("Add new DB to databases: "+newDatabase.getDBNameFC());
 					database=newDatabase;
 					databases.add(database);
 				}else{//update
-					database.addItemGroupName(newItemGroupName);					
+					database.addItemGroupName(newItemGroupName);
 				}
 				
 				/**
