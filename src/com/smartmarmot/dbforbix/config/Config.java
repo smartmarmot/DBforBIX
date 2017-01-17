@@ -99,6 +99,7 @@ public class Config {
 		private Map<String,List<String>> hostsTemplates=null;
 		private Map<String,Map<String,String>> itemConfigs = new HashMap<>();
 		private String hashZabbixConfig		=null;
+		private String zabbixItemConfigSuffix = "DB4bix.config";
 		
 		
 		
@@ -288,6 +289,10 @@ public class Config {
 				result=this.getTemplateMacroValue(hostid, macro);
 			}
 			return result;
+		}
+
+		public String getZabbixItemConfigSuffix() {
+			return zabbixItemConfigSuffix;
 		}	
 	}
 	
@@ -415,7 +420,6 @@ public class Config {
 	private static final String		SET_POOL_MAXIDLE	= GLOBAL_POOL + ".TimeOut";
 	private static final String 	SET_QUERY_TIMEOUT = GLOBAL_POOL+ ".QueryTimeOut";
 	private static final String 	ZBX_HEADER_PREFIX="ZBXD\1";
-	private static final String 	ZABBIX_ITEM_CONFIG_SUFFIX			= "DBforBix.config";
 	private static final String		SET_PERSISTENCETYPE	= GLOBAL_NAME + ".PersistenceType";
 	private static final String		SET_PERSISTENCEDIR = GLOBAL_NAME + ".PersistenceDir";
 
@@ -649,7 +653,8 @@ public class Config {
 				LOG.error("Could not parse zbxServerPort number", ex);
 			}
 		}
-		else if("ProxyName".equalsIgnoreCase(key)) zsrv.proxy=value;		
+		else if("ProxyName".equalsIgnoreCase(key)) zsrv.proxy=value;
+		else if("ConfigSuffix".equalsIgnoreCase(key)) zsrv.zabbixItemConfigSuffix=value;
 		else if("DBList".equalsIgnoreCase(key)) zsrv.setDefinedDBNames((new ArrayList<String>(Arrays.asList(value.replaceAll("\\s","").toUpperCase().split(",")))));		
 		else
 			LOG.info("Invalid config item: " + group + "." + name + "." + key);		
@@ -1263,7 +1268,7 @@ public class Config {
 				 */
 				for(int it=0;it<items.get("key_").size();++it){
 					String key=items.get("key_").get(it);
-					if(key.contains(ZABBIX_ITEM_CONFIG_SUFFIX)){
+					if(key.contains(zs.getZabbixItemConfigSuffix())){
 						String hostid=items.get("hostid").get(it);
 						if(hostFilter.contains(hostid)) 
 							continue;
