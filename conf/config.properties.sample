@@ -2,23 +2,23 @@
 
 #
 ## Log level (All|Debug|Info|Warning|Error)
-dbforbix.LogLevel=All
+DB4bix.LogLevel=All
 #
 ## Log file name
-dbforbix.LogFile=<path_to_log>/dbforbix.log
+DB4bix.LogFile=<path_to_log>/db4bix.log
 #
 ## Maximum log file size
-dbforbix.LogFileSize=10MB
+DB4bix.LogFileSize=10MB
 
 #pidFile
 #frequency of item's refresh
-dbforbix.Sleep=30
+DB4bix.Sleep=30
 
 #frequency of update config in seconds
-dbforbix.UpdateConfigTimeout=120
+DB4bix.UpdateConfigTimeout=120
 
 #MaxThreadNumber should be >= than the number of your databases
-dbforbix.MaxThreadNumber=100
+DB4bix.MaxThreadNumber=100
 
 #
 #### Configuration of Connection pool ###
@@ -38,7 +38,9 @@ ZabbixServer.Zabbix1.Address=<zabbix_server_host>
 ZabbixServer.Zabbix1.Port=10051
 # Name of Zabbix proxy (you should create this name on your Zabbix Web Interface)
 # It will be used to get hosts and items configurations
-ZabbixServer.Zabbix1.ProxyName=dbforbix
+ZabbixServer.Zabbix1.ProxyName=DB4bix
+# Item key suffix to find its configuration on Zabbix Server
+ZabbixServer.Zabbix1.ConfigSuffix=DB4bix.config
 # List of comma separated databases
 # This names also should be defined in your Template/Host macros {$DSN} in Zabbix Web Interface
 # See zabbix templates attached for further details

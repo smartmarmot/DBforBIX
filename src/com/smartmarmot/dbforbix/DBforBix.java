@@ -181,9 +181,9 @@ public class DBforBix implements Daemon {
 						zbxSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
 						zbxSender.start();
 										
-						persSender = new PersistentDBSender(PersistentDBSender.PROTOCOL.V18);
-						persSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
-						persSender.start();
+						//persSender = new PersistentDBSender(PersistentDBSender.PROTOCOL.V18);
+						//persSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
+						//persSender.start();
 
 						
 						config.startChecks();
@@ -193,7 +193,7 @@ public class DBforBix implements Daemon {
 					case "update": {
 						LOG.info("Sleeping before configuration update...");
 						Thread.sleep(config.getUpdateConfigTimeout()*1000);
-						LOG.info("Updating DBforBix...");
+						LOG.info("Updating DBforBix configuration...");
 						if(config.checkConfigChanges()) action="stop";				
 					}
 					break;
