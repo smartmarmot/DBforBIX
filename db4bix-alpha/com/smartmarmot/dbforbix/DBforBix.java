@@ -181,9 +181,9 @@ public class DBforBix implements Daemon {
 						zbxSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
 						zbxSender.start();
 										
-						persSender = new PersistentDBSender(PersistentDBSender.PROTOCOL.V18);
-						persSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
-						persSender.start();
+						//persSender = new PersistentDBSender(PersistentDBSender.PROTOCOL.V18);
+						//persSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
+						//persSender.start();
 
 						
 						config.startChecks();

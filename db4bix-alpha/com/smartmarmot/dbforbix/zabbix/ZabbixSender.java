@@ -17,16 +17,9 @@
 
 package com.smartmarmot.dbforbix.zabbix;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Map.Entry;
@@ -37,10 +30,8 @@ import org.apache.log4j.Logger;
 import com.smartmarmot.common.PersistentDB;
 import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
-import com.smartmarmot.dbforbix.config.Config.Database;
 import com.smartmarmot.dbforbix.config.Config.ZServer;
-import com.smartmarmot.dbforbix.scheduler.Discovery;
-import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
+import com.smartmarmot.dbforbix.zabbix.protocol.Sender32;
 import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
 
 /**
@@ -65,7 +56,7 @@ public class ZabbixSender extends Thread {
 		super("ZabbixSender");
 		switch (protVer) {
 			default:
-				protocol = new Sender18();
+				protocol = new Sender32();
 			break;
 		}
 		setDaemon(true);
@@ -118,7 +109,7 @@ public class ZabbixSender extends Thread {
 //							zHistories.add(zItem);
 //						}
 //					}					
-					boolean persistent = true;
+					boolean persistent = false;
 					for (int i = 0; i < 3; ++i) {
 						String resp=new String();
 						try {								
