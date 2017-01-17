@@ -48,8 +48,8 @@ abstract class AbstractAdapter implements Adapter {
 		return itemGroupNames;
 	}
 
-	public void addItemGroupName(Set<String> itemGroupName) {
-		this.itemGroupNames = itemGroupName;
+	public void addItemGroupName(String itemGroupName) {
+		itemGroupNames.add(itemGroupName);
 	}
 
 	@Override

@@ -199,7 +199,7 @@ public class DB4bix {
 					case "update": {
 						LOG.info("Sleeping before configuration update...");
 						Thread.sleep(config.getUpdateConfigTimeout()*1000);
-						LOG.info("Updating DB4bix...");
+						LOG.info("Updating DB4bix configuration...");
 						if(config.checkConfigChanges()) action="stop";				
 					}
 					break;
