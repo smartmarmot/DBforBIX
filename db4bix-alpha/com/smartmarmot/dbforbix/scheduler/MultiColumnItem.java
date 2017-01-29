@@ -74,7 +74,7 @@ public class MultiColumnItem extends AbstractMultiItem {
 					//get value
 					val = rs.getString(column);
 					val = (null == val) ? noData : val;
-					values.add(new ZabbixItem(name+realName, val,clock, this));
+					values.add(new ZabbixItem(name+realName, val,ZabbixItem.ZBX_STATE_NORMAL,clock, this));
 				}
 			}
 		}

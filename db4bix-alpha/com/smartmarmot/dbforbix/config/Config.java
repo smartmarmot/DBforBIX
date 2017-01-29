@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -404,6 +405,9 @@ public class Config {
 
 	}
 
+		
+	
+	
 	/**
 	 * 
 	 */
@@ -422,7 +426,7 @@ public class Config {
 	private static final String 	ZBX_HEADER_PREFIX="ZBXD\1";
 	private static final String		SET_PERSISTENCETYPE	= GLOBAL_NAME + ".PersistenceType";
 	private static final String		SET_PERSISTENCEDIR = GLOBAL_NAME + ".PersistenceDir";
-
+	
 	
 	
 	/**
@@ -570,7 +574,7 @@ public class Config {
 		try (InputStream is = Files.newInputStream(Paths.get(getConfigFile())); DigestInputStream dis = new DigestInputStream(is, md)){
 		  while(dis.read(b)>=0);
 		} catch (IOException e) {
-			LOG.error("Something has happenned reading file: " + e.getMessage());
+			LOG.error("Something has happenned reading file: " + e.getLocalizedMessage());
 		}
 		try{
 			setFileConfigHash((new HexBinaryAdapter()).marshal(md.digest()));
@@ -1052,7 +1056,18 @@ public class Config {
 	 */
 	public byte[] getRequestToZabbixServer(String json){
 		String str=new String(ZBX_HEADER_PREFIX + "________"+json);
-		byte[] data=str.getBytes();
+		//byte[] data=str.getBytes();
+		byte[] data;
+		try {
+			/**
+			 * For those who want to use russian and other unicode characters
+			 */
+			data = str.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			LOG.error("Problem with encoding json "+e.getLocalizedMessage());
+			data = str.getBytes();
+		}
 		
 		//get size of json request in little-endian format
 		byte[] leSize=null;
