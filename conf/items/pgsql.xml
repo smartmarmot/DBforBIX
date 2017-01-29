@@ -1,0 +1,29 @@
+<!DOCTYPE parms SYSTEM "param.dtd">
+<parms type="pgsql" prefix="">
+	<server>
+		<query time="300" item="activeconn">SELECT SUM(numbackends) FROM pg_stat_database</query>
+		<query time="300" item="tupreturned">SELECT SUM(tup_returned) FROM pg_stat_database</query>
+		<query time="300" item="tupfetched">SELECT SUM(tup_fetched) FROM pg_stat_database</query>
+		<query time="300" item="tupinserted">SELECT SUM(tup_inserted) FROM pg_stat_database</query>
+		<query time="300" item="tupupdated">SELECT SUM(tup_updated) FROM pg_stat_database</query>
+		<query time="300" item="tupdeleted">SELECT SUM(tup_deleted) FROM pg_stat_database</query>
+		<query time="300" item="xactcommit">SELECT SUM(xact_commit) FROM pg_stat_database</query>
+		<query time="300" item="xactrollback">SELECT SUM(xact_rollback) FROM pg_stat_database</query>
+
+		<query time="300" item="exclusivelock">SELECT COUNT(*) FROM pg_locks WHERE mode='ExclusiveLock'</query>
+		<query time="300" item="accessexclusivelock">SELECT COUNT(*) FROM pg_locks WHERE mode='AccessExclusiveLock'</query>
+		<query time="300" item="accesssharelock">SELECT COUNT(*) FROM pg_locks WHERE mode='AccessShareLock'</query>
+		<query time="300" item="rowsharelock">SELECT COUNT(*) FROM pg_locks WHERE mode='RowShareLock'</query>
+		<query time="300" item="rowexclusivelock">SELECT COUNT(*) FROM pg_locks WHERE mode='RowExclusiveLock'</query>
+		<query time="300" item="shareupdateexclusivelock">SELECT COUNT(*) FROM pg_locks WHERE mode='ShareUpdateExclusiveLock'</query>
+		<query time="300" item="sharerowexclusivelock">SELECT COUNT(*) FROM pg_locks WHERE mode='ShareRowExclusiveLock'</query>
+		
+		<query time="300" item="checkpoints_timed">SELECT checkpoints_timed FROM pg_stat_bgwriter</query>
+		<query time="300" item="checkpoints_req">SELECT checkpoints_req FROM pg_stat_bgwriter</query>
+		<query time="300" item="buffers_checkpoint">SELECT buffers_checkpoint FROM pg_stat_bgwriter</query>
+		<query time="300" item="buffers_clean">SELECT buffers_clean FROM pg_stat_bgwriter</query>
+		<query time="300" item="maxwritten_clean">SELECT maxwritten_clean FROM pg_stat_bgwriter</query>
+		<query time="300" item="buffers_backend">SELECT buffers_backend FROM pg_stat_bgwriter</query>
+		<query time="300" item="buffers_alloc">SELECT buffers_alloc FROM pg_stat_bgwriter</query>
+	</server>
+</parms>
