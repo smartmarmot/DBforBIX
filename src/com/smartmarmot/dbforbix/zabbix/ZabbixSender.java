@@ -82,10 +82,13 @@ public class ZabbixSender extends Thread {
 					ZabbixItem nextItem=items.poll();					
 					if(nextItem.getValue().isEmpty()) {
 						LOG.warn("Item "+nextItem+" has empty value!");
-						continue;
+						//continue;
+						nextItem.setValue("Item "+nextItem+" has empty value!");
+						nextItem.setState(ZabbixItem.ZBX_STATE_NOTSUPPORTED);
 					}
 					Config.ZServer zs=nextItem.getConfItem().getZServer();
-					if(mZServer2ZItems.get(zs)==null) mZServer2ZItems.put(zs, new HashSet<ZabbixItem>());
+					if(null == mZServer2ZItems.get(zs)) 
+						mZServer2ZItems.put(zs, new HashSet<ZabbixItem>());
 					mZServer2ZItems.get(zs).add(nextItem);
 				}
 

@@ -23,18 +23,22 @@ import com.smartmarmot.dbforbix.scheduler.Item;
 
 public final class ZabbixItem implements Serializable {
 
+	public static int ZBX_STATE_NORMAL=0;
+	public static int ZBX_STATE_NOTSUPPORTED=1;
+	
 	private static final long	serialVersionUID	= 1374520722821228793L;
 
 	private String				key;
 	private String				value;
 	private String				host;
+	private int					state;
 	private Long				clock;
 	private String				lastlogsize;
 	private Item				confItem;
 
 
 	//main case
-	public ZabbixItem(String key, String value, Long clock, Item confItem) {
+	public ZabbixItem(String key, String value, int state, Long clock, Item confItem) {
 		if (key == null || "".equals(key.trim()))
 			throw new IllegalArgumentException("empty key");
 		if (value == null)
@@ -42,11 +46,12 @@ public final class ZabbixItem implements Serializable {
 		if (confItem == null)
 			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
-		this.key = escapeSpecialChars(key);
-		this.value = escapeSpecialChars(value);
+		this.key = key;
+		this.value = value;
 		this.clock = clock;
 		this.host=confItem.getItemConfig().get("host");
-		this.setConfItem(confItem);		
+		this.setConfItem(confItem);
+		this.setState(state);
 	}
 
 	
@@ -59,26 +64,14 @@ public final class ZabbixItem implements Serializable {
 		if (confItem == null)
 			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
 
-		this.key = escapeSpecialChars(key);
-		this.value = escapeSpecialChars(value);
+		this.key = key;
+		this.value = value;
 		this.clock = clock;
 		this.host=host;
 		confItem=null;
 	}
 
-	private String escapeSpecialChars(String string) {
-		String result=string;
-		if(null!=result){
-			result=result.replace("\\", "\\\\");//has to be the first one
-			result=result.replace("\n", "\\n");
-			result=result.replace("\"", "\\\"");			
-			result=result.replace("\b", "\\b");
-			result=result.replace("\f", "\\f");
-			result=result.replace("\r", "\\r");
-			result=result.replace("\t", "\\t");			
-		}
-		return result;
-	}
+
 
 
 	/**
@@ -122,5 +115,20 @@ public final class ZabbixItem implements Serializable {
 
 	public void setConfItem(Item confItem) {	
 		this.confItem = confItem;
+	}
+
+
+	public int getState() {
+		return state;
+	}
+
+
+	public void setState(int state) {
+		this.state = state;
+	}
+	
+	
+	public void setValue(String value) {
+		this.value = value;
 	}
 }

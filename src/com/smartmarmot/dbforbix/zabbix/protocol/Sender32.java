@@ -50,6 +50,20 @@ public class Sender32 implements SenderProtocol {
 		return true;
 	}
 
+	
+	private String escapeSpecialChars(String string) {
+		String result=string;
+		if(null!=result){
+			result=result.replace("\\", "\\\\");//has to be the first one
+			result=result.replace("\n", "\\n");
+			result=result.replace("\"", "\\\"");			
+			result=result.replace("\b", "\\b");
+			result=result.replace("\f", "\\f");
+			result=result.replace("\r", "\\r");
+			result=result.replace("\t", "\\t");			
+		}
+		return result;
+	}
 	   
     private String openJson(String type, String proxyName) {
 		//{"request":(ZBX_PROTO_VALUE_HISTORY_DATA|ZBX_PROTO_VALUE_DISCOVERY_DATA|ZBX_PROTO_VALUE_AUTO_REGISTRATION_DATA),
@@ -69,8 +83,13 @@ public class Sender32 implements SenderProtocol {
 		//	"ns":NS}
 		String str=new String();
 		str+="{\"host\":\""+it.getHost()+"\",";
-		str+="\"key\":\""+it.getKey()+"\",";
-		str+="\"value\":\""+it.getValue()+"\",";
+		str+="\"key\":\""+escapeSpecialChars(it.getKey())+"\",";			
+		str+="\"value\":\""+escapeSpecialChars(it.getValue())+"\",";
+		/**
+		 * Error are passed in value while state is set to "not supported"
+		 */
+		if(ZabbixItem.ZBX_STATE_NOTSUPPORTED == it.getState())
+			str+="\"state\":\""+it.getState()+"\",";
 		str+="\"clock\":"+it.getClock()+",";
 		str+="\"ns\":0}";		
 		str+=",";
