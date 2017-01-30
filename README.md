@@ -1,6 +1,8 @@
 # DBforBIX
 
-See Wiki for DBforBix as Zabbix Proxy installation instructions: https://github.com/vagabondan/DBforBIX/wiki<br>
+Just copy dist https://github.com/vagabondan/DBforBIX/tree/master/dist/db4bix to your server and run<br>
+
+See Wiki for DBforBix as Zabbix Proxy configuration instructions: https://github.com/vagabondan/DBforBIX/wiki<br>
 
 DBforBIX is licensed under the GNU General Public License  V.3. <br>
 You can obtain a full copy of the licese here: https://www.gnu.org/licenses/gpl-3.0.txt <br>
