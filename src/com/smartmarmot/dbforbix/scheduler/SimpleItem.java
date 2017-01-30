@@ -78,7 +78,7 @@ public class SimpleItem extends AbstractItem {
 				if(null!=rs.getString(i))
 					realName = realName.replace("%"+i, rs.getString(i));
 			}
-			values.add(new ZabbixItem(realName, val,clock, this));
+			values.add(new ZabbixItem(realName, val,ZabbixItem.ZBX_STATE_NORMAL, clock, this));
 		}
 		rs.close();
 		pstmt.close();

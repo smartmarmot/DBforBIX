@@ -46,7 +46,7 @@ public class MultiRowItem extends AbstractMultiItem {
 		
 		// fill with base items
 		for (String item: items)
-			values.put(item, new ZabbixItem(name+item, noData,clock, this));
+			values.put(item, new ZabbixItem(name+item, noData,ZabbixItem.ZBX_STATE_NORMAL,clock, this));
 		
 		// now check if we find better values
 		while (rs.next()) {
@@ -54,7 +54,7 @@ public class MultiRowItem extends AbstractMultiItem {
 			String fetchedVal = rs.getString(2);
 			if (fetchedVal != null && values.containsKey(fetchedName)) {
 				clock = new Long(System.currentTimeMillis() / 1000L);
-				values.put(fetchedName, new ZabbixItem(name+fetchedName, fetchedVal,clock,this));
+				values.put(fetchedName, new ZabbixItem(name+fetchedName, fetchedVal,ZabbixItem.ZBX_STATE_NORMAL,clock,this));
 				
 			}
 		}

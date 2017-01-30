@@ -77,25 +77,25 @@ public class DBforBix implements Daemon {
 		}
 		
 		// init logging
-		try {
-			String logfile = config.getLogFile();
-			
-			if (logfile.startsWith("./"))
-				logfile = logfile.replaceFirst(".", config.getBasedir());
-			
-			PatternLayout layout = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%-5p] [%t[%M(%F:%L)]]: %m%n");
-			RollingFileAppender rfa = new RollingFileAppender(layout, logfile, true);
-			rfa.setMaxFileSize(config.getLogFileSize());
-			rfa.setMaxBackupIndex(1);
-			
-			Logger.getRootLogger().addAppender(rfa);
-			if (!debug)
-				Logger.getRootLogger().setLevel(config.getLogLevel());
-		}
-		catch (IOException ex) {
-			System.err.println("Error while configuring logging: " + ex.getLocalizedMessage());
-			LOG.error(ex.getLocalizedMessage(), ex);
-		}
+//		try {
+//			String logfile = config.getLogFile();
+//			
+//			if (logfile.startsWith("./"))
+//				logfile = logfile.replaceFirst(".", config.getBasedir());
+//			
+//			PatternLayout layout = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%-5p] [%t[%M(%F:%L)]]: %m%n");
+//			RollingFileAppender rfa = new RollingFileAppender(layout, logfile, true);
+//			rfa.setMaxFileSize(config.getLogFileSize());
+//			rfa.setMaxBackupIndex(1);
+//			
+//			Logger.getRootLogger().addAppender(rfa);
+//			if (!debug)
+//				Logger.getRootLogger().setLevel(config.getLogLevel());
+//		}
+//		catch (IOException ex) {
+//			System.err.println("Error while configuring logging: " + ex.getLocalizedMessage());
+//			LOG.error(ex.getLocalizedMessage(), ex);
+//		}
 		
 		
 		LOG.info("### executing " + Constants.BANNER + ": " + new Date().toString());
