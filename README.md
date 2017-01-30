@@ -1,10 +1,11 @@
 # DBforBIX
+
+See Wiki for DBforBix as Zabbix Proxy installation instructions: https://github.com/vagabondan/DBforBIX/wiki<br>
+
 DBforBIX is licensed under the GNU General Public License  V.3. <br>
 You can obtain a full copy of the licese here: https://www.gnu.org/licenses/gpl-3.0.txt <br>
 
 The project's documentation is available here: http://www.smartmarmot.com/wiki/index.php?title=DBforBIX2 <br>
-
-Wiki for DBforBix as Zabbix Proxy see here: https://github.com/vagabondan/DBforBIX/wiki
 
 # Github directory structure
 The github repository is organized as follow:
