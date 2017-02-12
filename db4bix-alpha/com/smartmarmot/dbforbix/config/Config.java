@@ -323,6 +323,10 @@ public class Config {
 			return nameFC;
 		}
 		
+		public void setDBNameFC(String nameFC) {
+			this.nameFC=nameFC;
+		}
+		
 		public String getURL() {
 			return url;
 		}
@@ -686,7 +690,7 @@ public class Config {
 		Database dbsrv = this.getDatabaseByNameFC(name);
 		if (dbsrv == null){
 			dbsrv = new Database();
-			dbsrv.nameFC=name;
+			dbsrv.setDBNameFC(name);
 			databases.add(dbsrv);
 		}
 		
@@ -720,8 +724,7 @@ public class Config {
 				result=db;
 				break;
 			}
-		}
-		//if(null==result) throw new NullPointerException("Failed to find among zbxServers Zabbix Server for given Zabbix Server nameFC: "+nameFC);		
+		}	
 		return result;
 	}
 
@@ -1295,7 +1298,7 @@ public class Config {
 						if(isMacro(db)){
 							db=zs.getMacroValue(hostid,db);
 						}
-						if(zs.definedDBNames.contains(db)){
+						//if(zs.definedDBNames.contains(db)){
 							Map<String,String> m = new HashMap<String,String>();
 							String param=items.get("params").get(it);//Map->List[it]
 							m.put("param", param);
@@ -1317,9 +1320,22 @@ public class Config {
 							
 							/**
 							 * fill Dbs config with itemGroupName Set<String> itemGrouName.
+							 */							
+							Database dbFC=this.getDatabaseByNameFC(db);
+							/**
+							 * propagate abcense of DB in file config to Zabbix Web
 							 */
-							this.getDatabaseByNameFC(db).addItemGroupName(itemGroupName);							
-						}
+							if(null==dbFC){
+								dbFC=new Database();
+								dbFC.setDBNameFC(db);
+								dbFC.url="---propagate error---";
+								dbFC.user="---propagate error---";
+								dbFC.password="---propagate error---";
+								dbFC.type=DBType.DB_NOT_DEFINED;
+								databases.add(dbFC);
+							}
+							dbFC.addItemGroupName(itemGroupName);
+						//}
 					}
 				}
 				LOG.debug("Got item config from Zabbix Server "+zs);
