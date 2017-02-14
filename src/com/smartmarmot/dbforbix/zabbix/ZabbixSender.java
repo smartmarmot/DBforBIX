@@ -77,6 +77,9 @@ public class ZabbixSender extends Thread {
 				//take bulk of items to send
 				int maxItems=100;
 				//ZabbixItem[] itemsReady=new ZabbixItem[maxItems];
+				/**
+				 * Put item to corresponding Zabbix Server
+				 */
 				Map<Config.ZServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<>();
 				for(int i=0;(i<maxItems)&&(items.peek()!=null);++i){
 					ZabbixItem nextItem=items.poll();					
@@ -87,7 +90,7 @@ public class ZabbixSender extends Thread {
 						nextItem.setState(ZabbixItem.ZBX_STATE_NOTSUPPORTED);
 					}
 					Config.ZServer zs=nextItem.getConfItem().getZServer();
-					if(null == mZServer2ZItems.get(zs)) 
+					if(null == mZServer2ZItems.get(zs))
 						mZServer2ZItems.put(zs, new HashSet<ZabbixItem>());
 					mZServer2ZItems.get(zs).add(nextItem);
 				}

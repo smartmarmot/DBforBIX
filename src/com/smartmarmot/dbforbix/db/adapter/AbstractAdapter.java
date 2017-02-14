@@ -27,6 +27,7 @@ import org.apache.commons.dbcp2.datasources.SharedPoolDataSource;
 import org.apache.log4j.Logger;
 
 import com.smartmarmot.dbforbix.config.Config;
+import com.smartmarmot.dbforbix.db.DBType;
 
 abstract class AbstractAdapter implements Adapter {
 
@@ -54,7 +55,7 @@ abstract class AbstractAdapter implements Adapter {
 
 	@Override
 	public void createConnection() throws SQLException, ClassNotFoundException{
-		if (datasrc == null) {
+		if (datasrc == null && DBType.DB_NOT_DEFINED != this.getType()) {
 			LOG.info("Creating new pool for database " + getName());
 			Config cfg=Config.getInstance();
 			DriverAdapterCPDS cpds = new DriverAdapterCPDS();
@@ -65,11 +66,9 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc = new SharedPoolDataSource();
 			datasrc.setConnectionPoolDataSource(cpds);
 			datasrc.setLoginTimeout(15);
-		
 			datasrc.setMaxTotal(cfg.getMaxActive());
 			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
-			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
-	
+			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());	
 			datasrc.setValidationQuery(getType().getAliveSQL());
 		}
 	}
@@ -82,7 +81,7 @@ abstract class AbstractAdapter implements Adapter {
 	@Override
 	public void abort(){
 		try {
-			datasrc.close();
+			if(null!=datasrc) datasrc.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
