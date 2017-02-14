@@ -24,7 +24,7 @@ package com.smartmarmot.dbforbix.db;
  */
 public enum DBType {
 
-	DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY;
+	DB2, ORACLE, MSSQL, MYSQL, PGSQL, ALLBASE, SYBASE, SQLANY, DB_NOT_DEFINED;
 
 	/**
 	 * Parses a string and returns a matching database type object

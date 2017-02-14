@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import com.smartmarmot.dbforbix.DBforBix;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.DBManager;
+import com.smartmarmot.dbforbix.db.DBType;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
@@ -90,26 +91,59 @@ public class Scheduler extends TimerTask {
 				// <itemGroupName> -> DBs monitored
 				Adapter[] targetDB = dbman.getDatabases(set.getKey());
 				if (targetDB != null && targetDB.length > 0) {
-					for (Adapter db : targetDB) {
-						Connection con = db.getConnection();
-						try {
-							for (Item item : set.getValue()) {
-								try {
-									ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
-									if (result != null)
-										for (ZabbixItem i : result)
-											sender.addItem(i);
-								}
-								catch (SQLTimeoutException sqlex) {
-									LOG.warn("item timed out after "+config.getQueryTimeout()+"s: " + item.getName(), sqlex);
-								}
-								catch (SQLException sqlex) {
-									LOG.warn("could not fetch value " + item.getName(), sqlex);
+					for (Adapter db : targetDB) {						
+						try{
+							Connection con = db.getConnection();
+							try {
+								for (Item item : set.getValue()) {
+									try {
+										ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
+										if (result != null)
+											for (ZabbixItem i : result)
+												sender.addItem(i);
+									}
+									catch (SQLTimeoutException sqlex) {
+										LOG.warn("item timed out after "+config.getQueryTimeout()+"s: " + item.getName(), sqlex);
+									}
+									catch (SQLException sqlex) {
+										LOG.warn("could not fetch value " + item.getName(), sqlex);
+									}
 								}
 							}
+							finally {
+								con.close();
+							}
 						}
-						finally {
-							con.close();
+						catch(SQLException sqlex){
+							LOG.error("Could not get connection to db: " + db.getName(), sqlex);
+							for (Item item : set.getValue()) {
+								sender.addItem(
+										new ZabbixItem(
+												item.getName(),
+												"Could not connect to DB " + db.getName()+":\n"+sqlex.getLocalizedMessage(),
+												ZabbixItem.ZBX_STATE_NOTSUPPORTED,
+												new Long(System.currentTimeMillis() / 1000L),
+												item
+										)
+								);
+							}
+						}
+						catch (java.lang.NullPointerException nullex){
+							if(DBType.DB_NOT_DEFINED == db.getType()){
+								LOG.error("Database "+db.getName()+" is not defined in DBforBix local file config!");
+								for (Item item : set.getValue()) {
+									sender.addItem(
+											new ZabbixItem(
+													item.getName(),
+													"Database "+db.getName()+" is not defined in DBforBix local file config!",
+													ZabbixItem.ZBX_STATE_NOTSUPPORTED,
+													new Long(System.currentTimeMillis() / 1000L),
+													item
+											)
+									);
+								}
+							}
+							else throw nullex;
 						}
 					}
 				}

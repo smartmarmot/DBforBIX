@@ -26,6 +26,7 @@ import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.adapter.ALLBASE;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
 import com.smartmarmot.dbforbix.db.adapter.DB2;
+import com.smartmarmot.dbforbix.db.adapter.DB_NOT_DEFINED;
 import com.smartmarmot.dbforbix.db.adapter.MSSQL;
 import com.smartmarmot.dbforbix.db.adapter.MySQL;
 import com.smartmarmot.dbforbix.db.adapter.Oracle;
@@ -82,6 +83,10 @@ public class DBManager {
 			break;
 			case SQLANY:
 				databases.add(new SQLANY(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
+						,cfg.getMaxWaitMillis(), cfg.getItemGroupNames(),cfg.getPersistence()));
+			break;
+			case DB_NOT_DEFINED:
+				databases.add(new DB_NOT_DEFINED(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
 						,cfg.getMaxWaitMillis(), cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 		}

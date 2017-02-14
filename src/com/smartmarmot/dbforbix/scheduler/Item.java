@@ -29,6 +29,14 @@ public interface Item {
 
 	public String getName();
 		
+	
+	/**
+	 * 
+	 * @param con - Connection object
+	 * @param timeout
+	 * @return
+	 * @throws SQLException
+	 */
 	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException;
 
 	public boolean setZServer(ZServer zs);

@@ -56,11 +56,11 @@ public class Sender32 implements SenderProtocol {
 		if(null!=result){
 			result=result.replace("\\", "\\\\");//has to be the first one
 			result=result.replace("\n", "\\n");
-			result=result.replace("\"", "\\\"");			
+			result=result.replace("\"", "\\\"");
 			result=result.replace("\b", "\\b");
 			result=result.replace("\f", "\\f");
 			result=result.replace("\r", "\\r");
-			result=result.replace("\t", "\\t");			
+			result=result.replace("\t", "\\t");
 		}
 		return result;
 	}
