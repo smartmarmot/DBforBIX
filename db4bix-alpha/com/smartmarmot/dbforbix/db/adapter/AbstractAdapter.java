@@ -79,6 +79,25 @@ abstract class AbstractAdapter implements Adapter {
 	}
 	
 	@Override
+	public void reconnect(){
+		LOG.warn("Trying to reconnect...");
+		abort();
+		try {
+			createConnection();
+			LOG.warn("Reconnected.");
+		} catch (ClassNotFoundException | SQLException e) {
+			LOG.warn("Reconnection has failed.");
+			e.printStackTrace();
+			try {
+				LOG.warn("Sleeping 60 seconds...");
+				Thread.sleep(60000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
 	public void abort(){
 		try {
 			if(null!=datasrc) datasrc.close();

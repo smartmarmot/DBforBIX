@@ -34,6 +34,7 @@ import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.DBManager;
 import com.smartmarmot.dbforbix.db.DBType;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
+import com.smartmarmot.dbforbix.db.adapter.Oracle;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
 
@@ -91,7 +92,7 @@ public class Scheduler extends TimerTask {
 				// <itemGroupName> -> DBs monitored
 				Adapter[] targetDB = dbman.getDatabases(set.getKey());
 				if (targetDB != null && targetDB.length > 0) {
-					for (Adapter db : targetDB) {						
+					for (Adapter db : targetDB) {
 						try{
 							Connection con = db.getConnection();
 							try {
@@ -107,6 +108,10 @@ public class Scheduler extends TimerTask {
 									}
 									catch (SQLException sqlex) {
 										LOG.warn("could not fetch value " + item.getName(), sqlex);
+										//connection closed Oracle
+										if(DBType.ORACLE == db.getType() && Oracle.ConnectionClosed == sqlex.getErrorCode()){
+											db.reconnect();
+										}
 									}
 								}
 							}

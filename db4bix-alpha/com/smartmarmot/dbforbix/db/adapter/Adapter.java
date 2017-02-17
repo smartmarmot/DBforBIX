@@ -49,5 +49,6 @@ public interface Adapter {
 	public void createConnection() throws SQLException, ClassNotFoundException;
 	public Connection getConnection() throws SQLException, ClassNotFoundException;
 	public void abort();
+	public void reconnect();
 	
 }
