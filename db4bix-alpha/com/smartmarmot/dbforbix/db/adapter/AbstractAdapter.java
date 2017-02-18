@@ -53,10 +53,9 @@ abstract class AbstractAdapter implements Adapter {
 		itemGroupNames.add(itemGroupName);
 	}
 
-	@Override
-	public void createConnection() throws SQLException, ClassNotFoundException{
-		if (datasrc == null && DBType.DB_NOT_DEFINED != this.getType()) {
-			LOG.info("Creating new pool for database " + getName());
+
+	private void createConnection() throws SQLException, ClassNotFoundException{
+			LOG.info("Creating new connection pool for database " + getName());
 			Config cfg=Config.getInstance();
 			DriverAdapterCPDS cpds = new DriverAdapterCPDS();
 			cpds.setDriver(getType().getJDBCDriverClass());
@@ -70,11 +69,16 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
 			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());	
 			datasrc.setValidationQuery(getType().getAliveSQL());
-		}
+			datasrc.setDefaultTestOnBorrow(true);
 	}
 	
 	@Override
-	public Connection getConnection() throws SQLException, ClassNotFoundException {		
+	public Connection getConnection() throws SQLException, ClassNotFoundException, DBNotDefinedException {		
+		if(DBType.DB_NOT_DEFINED == this.getType()) 
+			throw new DBNotDefinedException("Database "+getName()+" hasn't been defined in DBforBix local file config yet!");
+		if (datasrc == null ) {
+			createConnection();
+		}
 		return datasrc.getConnection();
 	}
 	
@@ -102,7 +106,6 @@ abstract class AbstractAdapter implements Adapter {
 		try {
 			if(null!=datasrc) datasrc.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		datasrc=null;

@@ -36,8 +36,6 @@ import org.apache.commons.daemon.DaemonContext;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.SimpleLayout;
 import com.smartmarmot.common.Constants;
 import com.smartmarmot.dbforbix.config.Config;
@@ -55,7 +53,7 @@ public class DBforBix implements Daemon {
 	
 	private static ZabbixSender				zbxSender;
 	private static PersistentDBSender	persSender;           
-	private static boolean debug = false;
+	//private static boolean debug = false;
 	
 	private static Options					options;
 	
@@ -121,7 +119,7 @@ public class DBforBix implements Daemon {
 		options.addOption("b", true, "base directory");
 		options.addOption("c", true, "config file location");
 		
-		options.addOption("d", false, "enable debugging");
+//		options.addOption("d", false, "enable debugging");
 		options.addOption("C", false, "enable console output");
 		
 		options.addOption("a", true, "action (start/stop/status)");
@@ -146,10 +144,10 @@ public class DBforBix implements Daemon {
 				System.exit(0);
 			}
 			
-			if (cmd.hasOption("d")) {
-				debug = true;
-				Logger.getRootLogger().setLevel(Level.ALL);
-			}
+//			if (cmd.hasOption("d")) {
+//				debug = true;
+//				Logger.getRootLogger().setLevel(Level.ALL);
+//			}
 			
 			if (cmd.hasOption("C"))
 				Logger.getRootLogger().addAppender(new ConsoleAppender(new SimpleLayout()));

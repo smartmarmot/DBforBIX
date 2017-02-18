@@ -23,7 +23,6 @@ import java.util.Set;
 
 import com.smartmarmot.dbforbix.db.DBType;
 
-
 public interface Adapter {
 
 	public DBType getType();
@@ -46,8 +45,20 @@ public interface Adapter {
 	public boolean hasTablespaceItems();
 	public boolean getPersistence();
 	
-	public void createConnection() throws SQLException, ClassNotFoundException;
-	public Connection getConnection() throws SQLException, ClassNotFoundException;
+    /**
+	 * Exception if database that came from Zabbix Web has not been defined in local file config yet.
+	 */
+	public class DBNotDefinedException extends Exception
+	{
+		private static final long serialVersionUID = -106570768147815384L;
+		//Parameterless Constructor
+	      public DBNotDefinedException() {super("Database hasn't been defined in DBforBix local file config yet!");}
+	      //Constructors that accept parameters
+	      public DBNotDefinedException(String msg) { super(msg); }  
+	      public DBNotDefinedException(Throwable cause) { super(cause); }  
+	      public DBNotDefinedException(String msg, Throwable cause) { super(msg, cause); } 
+	 }
+	public Connection getConnection() throws SQLException, ClassNotFoundException, DBNotDefinedException;
 	public void abort();
 	public void reconnect();
 	
