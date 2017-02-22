@@ -74,8 +74,9 @@ public enum DBType {
 				return DBConstants.SYBASE_DRIVER;
 			case SQLANY :	
 				return DBConstants.SQLANY_DRIVER;
+			default:
+				return null;
 		}
-		return null;
 	}
 
 	/**
@@ -100,8 +101,9 @@ public enum DBType {
 				return DBConstants.SYBASE_VALIDATION_QUERY;
 			case SQLANY :	
 				return DBConstants.SQLANY_VALIDATION_QUERY;
+			default:
+				return null;
 		}
-		return null;
 	}
 
 	/**
@@ -126,8 +128,9 @@ public enum DBType {
 				return DBConstants.SYBASE_WHOAMI_QUERY;
 			case SQLANY :	
 				return DBConstants.SQLANY_WHOAMI_QUERY;
+			default:
+				return null;
 		}
-		return null;
 	}
 
 	/**
@@ -151,9 +154,10 @@ public enum DBType {
 			case SYBASE :	
 				return DBConstants.SYBASE_DBNAME_QUERY;
 			case SQLANY :	
-				return DBConstants.SQLANY_DBNAME_QUERY;	
+				return DBConstants.SQLANY_DBNAME_QUERY;
+			default:
+				return null;	
 		}
-		return null;
 	}
 
 }

@@ -30,7 +30,6 @@ import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -860,11 +859,11 @@ public class Config {
 				if(null==adapter){
 					manager.addDatabase(db);
 					adapter=manager.getDatabaseByName(db.getDBNameFC());
-					try {
-						adapter.createConnection();
-					} catch (ClassNotFoundException | SQLException e) {
-						e.printStackTrace();
-					}
+//					try {
+//						adapter.getConnection();
+//					} catch (ClassNotFoundException | SQLException e) {
+//						e.printStackTrace();
+//					}
 				}
 				launchSchedulers(db.getItemGroupNames());
 			}
