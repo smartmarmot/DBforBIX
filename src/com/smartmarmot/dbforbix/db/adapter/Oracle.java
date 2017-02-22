@@ -23,6 +23,10 @@ import com.smartmarmot.dbforbix.db.DBType;
 
 
 public class Oracle extends AbstractAdapter {
+	
+	//Error codes
+	//ORA-12537 - connection closed
+	public static final int ConnectionClosed=12537;
 
 	public Oracle(String name, String url, String user, String passwd, Integer maxactive,Integer maxidle,Integer maxwaitmillis, Set<String> set, Boolean pers) {
 		this.name = name;

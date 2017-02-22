@@ -34,6 +34,7 @@ import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.DBManager;
 import com.smartmarmot.dbforbix.db.DBType;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
+import com.smartmarmot.dbforbix.db.adapter.Adapter.DBNotDefinedException;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
 
@@ -91,7 +92,7 @@ public class Scheduler extends TimerTask {
 				// <itemGroupName> -> DBs monitored
 				Adapter[] targetDB = dbman.getDatabases(set.getKey());
 				if (targetDB != null && targetDB.length > 0) {
-					for (Adapter db : targetDB) {						
+					for (Adapter db : targetDB) {
 						try{
 							Connection con = db.getConnection();
 							try {
@@ -103,10 +104,15 @@ public class Scheduler extends TimerTask {
 												sender.addItem(i);
 									}
 									catch (SQLTimeoutException sqlex) {
-										LOG.warn("item timed out after "+config.getQueryTimeout()+"s: " + item.getName(), sqlex);
+										LOG.warn("Timeout after "+config.getQueryTimeout()+"s for item: " + item.getName(), sqlex);
 									}
 									catch (SQLException sqlex) {
-										LOG.warn("could not fetch value " + item.getName(), sqlex);
+										LOG.warn("could not fetch value of [" + item.getName() +"]\nError code: "+ 
+												sqlex.getErrorCode()+"\nError message: "+sqlex.getLocalizedMessage()+"\n",
+												sqlex);
+										if(DBType.ORACLE==db.getType()
+											&& sqlex.getLocalizedMessage().toLowerCase().contains("closed connection")) 
+											db.reconnect();
 									}
 								}
 							}
@@ -128,22 +134,19 @@ public class Scheduler extends TimerTask {
 								);
 							}
 						}
-						catch (java.lang.NullPointerException nullex){
-							if(DBType.DB_NOT_DEFINED == db.getType()){
-								LOG.error("Database "+db.getName()+" is not defined in DBforBix local file config!");
-								for (Item item : set.getValue()) {
-									sender.addItem(
-											new ZabbixItem(
-													item.getName(),
-													"Database "+db.getName()+" is not defined in DBforBix local file config!",
-													ZabbixItem.ZBX_STATE_NOTSUPPORTED,
-													new Long(System.currentTimeMillis() / 1000L),
-													item
-											)
-									);
-								}
+						catch (DBNotDefinedException nodbex){
+							LOG.error(nodbex.getLocalizedMessage());
+							for (Item item : set.getValue()) {
+								sender.addItem(
+									new ZabbixItem(
+											item.getName(),
+											nodbex.getLocalizedMessage(),
+											ZabbixItem.ZBX_STATE_NOTSUPPORTED,
+											new Long(System.currentTimeMillis() / 1000L),
+											item
+									)
+								);
 							}
-							else throw nullex;
 						}
 					}
 				}

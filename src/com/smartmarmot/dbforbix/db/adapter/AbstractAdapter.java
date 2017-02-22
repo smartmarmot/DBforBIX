@@ -53,10 +53,9 @@ abstract class AbstractAdapter implements Adapter {
 		itemGroupNames.add(itemGroupName);
 	}
 
-	@Override
-	public void createConnection() throws SQLException, ClassNotFoundException{
-		if (datasrc == null && DBType.DB_NOT_DEFINED != this.getType()) {
-			LOG.info("Creating new pool for database " + getName());
+
+	private void createConnection() throws SQLException, ClassNotFoundException{
+			LOG.info("Creating new connection pool for database " + getName());
 			Config cfg=Config.getInstance();
 			DriverAdapterCPDS cpds = new DriverAdapterCPDS();
 			cpds.setDriver(getType().getJDBCDriverClass());
@@ -68,14 +67,44 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc.setLoginTimeout(15);
 			datasrc.setMaxTotal(cfg.getMaxActive());
 			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
-			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());	
+			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
 			datasrc.setValidationQuery(getType().getAliveSQL());
-		}
+			datasrc.setDefaultTestOnBorrow(true);
+			/**
+			 * wait while connection is initialized
+			 */
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	@Override
-	public Connection getConnection() throws SQLException, ClassNotFoundException {		
+	public Connection getConnection() throws SQLException, ClassNotFoundException, DBNotDefinedException {		
+		if(DBType.DB_NOT_DEFINED == this.getType()) 
+			throw new DBNotDefinedException("Database "+getName()+" hasn't been defined in DBforBix local file config yet!");
+		if (datasrc == null ) createConnection();
 		return datasrc.getConnection();
+	}
+	
+	@Override
+	public void reconnect(){
+		LOG.warn("Trying to reconnect...");
+		abort();
+		try {
+			createConnection();
+			LOG.warn("Reconnected.");
+		} catch (ClassNotFoundException | SQLException e) {
+			LOG.warn("Reconnection has failed.");
+			e.printStackTrace();
+			try {
+				LOG.warn("Sleeping 60 seconds...");
+				Thread.sleep(60000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+		}
 	}
 	
 	@Override
@@ -83,7 +112,6 @@ abstract class AbstractAdapter implements Adapter {
 		try {
 			if(null!=datasrc) datasrc.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		datasrc=null;
