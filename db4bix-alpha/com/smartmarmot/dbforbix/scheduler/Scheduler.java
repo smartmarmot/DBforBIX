@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import com.smartmarmot.dbforbix.DBforBix;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.DBManager;
+import com.smartmarmot.dbforbix.db.DBType;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
 import com.smartmarmot.dbforbix.db.adapter.Adapter.DBNotDefinedException;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
@@ -106,7 +107,12 @@ public class Scheduler extends TimerTask {
 										LOG.warn("Timeout after "+config.getQueryTimeout()+"s for item: " + item.getName(), sqlex);
 									}
 									catch (SQLException sqlex) {
-										LOG.warn("could not fetch value " + item.getName(), sqlex);
+										LOG.warn("could not fetch value of [" + item.getName() +"]\nError code: "+ 
+												sqlex.getErrorCode()+"\nError message: "+sqlex.getLocalizedMessage()+"\n",
+												sqlex);
+										if(DBType.ORACLE==db.getType()
+											&& sqlex.getLocalizedMessage().toLowerCase().contains("closed connection")) 
+											db.reconnect();
 									}
 								}
 							}

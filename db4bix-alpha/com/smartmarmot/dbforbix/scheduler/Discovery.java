@@ -65,8 +65,10 @@ public class Discovery extends AbstractItem {
 
 		builder.append("{\"data\":[");
 		while (rs.next()) {
-			if (!first)
-				builder.append(",");
+			if (first)
+				builder.append("{");
+			else
+				builder.append(",{");
 			for (int i = 1; i <= meta.getColumnCount(); i++) {
 				
 				/**
@@ -93,13 +95,24 @@ public class Discovery extends AbstractItem {
 				 * "clock":1481573922,"ns":418957607}
 				 */
 				
+				/**
+				 * comma for separate names inside one discovery block
+				 */
+				if(i>1) builder.append(",");
 				if (altNames == null)
-					builder.append("{\"{#" + meta.getColumnName(i).toUpperCase() + "}\":\"" + rs.getString(i).replace("\\", "\\\\") +							
-							"\"}");
+					builder.append("\"{#" + meta.getColumnName(i).toUpperCase() + "}\":\"" + rs.getString(i).replace("\\", "\\\\") +							
+							"\"");
 				else
-					builder.append("{\"{#" + altNames[i-1].toUpperCase() + "}\":\"" + rs.getString(i).replace("\\", "\\\\") +							
-							"\"}");
+					builder.append("\"{#" + altNames[i-1].toUpperCase() + "}\":\"" + rs.getString(i).replace("\\", "\\\\") +							
+							"\"");
 			}
+			/**
+			 * close discovery block
+			 */
+			builder.append("}");
+			/**
+			 * first discovery block has been passed
+			 */
 			first = false;
 		}
 

@@ -67,18 +67,24 @@ abstract class AbstractAdapter implements Adapter {
 			datasrc.setLoginTimeout(15);
 			datasrc.setMaxTotal(cfg.getMaxActive());
 			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
-			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());	
+			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
 			datasrc.setValidationQuery(getType().getAliveSQL());
 			datasrc.setDefaultTestOnBorrow(true);
+			/**
+			 * wait while connection is initialized
+			 */
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	@Override
 	public Connection getConnection() throws SQLException, ClassNotFoundException, DBNotDefinedException {		
 		if(DBType.DB_NOT_DEFINED == this.getType()) 
 			throw new DBNotDefinedException("Database "+getName()+" hasn't been defined in DBforBix local file config yet!");
-		if (datasrc == null ) {
-			createConnection();
-		}
+		if (datasrc == null ) createConnection();
 		return datasrc.getConnection();
 	}
 	
