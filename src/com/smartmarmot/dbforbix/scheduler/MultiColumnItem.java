@@ -50,7 +50,6 @@ public class MultiColumnItem extends AbstractMultiItem {
 		try(PreparedStatement pstmt = con.prepareStatement(query)){
 			pstmt.setQueryTimeout(timeout);
 			try(ResultSet rs = pstmt.executeQuery()){
-				String val = noData;
 							
 				/**
 				 * <multiquery time="60" item="index[%1]|free[%1]" type="column">
