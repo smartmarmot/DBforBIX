@@ -1475,12 +1475,11 @@ public class Config {
 					
 					case "multiquery": {
 						String itemList = itmE.attributeValue("items", "");
-						String items[] = itemList.split("\\|");
 						Item item;
 						if (itmE.attributeValue("type", "column").equalsIgnoreCase("column"))
-							item = new MultiColumnItem(prefix, items, query, itemConfig, zs);
+							item = new MultiColumnItem(prefix, itemList, query, itemConfig, zs);
 						else
-							item = new MultiRowItem(prefix, items, query, itemConfig, zs);
+							item = new MultiRowItem(prefix, itemList, query, itemConfig, zs);
 						itemSch.addItem(itemGroupName, item);
 					}
 					break;

@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export version="1.0">
+	<hosts>
+		<host name="Template_App_PostgreSQL">
+			<groups>
+				<group>Templates</group>
+			</groups>
+			<triggers>
+			</triggers>
+			<items>
+				<item type="2" key="pgsql.activeconn" value_type="3">
+					<description>Active connections</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.tupreturned" value_type="3">
+					<description>Number of rows returned</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.tupfetched" value_type="3">
+					<description>Number of rows fetched</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.tupinserted" value_type="3">
+					<description>Number of rows inserted</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.tupupdated" value_type="3">
+					<description>Number of rows updated</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.tupdeleted" value_type="3">
+					<description>Number of rows deleted</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.xactcommit" value_type="3">
+					<description>Number of transactions committed</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.xactrollback" value_type="3">
+					<description>Number of transactions rolled back</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+
+				<item type="2" key="pgsql.exclusivelock" value_type="3">
+					<description>Exclusive locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.accessexclusivelock" value_type="3">
+					<description>Access on exclusive locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.accesssharelock" value_type="3">
+					<description>Access on share locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.rowsharelock" value_type="3">
+					<description>Row share locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.rowexclusivelock" value_type="3">
+					<description>Row exclusive locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.shareupdateexclusivelock" value_type="3">
+					<description>Share update exclusive locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.sharerowexclusivelock" value_type="3">
+					<description>Share row exclusive locks</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+
+				<item type="2" key="pgsql.checkpoints_timed" value_type="3">
+					<description>Checkpoints timed</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.checkpoints_req" value_type="3">
+					<description>Checkpoints requested</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.buffers_checkpoint" value_type="3">
+					<description>Buffers checkpoint</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.buffers_clean" value_type="3">
+					<description>Buffers clean</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.maxwritten_clean" value_type="3">
+					<description>Max written clean</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.buffers_backend" value_type="3">
+					<description>Buffers backend</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+				<item type="2" key="pgsql.buffers_alloc" value_type="3">
+					<description>Buffers allocated</description>
+					<delay>60</delay>
+					<history>30</history>
+					<trends>365</trends>
+					<status>0</status>
+					<data_type>0</data_type>
+					<units></units>
+					<multiplier>0</multiplier>
+					<delta>1</delta>
+					<formula>0</formula>
+					<lastlogsize>0</lastlogsize>
+					<valuemapid>0</valuemapid>
+					<applications>
+						<application>PostgreSQL</application>
+					</applications>
+				</item>
+			</items>
+			<templates />
+			<graphs>
+			</graphs>
+			<macros />
+		</host>
+	</hosts>
+</zabbix_export>

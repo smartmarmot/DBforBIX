@@ -24,13 +24,15 @@ import com.smartmarmot.dbforbix.config.Config.ZServer;
 abstract class AbstractMultiItem extends AbstractItem {
 
 	protected String[] items;
+	protected String itemList;
 	protected String query;
 	protected String noData = "";
 	
-	AbstractMultiItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
+	AbstractMultiItem(String prefix, String itemList, String query, Map<String, String> itemConfig, ZServer zs) {
 		super(itemConfig, zs);
 		this.name = prefix;
-		this.items = items;
+		this.itemList=itemList;
+		this.items = this.itemList.split("\\|");
 		this.query = query;
 	}
 	
