@@ -1,0 +1,78 @@
+<!DOCTYPE parms SYSTEM "param.dtd">
+<parms type="mssql" prefix="mssql.">
+	<server>
+		<discovery time="600" item="database.discovery" names="DATABASE">SELECT DISTINCT name FROM [master].[sys].[databases] WHERE owner_sid!=1</discovery>
+		<query time="300" item="database.datafile[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Data File(s) Size (KB)' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="300" item="database.logfile[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log File(s) Size (KB)' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="300" item="database.logfileused[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log File(s) Used Size (KB)' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="300" item="database.logfileusedp[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Percent Log Used' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="60" item="database.transactions[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Active Transactions' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="60" item="database.transpersec[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Transactions/sec' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="60" item="database.logflush[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Flushes/sec' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="60" item="database.logflushbytes[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Bytes Flushed/sec' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<!-- <query time="60" item="database.logflushwaits[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Flush Waits/sec' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query> -->
+		<!-- <query time="60" item="database.logflushwaittime[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Flush Wait Time' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query> -->
+		<query time="60" item="database.logtrunc[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Truncations' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="60" item="database.loggrow[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Growths' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<query time="60" item="database.logshrink[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Log Shrinks' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<!-- <query time="60" item="database.committableentries[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Commit table entries' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query> -->
+		<query time="60" item="database.writetrans[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Write Transactions/sec' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query>
+		<!-- <query time="60" item="database.tractedtrans[%1]">SELECT RTRIM(instance_name),cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:Databases' AND counter_name='Tracked transactions/sec' AND instance_name NOT IN ('_Total','mssqlsystemresource','tempdb','master','msdb','model')</query> -->
+ 
+		<query time="120" item="avgwaittime">SELECT (MAX(CAST(cntr_value as float))/MIN(CAST(cntr_value as float))) FROM sys.dm_os_performance_counters WHERE (counter_name='Average Wait Time (ms)' OR counter_name='Average Wait Time Base') AND instance_name='_Total'</query>
+		<query time="120" item="cachehit">SELECT 100*(MIN(CAST(cntr_value as float))/MAX(CAST(cntr_value as float))) FROM sys.dm_os_performance_counters WHERE counter_name='Buffer cache hit ratio' OR counter_name='Buffer cache hit ratio base'</query>
+		<query time="120" item="iopending">SELECT COUNT(*) FROM sys.dm_io_pending_io_requests</query>
+		<query time="600" item="datafile">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Data File(s) Size (KB)' AND instance_name='_Total'</query>
+		<query time="600" item="logfile">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Log File(s) Size (KB)' AND instance_name='_Total'</query>
+		<query time="600" item="logfileused">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Log File(s) Used Size (KB)' AND instance_name='_Total'</query>
+		<query time="600" item="logfileusedp">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Percent Log Used' AND instance_name='_Total'</query>
+		<query time="60" item="pagereads">SELECT 'pagereads',cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Page reads/sec' AND instance_name=''</query>
+		<query time="60" item="pagewrites">SELECT 'pagewrites',cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Page writes/sec' AND instance_name=''</query>
+		
+		<query time="120" item="pagelookups">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Page lookups/sec' AND instance_name=''</query>
+		<query time="120" item="freepages">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Free pages' AND instance_name=''</query>
+		<query time="120" item="totalpages">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Total pages' AND instance_name=''</query>
+		<query time="120" item="lazywrites">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Lazy writes/sec' AND instance_name=''</query>
+		<query time="120" item="readaheadpages">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Readahead pages/sec' AND instance_name=''</query>
+		<query time="120" item="checkpointpages">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE counter_name='Checkpoint pages/sec' AND instance_name=''</query>
+		<query time="120" item="sqlerrors">SELECT * FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:SQL Errors' AND instance_name='_Total'</query>
+ 
+		<query time="120" item="mem.connection">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Connection Memory (KB)'</query>
+		<query time="120" item="mem.grantedws">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Granted Workspace Memory (KB)'</query>
+		<query time="120" item="mem.lock">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Lock Memory (KB)'</query>
+		<query time="120" item="mem.lockblock">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Lock Blocks'</query>
+		<query time="120" item="mem.lockblockalloc">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Lock Blocks Allocated'</query>
+		<query time="120" item="mem.lockownerblock">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Lock Owner Blocks'</query>
+		<query time="120" item="mem.lockownerblockalloc">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Lock Owner Blocks Allocated'</query>
+		<query time="120" item="mem.maxws">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Maximum Workspace Memory (KB)'</query>
+		<query time="120" item="mem.optimizer">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Optimizer Memory (KB)'</query>
+		<query time="120" item="mem.sqlcache">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='SQL Cache Memory (KB)'</query>
+		<query time="120" item="mem.target">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Target Server Memory (KB)'</query>
+		<query time="300" item="mem.total">SELECT cntr_value FROM sys.dm_os_performance_counters WHERE object_name='SQLServer:Memory Manager' AND counter_name='Total Server Memory (KB)'</query>
+
+		<query time="60" item="activetmptables">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Active Temp Tables'</query>
+		<query time="60" item="tmptablerate">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Temp Tables Creation Rate'</query>
+		<query time="60" item="logins">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Logins/sec'</query>
+		<query time="60" item="conresets">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Connection Reset/sec'</query>
+		<query time="60" item="logouts">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Logouts/sec'</query>
+		<query time="60" item="userconns">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='User Connections'</query>
+		<query time="60" item="logicconns">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Logical Connections'</query>
+		<query time="60" item="transactions">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Transactions'</query>
+		<query time="60" item="nonatomicyieldrate">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Non-atomic yield rate'</query>
+		<query time="60" item="marsdeadlocks">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Mars Deadlocks'</query>
+		<!-- <query time="60" item="httpauthreq">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='HTTP Authenticated Requests'</query> -->
+		<!--
+		<query time="60" item="soapemptyreq">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SOAP Empty Requests'</query>
+		<query time="60" item="soapsqlreq">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SOAP SQL Requests'</query>
+		<query time="60" item="soapmethinv">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SOAP Method Invocations'</query>
+		<query time="60" item="soapwsdlreq">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SOAP WSDL Requests'</query>
+		<query time="60" item="soapsessionstartreq">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SOAP Session Initiate Requests'</query>
+		<query time="60" item="soapsessionendreq">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SOAP Session Terminate Requests'</query>
+		-->
+		<query time="60" item="processesblocked">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Processes blocked'</query>
+		<query time="60" item="tmptablesfordest">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='Temp Tables For Destruction'</query>
+		<query time="60" item="sqltraceioprovlockwaits">SELECT cntr_value FROM master.sys.dm_os_performance_counters WHERE object_name='SQLServer:General Statistics' AND counter_name='SQL Trace IO Provider Lock Waits'</query>
+	
+	</server>
+</parms>
+                                                                                                   

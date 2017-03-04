@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT params (server|database|instance|schema|tablespace|user)*>
+
+<!ELEMENT server (discovery|query|multiquery)*>
+<!ELEMENT database (discovery|query|multiquery)*>
+<!ELEMENT instance (discovery|query|multiquery)*>
+<!ELEMENT schema (discovery|query|multiquery)*>
+<!ELEMENT tablespace (discovery|query|multiquery)*>
+<!ELEMENT user (discovery|query|multiquery)*>
+
+<!ELEMENT discovery (#PCDATA)>
+<!ELEMENT query (#PCDATA)>
+<!ELEMENT multiquery (#PCDATA)>
+
+<!ATTLIST params
+   prefix    CDATA       #REQUIRED
+   type      CDATA       #REQUIRED
+>
+<!ATTLIST discovery
+   item   CDATA          #REQUIRED
+   time   CDATA          #REQUIRED
+   names  CDATA          #IMPLIED
+   type  (database|instance|schema|tablespace|user) #IMPLIED
+>
+<!ATTLIST query
+   item   CDATA          #REQUIRED
+   time   CDATA          #REQUIRED
+   nodata CDATA          #IMPLIED
+   trim  (yes | no)      "yes"
+>
+<!ATTLIST multiquery
+   items  CDATA          #REQUIRED
+   time   CDATA          #REQUIRED
+   nodata CDATA          #IMPLIED
+   trim  (yes | no)      "yes"
+   type  (column | list) "column"
+>
