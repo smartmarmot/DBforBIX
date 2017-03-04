@@ -1,0 +1,14 @@
+[Unit]
+Description=DBforBIX Monitoring Agent
+After=syslog.target network.target
+Conflicts=
+
+[Service]
+Type=forking
+PIDFile=/tmp/dbforbix.pid
+ExecStart=/opt/dbforbix/dbforbix.sh start
+ExecReload=/opt/dbforbix/dbforbix.sh restart
+ExecStop=/opt/dbforbix/dbforbix.sh stop
+
+[Install]
+WantedBy=multi-user.target
