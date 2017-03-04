@@ -36,53 +36,62 @@ public class MultiColumnItem extends AbstractMultiItem {
 	
 	private static final Logger		LOG				= Logger.getLogger(MultiColumnItem.class);
 
-	public MultiColumnItem(String prefix, String[] items, String query, Map<String, String> itemConfig, ZServer zs) {
-		super(prefix, items, query, itemConfig, zs);
+	public MultiColumnItem(String prefix, String itemList, String query, Map<String, String> itemConfig, ZServer zs) {
+		super(prefix, itemList, query, itemConfig, zs);
 	}
 
 	@Override
 	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
-		PreparedStatement pstmt = con.prepareStatement(query);
-		pstmt.setQueryTimeout(timeout);
-		ResultSet rs = pstmt.executeQuery();
-		String val = noData;
 		List<ZabbixItem> values = new ArrayList<>();
-					
 		/**
-		 * <multiquery time="60" item="index[%1]|free[%1]" type="column">
-		 * SELECT table_schema "database", SUM(index_length) "size", SUM(data_free) "free" 
-		 * FROM INFORMATION_SCHEMA.TABLES 
-		 * WHERE table_schema NOT IN ('information_schema','performance_schema') GROUP BY table_schema
-		 * </multiquery>
-		 */	
-		
-		while (rs.next()) {//it can be multirows
-			ResultSetMetaData meta = rs.getMetaData();
-			if (meta.getColumnCount() < items.length) {
-				LOG.error("Number of columns in select of item "+name+items+"\nof item config: "+this.getItemConfig().keySet()+
-						"\nis less than in item config");
-				break;
-			}
-			else {
-				//from the last column to first
-				for (int it=items.length-1, column=meta.getColumnCount();it>=0;--it,--column){
-					//name[%1_%2_%5] -> name[one_two_three]
-					String realName = items[it];
-					for(int i = 1; i<= meta.getColumnCount(); i++)
-						realName = realName.replace("%"+i, rs.getString(i));
-					//get value
-					val = rs.getString(column);
-					val = (null == val) ? noData : val;
-					values.add(new ZabbixItem(name+realName, val,ZabbixItem.ZBX_STATE_NORMAL,clock, this));
+		 * Statement has to be closed or "Error message: ORA-01000: maximum open cursors exceeded" occurs with time otherwise
+		 */
+		try(PreparedStatement pstmt = con.prepareStatement(query)){
+			pstmt.setQueryTimeout(timeout);
+			try(ResultSet rs = pstmt.executeQuery()){
+				String val = noData;
+							
+				/**
+				 * <multiquery time="60" item="index[%1]|free[%1]" type="column">
+				 * SELECT table_schema "database", SUM(index_length) "size", SUM(data_free) "free" 
+				 * FROM INFORMATION_SCHEMA.TABLES 
+				 * WHERE table_schema NOT IN ('information_schema','performance_schema') GROUP BY table_schema
+				 * </multiquery>
+				 */	
+				
+				while (rs.next()) {//it can be multirows
+					ResultSetMetaData meta = rs.getMetaData();
+					if (meta.getColumnCount() < items.length) {
+						LOG.error("Number of columns in select of item "+name+items+"\nof item config: "+this.getItemConfig().keySet()+
+								"\nis less than in item config");
+						break;
+					}
+					else {
+						//from the last column to first
+						for (int it=items.length-1, column=meta.getColumnCount();it>=0;--it,--column){
+							//name[%1_%2_%5] -> name[one_two_three]
+							String realName = items[it];
+							for(int i = 1; i<= meta.getColumnCount(); i++)
+								realName = realName.replace("%"+i, (null != rs.getString(i)) ? rs.getString(i) : noData );
+							//get value
+							values.add(new ZabbixItem(name+realName, 
+									(null != rs.getString(column)) ? rs.getString(column) : noData,
+									ZabbixItem.ZBX_STATE_NORMAL,clock, this));
+						}
+					}
 				}
 			}
+			/**
+			 * Autoclose rs statement
+			 */
+			catch(SQLException ex){
+				throw ex;
+			}
+		}catch(SQLException ex){
+			LOG.error("Cannot get data for items:\n" + name+itemList +"\nQuery:\n"+query, ex);
+			throw ex;
 		}
-		
-		
-		rs.close();
-		pstmt.close();
-
 		return values.toArray(new ZabbixItem[0]);
 	}
 

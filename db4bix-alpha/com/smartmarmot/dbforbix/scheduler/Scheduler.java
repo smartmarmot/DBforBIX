@@ -93,31 +93,25 @@ public class Scheduler extends TimerTask {
 				Adapter[] targetDB = dbman.getDatabases(set.getKey());
 				if (targetDB != null && targetDB.length > 0) {
 					for (Adapter db : targetDB) {
-						try{
-							Connection con = db.getConnection();
-							try {
-								for (Item item : set.getValue()) {
-									try {
-										ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
-										if (result != null)
-											for (ZabbixItem i : result)
-												sender.addItem(i);
-									}
-									catch (SQLTimeoutException sqlex) {
-										LOG.warn("Timeout after "+config.getQueryTimeout()+"s for item: " + item.getName(), sqlex);
-									}
-									catch (SQLException sqlex) {
-										LOG.warn("could not fetch value of [" + item.getName() +"]\nError code: "+ 
-												sqlex.getErrorCode()+"\nError message: "+sqlex.getLocalizedMessage()+"\n",
-												sqlex);
-										if(DBType.ORACLE==db.getType()
-											&& sqlex.getLocalizedMessage().toLowerCase().contains("closed connection")) 
-											db.reconnect();
-									}
+						try(Connection con = db.getConnection()) {
+							for (Item item : set.getValue()) {
+								try {
+									ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
+									if (result != null)
+										for (ZabbixItem i : result)
+											sender.addItem(i);
 								}
-							}
-							finally {
-								con.close();
+								catch (SQLTimeoutException sqlex) {
+									LOG.warn("Timeout after "+config.getQueryTimeout()+"s for item: " + item.getName(), sqlex);
+								}
+								catch (SQLException sqlex) {
+									//LOG.warn("could not fetch value of [" + item.getName() +"]\nError code: "+
+									//		sqlex.getErrorCode()+"\nError message: "+sqlex.getLocalizedMessage()+"\n",
+									//		sqlex);
+									if(DBType.ORACLE==db.getType()
+										&& sqlex.getLocalizedMessage().toLowerCase().contains("closed connection"))
+										db.reconnect();
+								}
 							}
 						}
 						catch(SQLException sqlex){
@@ -152,8 +146,12 @@ public class Scheduler extends TimerTask {
 				}
 			}
 		}
+		catch(Exception ex){
+			LOG.error("Scheduler exception: " + ex.getLocalizedMessage(),ex);
+		}
 		catch (Throwable th) {
-			LOG.error("Scheduler - Error "+th.getMessage(), th);
+			LOG.error("Scheduler - Error "+th.getLocalizedMessage());
+			th.printStackTrace();
 		}
 		working = false;
 	}
