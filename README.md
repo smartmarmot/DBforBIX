@@ -1,5 +1,7 @@
 # DBforBIX
 
+DBforBix is the DB monitoring tool for Zabbix. It works like an active Zabbix Proxy by getting configuration from Zabbix Server and sending the results back.
+
 Just copy dist https://github.com/vagabondan/DBforBIX/tree/master/dist/ to your server and run<br>
 
 See Wiki for DBforBix as Zabbix Proxy configuration instructions: https://github.com/vagabondan/DBforBIX/wiki<br>
