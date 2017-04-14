@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.2</version>
-    <date>2017-01-05T21:33:05Z</date>
+    <date>2017-04-14T15:48:30Z</date>
     <groups>
         <group>
-            <name>DB/Templates</name>
+            <name>DB4bix/Templates</name>
         </group>
     </groups>
     <templates>
         <template>
-            <template>DB.Template.DB4bix.Oracle</template>
-            <name>DB.Template.DB4bix.Oracle</name>
+            <template>DB4bix.Oracle</template>
+            <name>DB4bix.Oracle</name>
             <description/>
             <groups>
                 <group>
-                    <name>DB/Templates</name>
+                    <name>DB4bix/Templates</name>
                 </group>
             </groups>
             <applications>
@@ -223,49 +223,6 @@
                     <logtimefmt/>
                 </item>
                 <item>
-                    <name>Instance user connections</name>
-                    <type>2</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>oracle.userconn</key>
-                    <delay>0</delay>
-                    <history>14</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Oracle.Parameters</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
                     <name>Zabbix session IO LOG</name>
                     <type>2</type>
                     <snmp_community/>
@@ -329,7 +286,7 @@
                     <delay_flex/>
                     <params>&lt;parms type=&quot;oracle&quot; prefix=&quot;oracle.&quot;&gt;&#13;
 	&lt;server&gt;&#13;
-		&lt;discovery time=&quot;120&quot; item=&quot;discovery.DB4bix.config[instanceid,{$DSN}]&quot; names=&quot;INST_ID&quot;&gt;select inst_id from gv$instance&lt;/discovery&gt;&#13;
+		&lt;discovery time=&quot;120&quot; item=&quot;discovery.DB4bix.config[instanceid,{$DSN}]&quot; names=&quot;INST_ID&quot;&gt;SELECT inst_id FROM gv$instance&lt;/discovery&gt;&#13;
         &lt;query time=&quot;60&quot; item=&quot;stats[%1,%2]&quot;&gt;&#13;
 		SELECT inst_id, REPLACE(name,' ','_'), value FROM gv$sysstat WHERE name IN ('user I/O wait time','physical read total bytes','physical write total bytes','lob reads','lob writes','db block changes','db block gets','consistent gets','physical reads','physical reads direct','physical writes direct','redo writes','physical read requests optimized','physical write requests optimized')&#13;
 		&lt;/query&gt;&#13;
@@ -374,7 +331,7 @@
 			group by inst_id&#13;
 		&lt;/query&gt;&#13;
 		&lt;query time=&quot;60&quot; item=&quot;sgastat[%1,%2]&quot;&gt;&#13;
-			SELECT inst_id, name,sum(bytes) bytes&#13;
+			SELECT inst_id, REPLACE(name,' ','_'),sum(bytes) bytes&#13;
 			FROM GV$SGASTAT &#13;
 			where pool in ('shared pool') and &#13;
 			name in ('dictionary cache','free memory','library cache','sql area','SQLA')&#13;
@@ -389,7 +346,7 @@
 		&lt;query time=&quot;120&quot; item=&quot;session_system[%1]&quot; nodata=&quot;0&quot;&gt;SELECT inst_id, COUNT(*) FROM gv$session WHERE type='BACKGROUND' group by inst_id&lt;/query&gt;&#13;
 		&lt;query time=&quot;120&quot; item=&quot;session_active[%1]&quot; nodata=&quot;0&quot;&gt;SELECT inst_id, COUNT(*) FROM gv$session WHERE type!='BACKGROUND' AND status='ACTIVE' group by inst_id&lt;/query&gt;&#13;
 		&lt;query time=&quot;120&quot; item=&quot;users_connected[%1]&quot; nodata=&quot;0&quot;&gt;&#13;
-		SELECT inst_id, count(username) FROM gv$session WHERE username is not null group by inst_id		&#13;
+		SELECT inst_id, count(username)  FROM gv$session WHERE username is not null group by inst_id		&#13;
 		&lt;/query&gt;&#13;
 		&lt;query time=&quot;600&quot; item=&quot;dbfilesize&quot;&gt;SELECT SUM(NVL(bytes,0)) val FROM dba_data_files&lt;/query&gt;&#13;
 		&lt;query time=&quot;600&quot; item=&quot;dbsize&quot;&gt;&#13;
@@ -404,7 +361,7 @@
 				)&#13;
 		&lt;/query&gt;&#13;
 		&lt;query time=&quot;600&quot; item=&quot;session_io_log&quot; nodata=&quot;none&quot;&gt;&#13;
-		select LISTAGG(sessions_tab,chr(10)) WITHIN GROUP(ORDER BY PCT desc) sessions from (&#13;
+		select LISTAGG(SUBSTR(sessions_tab,1,395),chr(10)) WITHIN GROUP(ORDER BY PCT desc) sessions from (&#13;
       select INST_ID||': '||'PCT[R/W/T,MB/s]='||PCT||'['||SESSION_IO_R_MBps||'/'||SESSION_IO_W_MBps||'/'||TOTAL_IO_MBps||'];SQL_(ID/FULL_PLAN_HV)='||SQL_ID||'/'||sql_full_plan_hash_value||';SID='||sid||'#'||SERIAL#||';(SCH/USER)NAME='||SCHEMANAME||'/'||USERNAME||';STATUS='||STATUS||';TYPE='||TYPE||';OSUSER='||OSUSER||';PROGRAM='||REGEXP_REPLACE(PROGRAM,'@.*$','')||'@'||MACHINE||';PROCESS='||PROCESS||';'||DESCRIPTION sessions_tab, PCT &#13;
       from (&#13;
         select b.inst_id,b.sid,b.SERIAL#,b.SCHEMANAME,b.OSUSER,b.USERNAME,b.STATUS,b.SQL_ID,b.PROCESS,b.PROGRAM,b.MACHINE,b.TYPE,&#13;
@@ -445,7 +402,8 @@
 &#13;
     &lt;query time=&quot;120&quot; item=&quot;db_locks&quot; nodata=&quot;none&quot;&gt;&#13;
 		select SUBSTR( sessions,1,2040)session_cut &#13;
-		from (select LISTAGG(sessions_tab, chr(10)) WITHIN GROUP (ORDER BY sessions_tab desc) sessions &#13;
+		from (&#13;
+                  select LISTAGG(SUBSTR(sessions_tab,1,395), chr(10)) WITHIN GROUP (ORDER BY sessions_tab desc) sessions &#13;
 		  from (&#13;
 			select blocking_sessions.inst_id||':'||chr(9)||&#13;
 			'OBJ: '||o.owner || '.' ||o.object_name ||chr(10)||chr(9)||chr(9)||&#13;
@@ -502,7 +460,7 @@
 	&lt;/query&gt;&#13;
 	&#13;
 	&lt;query time=&quot;600&quot; item=&quot;zabbix_session_io_log&quot; nodata=&quot;none&quot;&gt;&#13;
-	select LISTAGG(sessions_tab,chr(10)) WITHIN GROUP(ORDER BY PCT desc) sessions from (&#13;
+	select LISTAGG(SUBSTR(sessions_tab,1,395),chr(10)) WITHIN GROUP(ORDER BY PCT desc) sessions from (&#13;
       select INST_ID||': '||'PCT[R/W/T,MB/s]='||PCT||'['||SESSION_IO_R_MBps||'/'||SESSION_IO_W_MBps||'/'||TOTAL_IO_MBps||'];SQL_(ID/FULL_PLAN_HV)='||SQL_ID||'/'||sql_full_plan_hash_value||';SID='||sid||'#'||SERIAL#||';(SCH/USER)NAME='||SCHEMANAME||'/'||USERNAME||';STATUS='||STATUS||';TYPE='||TYPE||';OSUSER='||OSUSER||';PROGRAM='||REGEXP_REPLACE(PROGRAM,'@.*$','')||'@'||MACHINE||';PROCESS='||PROCESS||';'||DESCRIPTION sessions_tab, PCT &#13;
       from (&#13;
         select b.inst_id,b.sid,b.SERIAL#,b.SCHEMANAME,b.OSUSER,b.USERNAME,b.STATUS,b.SQL_ID,b.PROCESS,b.PROGRAM,b.MACHINE,b.TYPE,&#13;
@@ -548,7 +506,7 @@
                         <formula/>
                         <conditions/>
                     </filter>
-                    <lifetime>0</lifetime>
+                    <lifetime>1</lifetime>
                     <description/>
                     <item_prototypes>
                         <item_prototype>
@@ -3538,7 +3496,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},consistent_gets]</key>
                                     </item>
                                 </graph_item>
@@ -3550,7 +3508,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},db_block_changes]</key>
                                     </item>
                                 </graph_item>
@@ -3562,7 +3520,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},db_block_gets]</key>
                                     </item>
                                 </graph_item>
@@ -3574,7 +3532,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},lob_reads]</key>
                                     </item>
                                 </graph_item>
@@ -3586,7 +3544,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},lob_writes]</key>
                                     </item>
                                 </graph_item>
@@ -3598,7 +3556,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},physical_reads]</key>
                                     </item>
                                 </graph_item>
@@ -3610,7 +3568,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},physical_read_total_bytes]</key>
                                     </item>
                                 </graph_item>
@@ -3622,7 +3580,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},physical_write_total_bytes]</key>
                                     </item>
                                 </graph_item>
@@ -3634,7 +3592,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.stats[{#INST_ID},user_I/O_wait_time]</key>
                                     </item>
                                 </graph_item>
@@ -3666,7 +3624,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.procnum[{#INST_ID}]</key>
                                     </item>
                                 </graph_item>
@@ -3678,7 +3636,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},processes]</key>
                                     </item>
                                 </graph_item>
@@ -3710,7 +3668,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.session_active[{#INST_ID}]</key>
                                     </item>
                                 </graph_item>
@@ -3722,7 +3680,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sessions[{#INST_ID}]</key>
                                     </item>
                                 </graph_item>
@@ -3730,11 +3688,11 @@
                                     <sortorder>2</sortorder>
                                     <drawtype>0</drawtype>
                                     <color>2774A4</color>
-                                    <yaxisside>0</yaxisside>
+                                    <yaxisside>1</yaxisside>
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},sessions]</key>
                                     </item>
                                 </graph_item>
@@ -3746,7 +3704,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.session_system[{#INST_ID}]</key>
                                     </item>
                                 </graph_item>
@@ -3778,7 +3736,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},sga_bufcache]</key>
                                     </item>
                                 </graph_item>
@@ -3790,7 +3748,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},fixed_sga]</key>
                                     </item>
                                 </graph_item>
@@ -3802,7 +3760,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},java_pool]</key>
                                     </item>
                                 </graph_item>
@@ -3814,7 +3772,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},large_pool]</key>
                                     </item>
                                 </graph_item>
@@ -3826,7 +3784,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},log_buffer]</key>
                                     </item>
                                 </graph_item>
@@ -3838,7 +3796,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},pool_misc]</key>
                                     </item>
                                 </graph_item>
@@ -3850,7 +3808,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.sgastat[{#INST_ID},pool_sql_area]</key>
                                     </item>
                                 </graph_item>
@@ -3882,7 +3840,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.archivelog_size[{#INST_ID}]</key>
                                     </item>
                                 </graph_item>
@@ -3894,7 +3852,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},bitmap_merge_area_size]</key>
                                     </item>
                                 </graph_item>
@@ -3906,7 +3864,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},create_bitmap_area_size]</key>
                                     </item>
                                 </graph_item>
@@ -3918,7 +3876,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},hash_area_size]</key>
                                     </item>
                                 </graph_item>
@@ -3930,7 +3888,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},sga_max_size]</key>
                                     </item>
                                 </graph_item>
@@ -3942,7 +3900,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},shared_pool_reserved_size]</key>
                                     </item>
                                 </graph_item>
@@ -3954,7 +3912,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.parameter[{#INST_ID},sort_area_size]</key>
                                     </item>
                                 </graph_item>
@@ -4119,7 +4077,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.librarycache.hitratio[{#NAMESPACE}]</key>
                                     </item>
                                 </graph_item>
@@ -4131,7 +4089,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.librarycache.pinhitratio[{#NAMESPACE}]</key>
                                     </item>
                                 </graph_item>
@@ -4186,7 +4144,7 @@
                             <snmp_oid/>
                             <key>oracle.tablespace.bytes[{#TABLESPACE}]</key>
                             <delay>0</delay>
-                            <history>14</history>
+                            <history>7</history>
                             <trends>365</trends>
                             <status>0</status>
                             <value_type>3</value_type>
@@ -4230,7 +4188,7 @@
                             <snmp_oid/>
                             <key>oracle.tablespace.maxbytes[{#TABLESPACE}]</key>
                             <delay>0</delay>
-                            <history>14</history>
+                            <history>7</history>
                             <trends>365</trends>
                             <status>0</status>
                             <value_type>3</value_type>
@@ -4269,11 +4227,11 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>({DB.Template.DB4bix.Oracle:oracle.tablespace.maxbytes[{#TABLESPACE}].last()}&gt;0) and&#13;
-({DB.Template.DB4bix.Oracle:oracle.tablespace.maxbytes[{#TABLESPACE}].last()}*0.999&lt;{DB.Template.DB4bix.Oracle:oracle.tablespace.bytes[{#TABLESPACE}].last()})</expression>
+                            <expression>({DB4bix.Oracle:oracle.tablespace.maxbytes[{#TABLESPACE}].last()}&gt;0) and&#13;
+({DB4bix.Oracle:oracle.tablespace.bytes[{#TABLESPACE}].last()} &gt; {DB4bix.Oracle:oracle.tablespace.maxbytes[{#TABLESPACE}].last()}*{$TBS_HIGH_LIMIT})</expression>
                             <recovery_mode>0</recovery_mode>
                             <recovery_expression/>
-                            <name>99.9% of tablespace {#TABLESPACE} used on {HOST.NAME}</name>
+                            <name>Tablespace {#TABLESPACE} size is {ITEM.LASTVALUE2} (&gt;{$TBS_HIGH_LIMIT}*{ITEM.LASTVALUE1}) on {HOST.NAME}</name>
                             <correlation_mode>0</correlation_mode>
                             <correlation_tag/>
                             <url/>
@@ -4281,7 +4239,7 @@
                             <priority>2</priority>
                             <description/>
                             <type>0</type>
-                            <manual_close>1</manual_close>
+                            <manual_close>0</manual_close>
                             <dependencies/>
                             <tags/>
                         </trigger_prototype>
@@ -4313,7 +4271,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.tablespace.maxbytes[{#TABLESPACE}]</key>
                                     </item>
                                 </graph_item>
@@ -4325,7 +4283,7 @@
                                     <calc_fnc>2</calc_fnc>
                                     <type>0</type>
                                     <item>
-                                        <host>DB.Template.DB4bix.Oracle</host>
+                                        <host>DB4bix.Oracle</host>
                                         <key>oracle.tablespace.bytes[{#TABLESPACE}]</key>
                                     </item>
                                 </graph_item>
@@ -4338,17 +4296,249 @@
             <httptests/>
             <macros>
                 <macro>
+                    <macro>{$DB_SIZE_HIGH_LIMIT}</macro>
+                    <value>0.95</value>
+                </macro>
+                <macro>
                     <macro>{$DB_USER}</macro>
                     <value>zabbix</value>
                 </macro>
+                <macro>
+                    <macro>{$TBS_HIGH_LIMIT}</macro>
+                    <value>0.99</value>
+                </macro>
             </macros>
             <templates/>
-            <screens/>
+            <screens>
+                <screen>
+                    <name>Oracle health</name>
+                    <hsize>4</hsize>
+                    <vsize>20</vsize>
+                    <screen_items>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>IO (inst_id={#INST_ID})</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>1</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>Sessions (inst_id={#INST_ID})</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>1</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>Processes number (inst_id={#INST_ID})</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>1</x>
+                            <y>1</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>SGA (inst_id={#INST_ID})</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>2</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>Sizes (inst_id={#INST_ID})</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>19</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>1</x>
+                            <y>2</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <key>oracle.users_connected[{#INST_ID}]</key>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>0</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>3</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>DB Size</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>3</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>300</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>4</y>
+                            <colspan>4</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>Size of {#TABLESPACE}</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>300</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>5</y>
+                            <colspan>4</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>Hitratio {#NAMESPACE}</name>
+                                <host>DB4bix.Oracle</host>
+                            </resource>
+                            <max_columns>4</max_columns>
+                            <application/>
+                        </screen_item>
+                    </screen_items>
+                </screen>
+            </screens>
         </template>
     </templates>
+    <triggers>
+        <trigger>
+            <expression>{DB4bix.Oracle:oracle.dbsize.min(5m)}&gt;{$DB_SIZE_HIGH_LIMIT}*{DB4bix.Oracle:oracle.dbfilesize.last()}</expression>
+            <recovery_mode>0</recovery_mode>
+            <recovery_expression/>
+            <name>DB size is near its file size: {ITEM.LASTVALUE1}&gt;{$DB_SIZE_HIGH_LIMIT}*{ITEM.LASTVALUE2} on {HOST.NAME}</name>
+            <correlation_mode>0</correlation_mode>
+            <correlation_tag/>
+            <url/>
+            <status>0</status>
+            <priority>3</priority>
+            <description/>
+            <type>0</type>
+            <manual_close>0</manual_close>
+            <dependencies/>
+            <tags/>
+        </trigger>
+    </triggers>
     <graphs>
         <graph>
-            <name>Users connections</name>
+            <name>DB Size</name>
             <width>900</width>
             <height>200</height>
             <yaxismin>0.0000</yaxismin>
@@ -4368,13 +4558,25 @@
                 <graph_item>
                     <sortorder>0</sortorder>
                     <drawtype>0</drawtype>
-                    <color>00C8C8</color>
+                    <color>1A7C11</color>
                     <yaxisside>0</yaxisside>
-                    <calc_fnc>7</calc_fnc>
+                    <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.Oracle</host>
-                        <key>oracle.userconn</key>
+                        <host>DB4bix.Oracle</host>
+                        <key>oracle.dbfilesize</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <drawtype>0</drawtype>
+                    <color>F63100</color>
+                    <yaxisside>0</yaxisside>
+                    <calc_fnc>2</calc_fnc>
+                    <type>0</type>
+                    <item>
+                        <host>DB4bix.Oracle</host>
+                        <key>oracle.dbsize</key>
                     </item>
                 </graph_item>
             </graph_items>

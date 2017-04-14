@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.2</version>
-    <date>2017-01-05T21:33:31Z</date>
+    <date>2017-04-14T15:47:59Z</date>
     <groups>
         <group>
-            <name>DB/Templates</name>
+            <name>DB4bix/Templates</name>
         </group>
     </groups>
     <templates>
         <template>
-            <template>DB.Template.DB4bix.MySQL</template>
-            <name>DB.Template.DB4bix.MySQL</name>
+            <template>DB4bix.MySQL</template>
+            <name>DB4bix.MySQL</name>
             <description/>
             <groups>
                 <group>
-                    <name>DB/Templates</name>
+                    <name>DB4bix/Templates</name>
                 </group>
             </groups>
             <applications>
@@ -5571,7 +5571,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
     </templates>
     <triggers>
         <trigger>
-            <expression>{DB.Template.DB4bix.MySQL:mysql.max_used_connections.last(0)}&gt;({DB.Template.DB4bix.MySQL:mysql.max_connections.last(0)}*0.9)</expression>
+            <expression>{DB4bix.MySQL:mysql.max_used_connections.last(0)}&gt;({DB4bix.MySQL:mysql.max_connections.last(0)}*0.9)</expression>
             <recovery_mode>0</recovery_mode>
             <recovery_expression/>
             <name>90% of max connections used on {HOSTNAME}</name>
@@ -5587,7 +5587,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
             <tags/>
         </trigger>
         <trigger>
-            <expression>{DB.Template.DB4bix.MySQL:mysql.uptime.last(0)}&lt;300</expression>
+            <expression>{DB4bix.MySQL:mysql.uptime.last(0)}&lt;300</expression>
             <recovery_mode>0</recovery_mode>
             <recovery_expression/>
             <name>MySQL has been restarted on {HOSTNAME}</name>
@@ -5603,7 +5603,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
             <tags/>
         </trigger>
         <trigger>
-            <expression>{DB.Template.DB4bix.MySQL:mysql.uptime.nodata(120)}&gt;0</expression>
+            <expression>{DB4bix.MySQL:mysql.uptime.nodata(120)}&gt;0</expression>
             <recovery_mode>0</recovery_mode>
             <recovery_expression/>
             <name>No data from monitoring agent for {HOSTNAME}</name>
@@ -5646,7 +5646,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.bytes_received</key>
                     </item>
                 </graph_item>
@@ -5658,7 +5658,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.bytes_sent</key>
                     </item>
                 </graph_item>
@@ -5670,7 +5670,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.queries</key>
                     </item>
                 </graph_item>
@@ -5682,7 +5682,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.slow_queries</key>
                     </item>
                 </graph_item>
@@ -5714,7 +5714,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_commit</key>
                     </item>
                 </graph_item>
@@ -5726,7 +5726,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_delete</key>
                     </item>
                 </graph_item>
@@ -5738,7 +5738,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_delete_multi</key>
                     </item>
                 </graph_item>
@@ -5750,7 +5750,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_execute_sql</key>
                     </item>
                 </graph_item>
@@ -5762,7 +5762,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_help</key>
                     </item>
                 </graph_item>
@@ -5774,7 +5774,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_insert</key>
                     </item>
                 </graph_item>
@@ -5786,7 +5786,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_insert_select</key>
                     </item>
                 </graph_item>
@@ -5798,7 +5798,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_lock_tables</key>
                     </item>
                 </graph_item>
@@ -5810,7 +5810,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_optimize</key>
                     </item>
                 </graph_item>
@@ -5822,7 +5822,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_replace</key>
                     </item>
                 </graph_item>
@@ -5834,7 +5834,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_replace_select</key>
                     </item>
                 </graph_item>
@@ -5846,7 +5846,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_rollback</key>
                     </item>
                 </graph_item>
@@ -5858,7 +5858,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_select</key>
                     </item>
                 </graph_item>
@@ -5870,7 +5870,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_update</key>
                     </item>
                 </graph_item>
@@ -5882,7 +5882,7 @@ last(&quot;mysql.index[{#DATABASE}]&quot;,0)</params>
                     <calc_fnc>2</calc_fnc>
                     <type>0</type>
                     <item>
-                        <host>DB.Template.DB4bix.MySQL</host>
+                        <host>DB4bix.MySQL</host>
                         <key>mysql.com_update_multi</key>
                     </item>
                 </graph_item>
