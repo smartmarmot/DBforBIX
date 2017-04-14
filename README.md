@@ -1,6 +1,6 @@
 # DBforBIX
 
-Just copy dist https://github.com/vagabondan/DBforBIX/tree/master/dist/ to your server and run<br>
+Just copy dist https://github.com/vagabondan/DBforBIX/tree/master/dist/ to your server, edit configuration and run<br>
 
 See Wiki for DBforBix as Zabbix Proxy configuration instructions: https://github.com/vagabondan/DBforBIX/wiki<br>
 
