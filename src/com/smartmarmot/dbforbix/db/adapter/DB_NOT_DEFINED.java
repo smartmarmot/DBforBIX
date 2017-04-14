@@ -6,7 +6,7 @@ import com.smartmarmot.dbforbix.db.DBType;
 
 public class DB_NOT_DEFINED extends AbstractAdapter {
 
-	public DB_NOT_DEFINED(String name, String url, String user, String passwd,Integer maxactive, Integer maxidle,Integer maxwaitmillis, Set<String> set, Boolean pers) {
+	public DB_NOT_DEFINED(String name, String url, String user, String passwd,Integer maxactive, Integer maxidle,Integer maxwaitmillis, Integer queryTimeout, Set<String> set, Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -14,10 +14,13 @@ public class DB_NOT_DEFINED extends AbstractAdapter {
 		this.maxactive = maxactive.intValue();
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
+		this.queryTimeout = queryTimeout.intValue();
 		this.persistence = pers;
 		this.itemGroupNames=set;
 	}
 	
+
+
 	@Override
 	public DBType getType() {
 		return DBType.DB_NOT_DEFINED;

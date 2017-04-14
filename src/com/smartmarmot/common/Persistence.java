@@ -8,6 +8,7 @@ public interface Persistence {
 	public ZabbixItem pop();
 
 	public Long size();
+	
 
 	public void push(ZabbixItem zi);
 

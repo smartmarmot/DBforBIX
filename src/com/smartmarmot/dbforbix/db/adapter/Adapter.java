@@ -32,6 +32,8 @@ public interface Adapter {
 	public String  getPassword();
 	public Integer getMaxActive();
 	public Integer getMaxIdle();
+	public Integer getMaxWaitMillis();
+	public Integer getQueryTimeout();
 	//public String getItemFile();
 	public Set<String> getItemGroupNames();
 	
@@ -44,6 +46,7 @@ public interface Adapter {
 	public boolean hasSchemaItems();
 	public boolean hasTablespaceItems();
 	public boolean getPersistence();
+	
 	
     /**
 	 * Exception if database that came from Zabbix Web has not been defined in local file config yet.
@@ -61,5 +64,6 @@ public interface Adapter {
 	public Connection getConnection() throws SQLException, ClassNotFoundException, DBNotDefinedException;
 	public void abort();
 	public void reconnect();
+	
 	
 }

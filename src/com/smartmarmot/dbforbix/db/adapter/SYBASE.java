@@ -7,7 +7,7 @@ import com.smartmarmot.dbforbix.db.DBType;
 
 public class SYBASE extends AbstractAdapter {
 
-	public SYBASE(String name, String url, String user, String passwd,Integer maxactive, Integer maxidle,Integer maxwaitmillis, Set<String> set,Boolean pers) {
+	public SYBASE(String name, String url, String user, String passwd,Integer maxactive, Integer maxidle,Integer maxwaitmillis, Integer queryTimeout, Set<String> set,Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -15,6 +15,7 @@ public class SYBASE extends AbstractAdapter {
 		this.maxactive = maxactive.intValue();
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
+		this.queryTimeout = queryTimeout.intValue();
 		this.itemGroupNames=set;
 		this.persistence = pers;
 	}
