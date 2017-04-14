@@ -50,7 +50,7 @@ import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
 
-import org.apache.log4j.Level;
+//import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -311,7 +311,7 @@ public class Config {
 		private Integer maxidle = new Integer(2);
 		private Integer maxwaitmillis = new Integer (10000);
 		private Boolean persistent = false;
-		private int		queryTimeout;
+		private Integer	queryTimeout = new Integer(15);
 		private Set<String>  itemGroupNames=new HashSet<String>();
 		
 		public DBType getType() {
@@ -350,7 +350,7 @@ public class Config {
 		
 		@Override
 		public String toString() {
-			return getType() + ":" + getURL() + " " + getInstance();
+			return "DSN:"+this.getDBNameFC()+",\ttype:"+getType() + ",\tURL:" + getURL() + ",\tInstance:" + getInstance();
 		}
 
 		public Integer getMaxWaitMillis() {
@@ -415,17 +415,14 @@ public class Config {
 	 * 
 	 */
 	private static final Logger		LOG				= Logger.getLogger(Config.class);
-	private static final String		GLOBAL_NAME			= "DBforBix";
+	private static final String		GLOBAL_NAME			= "DBforBIX";
 	private static final String		GLOBAL_POOL			= "Pool";
 	private static final String		GLOBAL_ZBXSRV		= "ZabbixServer";
 	private static final String		GLOBAL_DB			= "DB";
-	private static final String		SET_LOGLEVEL	= GLOBAL_NAME + ".LogLevel";
-	private static final String		SET_LOGFILE	= GLOBAL_NAME + ".LogFile";
-	private static final String		SET_LOGFILESIZE	= GLOBAL_NAME + ".LogFileSize";
 	private static final String		SET_UPDATECONFIG = GLOBAL_NAME + ".UpdateConfigTimeout";
 	private static final String		SET_POOL_MAXACTIVE	= GLOBAL_POOL + ".MaxActive";
-	private static final String		SET_POOL_MAXIDLE	= GLOBAL_POOL + ".TimeOut";
-	private static final String 	SET_QUERY_TIMEOUT = GLOBAL_POOL+ ".QueryTimeOut";
+	private static final String		SET_POOL_MAXIDLE	= GLOBAL_POOL + ".MaxIdle";
+	private static final String 	SET_LOGIN_TIMEOUT = GLOBAL_POOL+ ".LoginTimeOut";
 	private static final String 	ZBX_HEADER_PREFIX="ZBXD\1";
 	private static final String		SET_PERSISTENCETYPE	= GLOBAL_NAME + ".PersistenceType";
 	private static final String		SET_PERSISTENCEDIR = GLOBAL_NAME + ".PersistenceDir";
@@ -449,12 +446,12 @@ public class Config {
 	 * 
 	 */
 	private String 					configFileHash					= null; 
-	private Level					logLevel						= Level.WARN;
-	private String					logFile							= "./logs/DBforBix.log";
-	private String					sspDir		 					= "./temp/";
-	private String					logFileSize						= "1MB";
+//	private Level					logLevel						= Level.WARN;
+//	private String					logFile							= "./logs/DBforBix.log";
+//	private String					sspDir		 					= "./temp/";
+//	private String					logFileSize						= "1MB";
 	private int						maxActive						= 10;	
-	private int						queryTimeout					= 60;	// default queryTimeout
+	private int						loginTimeout					= 60;	// default queryTimeout
 	private int						maxIdle							= 15;	// pieces
 	private int						updateConfigTimeout				= 120; 	// seconds
 	private String					persistenceType					= "DB";
@@ -599,12 +596,6 @@ public class Config {
 		try (FileReader reader = new FileReader(configFile)){
 	     		PropertiesConfiguration pcfg = new PropertiesConfiguration();	     		
 		     	pcfg.read(reader);
-			if (pcfg.containsKey(SET_LOGLEVEL))
-				logLevel = Level.toLevel(pcfg.getString(SET_LOGLEVEL), Level.INFO);
-			if (pcfg.containsKey(SET_LOGFILE))
-				logFile = pcfg.getString(SET_LOGFILE);
-			if (pcfg.containsKey(SET_LOGFILESIZE))
-				setLogFileSize(pcfg.getString(SET_LOGFILESIZE));
 			if (pcfg.containsKey(SET_PERSISTENCETYPE))
 				persistenceType = pcfg.getString(SET_PERSISTENCETYPE);			
 			if (pcfg.containsKey(SET_PERSISTENCEDIR))
@@ -615,8 +606,8 @@ public class Config {
 				maxActive = pcfg.getInt(SET_POOL_MAXACTIVE);
 			if (pcfg.containsKey(SET_POOL_MAXIDLE))
 				maxIdle = pcfg.getInt(SET_POOL_MAXIDLE);
-			if (pcfg.containsKey(SET_QUERY_TIMEOUT))
-				queryTimeout  = Integer.parseInt(pcfg.getString(SET_QUERY_TIMEOUT));				
+			if (pcfg.containsKey(SET_LOGIN_TIMEOUT))
+				loginTimeout  = Integer.parseInt(pcfg.getString(SET_LOGIN_TIMEOUT));				
 			Iterator<?> it;
 			it = pcfg.getKeys(GLOBAL_ZBXSRV);
 			while (it.hasNext()) {
@@ -705,6 +696,8 @@ public class Config {
 			dbsrv.password = value;
 		else if ("MaxWaitMillis".equalsIgnoreCase(key))
 			dbsrv.setMaxWaitMillis(Integer.parseInt(value));
+		else if ("QueryTimeout".equalsIgnoreCase(key))
+			dbsrv.setQueryTimeout(Integer.parseInt(value));		
 		else if ("MaxActive".equalsIgnoreCase(key))
 			dbsrv.setMaxActive(Integer.parseInt(value));
 		else if ("MaxIdle".equalsIgnoreCase(key))
@@ -1088,7 +1081,7 @@ public class Config {
 	/**
 	 * encode in low-endian format
 	 * @param l - number in current OS format
-	 * @return low-endian encoded number in byte array
+	 * @return little-endian encoded number in byte array
 	 */
 	private byte[] getNumberInLEFormat8B(long l) {
 		byte[] leL=new byte[8];
@@ -1503,34 +1496,14 @@ public class Config {
 		return basedir;
 	}
 
-	public Level getLogLevel() {
-		return logLevel;
-	}
-
-	public String getLogFile() {
-		return logFile;
-	}
-
 	public String getSPDir() {
 		return persistenceDir;
-	}
-	
-	public String getSSPDir() {
-		return sspDir;
 	}
 
 	public String getSPType() {
 		return persistenceType;
 	}
 
-	public String getLogFileSize() {
-		return logFileSize;
-	}
-
-	public void setLogFileSize(String s) {
-		logFileSize=s;
-	}
-	
 	public int getMaxActive() {
 		return maxActive;
 	}
@@ -1575,10 +1548,6 @@ public class Config {
 		builder.append("Config:\n");
 		builder.append("\n");
 		builder.append("BaseDir:\t").append(getBasedir()).append("\n");
-		builder.append("LogLevel:\t").append(getLogLevel()).append("\n");
-		builder.append("LogFile:\t").append(getLogFile()).append("\n");
-		builder.append("LogFileSize:\t").append(getLogFileSize()).append("\n");
-		builder.append("\n");
 		for (ZServer zsrv: zbxServers)
 			builder.append("-- Zabbix:\t").append(zsrv).append("\n");
 		for (Database db: databases)
@@ -1586,8 +1555,8 @@ public class Config {
 		return builder.toString();
 	}
 
-	public int getQueryTimeout() {
-		return this.queryTimeout;
+	public int getLoginTimeout() {
+		return this.loginTimeout;
 	}
 
 	public String getConfigFile() {

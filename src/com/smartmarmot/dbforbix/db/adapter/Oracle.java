@@ -28,13 +28,14 @@ public class Oracle extends AbstractAdapter {
 	//ORA-12537 - connection closed
 	public static final int ConnectionClosed=12537;
 
-	public Oracle(String name, String url, String user, String passwd, Integer maxactive,Integer maxidle,Integer maxwaitmillis, Set<String> set, Boolean pers) {
+	public Oracle(String name, String url, String user, String passwd, Integer maxactive,Integer maxidle,Integer maxwaitmillis, Integer queryTimeout, Set<String> set, Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
 		this.passwd = passwd;
 		this.maxactive = maxactive;
 		this.maxwaitmillis = maxwaitmillis;
+		this.queryTimeout = queryTimeout.intValue();
 		this.maxidle = maxidle;
 		this.itemGroupNames = set;
 		this.persistence = pers;
