@@ -42,6 +42,9 @@ abstract class AbstractAdapter implements Adapter {
 	protected int 	 maxactive;
 	protected int    maxidle;
 	protected int    maxwaitmillis;
+	protected int	 queryTimeout;
+
+
 	protected boolean persistence;
 	protected Set<String> itemGroupNames=new HashSet<String>();
 
@@ -64,9 +67,9 @@ abstract class AbstractAdapter implements Adapter {
 			cpds.setPassword(getPassword());
 			datasrc = new SharedPoolDataSource();
 			datasrc.setConnectionPoolDataSource(cpds);
-			datasrc.setLoginTimeout(15);
-			datasrc.setMaxTotal(cfg.getMaxActive());
-			datasrc.setDefaultMaxIdle(cfg.getMaxIdle());
+			datasrc.setLoginTimeout(cfg.getLoginTimeout());
+			datasrc.setMaxTotal(getMaxActive());
+			datasrc.setDefaultMaxIdle(getMaxIdle());
 			datasrc.setDefaultMaxWaitMillis(getMaxWaitMillis());
 			datasrc.setValidationQuery(getType().getAliveSQL());
 			datasrc.setDefaultTestOnBorrow(true);
@@ -136,12 +139,15 @@ abstract class AbstractAdapter implements Adapter {
 	public String getPassword() {
 		return passwd;
 	}
+	
+	@Override
 	public Integer getMaxActive() {
 		return maxactive;
 	}
 	public Integer getMaxIdle() {
 		return maxidle;
 	}
+	@Override
 	public Integer getMaxWaitMillis() {
 		return maxwaitmillis;
 	}
@@ -149,6 +155,10 @@ abstract class AbstractAdapter implements Adapter {
 		return persistence;
 	}
 
+	@Override
+	public Integer getQueryTimeout() {
+		return queryTimeout;
+	}
 	
 	@Override
 	public String[] getDiscoveryItems() {

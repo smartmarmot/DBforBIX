@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
 import com.smartmarmot.dbforbix.DBforBix;
-import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.DBManager;
 import com.smartmarmot.dbforbix.db.DBType;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
@@ -84,7 +83,6 @@ public class Scheduler extends TimerTask {
 		working = true;
 		DBManager dbman = DBManager.getInstance();
 		ZabbixSender sender = DBforBix.getZSender();
-		Config config = Config.getInstance();
 		try {
 			LOG.debug("Scheduler.run() " + getPause());
 			// <itemGroupName>:<ConfigItem>
@@ -96,18 +94,27 @@ public class Scheduler extends TimerTask {
 						try(Connection con = db.getConnection()) {
 							for (Item item : set.getValue()) {
 								try {
-									ZabbixItem[] result = item.getItemData(con, config.getQueryTimeout());
+									ZabbixItem[] result = item.getItemData(con, db.getQueryTimeout());
 									if (result != null)
 										for (ZabbixItem i : result)
 											sender.addItem(i);
 								}
 								catch (SQLTimeoutException sqlex) {
-									LOG.warn("Timeout after "+config.getQueryTimeout()+"s for item: " + item.getName(), sqlex);
+									LOG.warn("Timeout after "+db.getQueryTimeout()+"s for item: " + item.getName(), sqlex);
 								}
 								catch (SQLException sqlex) {
-									//LOG.warn("could not fetch value of [" + item.getName() +"]\nError code: "+
-									//		sqlex.getErrorCode()+"\nError message: "+sqlex.getLocalizedMessage()+"\n",
-									//		sqlex);
+									LOG.warn("could not fetch value of [" + item.getName() +"]\nError code: "+
+											sqlex.getErrorCode()+"\nError message: "+sqlex.getLocalizedMessage()+"\n",
+											sqlex);
+									sender.addItem(
+											new ZabbixItem(
+													item.getName(),
+													"Could not fetch value of [" + item.getName() +"] for db "+ db.getName()+":\n"+sqlex.getLocalizedMessage(),
+													ZabbixItem.ZBX_STATE_NOTSUPPORTED,
+													new Long(System.currentTimeMillis() / 1000L),
+													item
+											)
+									);
 									if(DBType.ORACLE==db.getType()
 										&& sqlex.getLocalizedMessage().toLowerCase().contains("closed connection"))
 										db.reconnect();

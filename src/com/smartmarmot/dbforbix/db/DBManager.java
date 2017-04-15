@@ -55,39 +55,39 @@ public class DBManager {
 		switch (cfg.getType()) {
 			case DB2:
 				databases.add(new DB2(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(), cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case ORACLE:
 				databases.add(new Oracle(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case MSSQL:
 				databases.add(new MSSQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case MYSQL:
 				databases.add(new MySQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case PGSQL:
 				databases.add(new PGSQL(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case ALLBASE:
 				databases.add(new ALLBASE(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case SYBASE:
 				databases.add(new SYBASE(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(),cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case SQLANY:
 				databases.add(new SQLANY(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(), cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 			case DB_NOT_DEFINED:
 				databases.add(new DB_NOT_DEFINED(cfg.getDBNameFC(), cfg.getURL(), cfg.getUser(), cfg.getPassword(),cfg.getMaxActive(),cfg.getMaxIdle()
-						,cfg.getMaxWaitMillis(), cfg.getItemGroupNames(),cfg.getPersistence()));
+						,cfg.getMaxWaitMillis(),cfg.getQueryTimeout(),cfg.getItemGroupNames(),cfg.getPersistence()));
 			break;
 		}
 	}
