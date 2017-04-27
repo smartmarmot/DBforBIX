@@ -24,7 +24,7 @@ import com.smartmarmot.dbforbix.db.DBType;
 
 public class PGSQL extends AbstractAdapter {
 
-	public PGSQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Set<String> set,Boolean pers) {
+	public PGSQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Integer queryTimeout, Set<String> set,Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -32,6 +32,7 @@ public class PGSQL extends AbstractAdapter {
 		this.maxactive = maxactive.intValue();
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
+		this.queryTimeout = queryTimeout.intValue();
 		this.itemGroupNames = set;
 		this.persistence = pers;
 	}
