@@ -1113,6 +1113,20 @@ public class Config {
 	
 	
 	/**
+	 * Exception if response from Zabbix is empty.
+	 */
+	public class ZBXBadResp extends Exception
+	{
+		private static final long serialVersionUID = 6490352403263167340L;
+		//Parameterless Constructor
+	    public ZBXBadResp() {super("Zabbix Server returned empty response!");}
+	    //Constructors that accept parameters
+	    public ZBXBadResp(String msg) { super(msg); }  
+	    public ZBXBadResp(Throwable cause) { super(cause); }  
+	    public ZBXBadResp(String msg, Throwable cause) { super(msg, cause); } 
+	}
+	
+	/**
 	 * Send request to Zabbix Server:
 	 * @param host - Zabbix Server
 	 * @param port - Zabbix Server Port
@@ -1126,6 +1140,8 @@ public class Config {
 		InputStream in = null;			
 		byte[] data=null;
 		String resp=new String();
+		 
+		
 		try {
 			zabbix = new Socket();
 			//TODO socket timeout has to be read from config file
@@ -1155,10 +1171,15 @@ public class Config {
 			}
 			//LOG.debug("requestZabbix(): resp: "+ resp);
 			//resp=resp.substring(13);//remove binary header
+			if(resp.isEmpty())
+				throw new ZBXBadResp("Zabbix Server ("+host+":"+port+") has returned empty response for request:\n"+json);
 			
 		}
+		catch (ZBXBadResp respEx){
+			LOG.error(respEx.getLocalizedMessage());
+		}
 		catch (Exception ex) {
-			LOG.error("requestZabbix(): Error getting data from Zabbix server - " + ex.getMessage());
+			LOG.error("Error getting data from Zabbix server - " + ex.getMessage());
 		}
 		finally {
 			if (in != null)
@@ -1197,7 +1218,6 @@ public class Config {
 		for (ZServer zs: zServers){
 			String resp=new String();
 			resp=requestZabbix(zs.zbxServerHost, zs.zbxServerPort,zs.getProxyConfigRequest());
-
 			zs.setHashZabbixConfig(Config.calculateMD5Sum(resp));
 
 			
@@ -1206,6 +1226,8 @@ public class Config {
 				//resp=resp.substring(13);
 				//LOG.debug(resp);
 				JSONObject o=JSON.parseObject(resp);
+				if(o.containsKey("response") && o.getString("response").contains("failed"))
+					throw new ZBXBadResp("Zabbix Server ("+zs+") has returned failed response with reason: "+o.getString("info")+"\nRequest: "+zs.getProxyConfigRequest());
 
 				/**result for hosts:
 				 * {ipmi_privilege=[2], tls_psk_identity=[], tls_accept=[1], hostid=[11082], tls_issuer=[],
@@ -1238,8 +1260,11 @@ public class Config {
 				
 				
 			}
+			catch (ZBXBadResp respEx){
+				LOG.error(respEx.getLocalizedMessage());
+			}
 			catch (Exception ex){
-				System.out.println("Error parsing json objects - " + ex.getLocalizedMessage());
+				LOG.error("Error parsing json objects: " + ex.getLocalizedMessage());
 			}
 			
 			//references
