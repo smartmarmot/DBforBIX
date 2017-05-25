@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="build_release" name="dbforbix">
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	<property name="release" value="2.4" />
+
+	<target name="clear">
+		<delete dir="${build}" includes="**/*" includeemptydirs="true" />
+		<delete dir="${dist}/jar" includes="*.jar" />
+		<delete dir="${dist}/linux" includes="*.jar" />
+		<delete dir="${dist}/windows" includes="*.jar" />
+	</target>
+
+	<target name="build" depends="clear">
+		<copy todir="${build}">
+			<fileset dir="${src}">
+				<include name="**/*.xml" />
+				<include name="**/*.png" />
+			</fileset>
+		</copy>
+		<javac includeantruntime="false" source="1.8" encoding="utf-8" target="1.8" destdir="${build}" debug="on" listfiles="true">
+			<src path="${src}" />
+			<classpath>
+				<pathelement path="${dist}/jar/lib/commons-cli-1.3.1.jar" />
+				<pathelement path="${dist}/jar/lib/fastjson-1.2.8.jar" />
+				<pathelement path="${dist}/jar/lib/commons-codec-1.10.jar" />
+				<pathelement path="${dist}/jar/lib/commons-collections4-4.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-configuration2-2.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-daemon-1.0.15.jar" />
+				<pathelement path="${dist}/jar/lib/commons-dbcp2-2.1.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-lang3-3.5.jar" />
+				<pathelement path="${dist}/jar/lib/commons-logging-1.2.jar" />
+				<pathelement path="${dist}/jar/lib/commons-pool2-2.4.2.jar" />
+				<pathelement path="${dist}/jar/lib/dom4j-1.6.1.jar" />
+				<pathelement path="${dist}/jar/lib/log4j-1.2.17.jar" />
+				<pathelement path="${dist}/jar/lib/h2-1.4.193.jar" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="build_release" depends="build">
+		<jar destfile="${dist}/jar/dbforbix.jar">
+			<manifest>
+				<attribute name="Main-Class" value="com.smartmarmot.dbforbix.DBforBix" />
+				<attribute name="Class-Path" value=". lib/fastjson-1.2.8.jar lib/h2-1.4.193.jar lib/commons-cli-1.3.1.jar lib/commons-codec-1.10.jar lib/commons-collections4-4.1.jar lib/commons-configuration2-2.1.jar lib/commons-daemon-1.0.15.jar lib/commons-dbcp2-2.1.1.jar lib/commons-lang3-3.5.jar lib/commons-logging-1.2.jar lib/commons-pool2-2.4.2.jar lib/dom4j-1.6.1.jar lib/log4j-1.2.17.jar" />
+			</manifest>
+			<fileset dir="${build}" />
+		</jar>
+		<delete>
+			<fileset dir="${dist}/linux/conf">
+				<include name="*.*" />
+			</fileset>
+			<fileset dir="${dist}/linux/items">
+				<include name="*.*" />
+			</fileset>
+			<fileset dir="${dist}/linux/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${dist}/win/conf">
+				<include name="*.*" />
+			</fileset>
+			<fileset dir="${dist}/win/items">
+				<include name="*.*" />
+			</fileset>
+			<fileset dir="${dist}/win/lib">
+				<include name="*.jar" />
+			</fileset>
+		</delete>
+		<copy todir="${dist}/linux">
+			<fileset dir="${dist}/jar">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${dist}/linux/conf">
+			<fileset dir="conf">
+				<include name="*.sample" />
+			</fileset>
+		</copy>
+		<copy todir="${dist}/linux/items">
+			<fileset dir="items">
+				<include name="*.dtd" />
+				<include name="*.xml" />
+			</fileset>
+		</copy>
+				<copy todir="${dist}/win">
+			<fileset dir="${dist}/jar">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${dist}/win/conf">
+			<fileset dir="conf">
+				<include name="*.sample" />
+			</fileset>
+		</copy>
+		<copy todir="${dist}/win/items">
+			<fileset dir="items">
+				<include name="*.dtd" />
+				<include name="*.xml" />
+			</fileset>
+		</copy>
+				<zip destfile="${dist}/dbforbix-${release}-win.zip">
+			<fileset dir="${dist}/win" >
+				<include name="**/" />
+				<include name="**/*.*" />
+			</fileset>
+			<fileset dir=".">
+				<include name="template/*.xml" />
+			</fileset>
+		</zip>
+		<tar destfile="${dist}/dbforbix-${release}-linux64.tar.gz" compression="gzip">
+			<fileset dir="${dist}/linux">
+				<include name="**/" />
+				<include name="**/*.*" />
+			</fileset>
+			<fileset dir=".">
+				<include name="template/*.xml" />
+			</fileset>
+		</tar>
+		<tar destfile="${dist}/dbforbix-${release}-src.tar.gz" compression="gzip">
+			<fileset dir="${src}">
+				<include name="**/*.java" />
+			</fileset>
+		</tar>
+	</target>
+	
+	<target depends="build" name="build-tests">
+		<javac debug="true" destdir="${build}-tests" includeantruntime="false" source="1.7" target="1.7">
+			<src path="tests" />
+			<classpath>
+				<pathelement path="${dist}/jar/lib/commons-cli-1.3.1.jar" />
+				<pathelement path="${dist}/jar/lib/fastjson-1.2.8.jar" />
+				<pathelement path="${dist}/jar/lib/commons-codec-1.10.jar" />
+				<pathelement path="${dist}/jar/lib/commons-collections4-4.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-configuration2-2.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-daemon-1.0.15.jar" />
+				<pathelement path="${dist}/jar/lib/commons-dbcp2-2.1.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-lang3-3.5.jar" />
+				<pathelement path="${dist}/jar/lib/commons-logging-1.2.jar" />
+				<pathelement path="${dist}/jar/lib/commons-pool2-2.4.2.jar" />
+				<pathelement path="${dist}/jar/lib/dom4j-1.6.1.jar" />
+				<pathelement path="${dist}/jar/lib/log4j-1.2.17.jar" />
+				<pathelement path="${dist}/jar/lib/h2-1.4.193.jar" />
+				<pathelement path="${build}" />
+				<pathelement path="lib/junit-4.10.jar" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target depends="build-tests" name="run-test">
+		<junit fork="yes">
+			<formatter type="xml"  />
+			<classpath>
+				<pathelement path="${dist}/jar/lib/commons-cli-1.3.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-codec-1.10.jar" />
+				<pathelement path="${dist}/jar/lib/fastjson-1.2.8.jar" />
+				<pathelement path="${dist}/jar/lib/commons-collections4-4.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-configuration2-2.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-daemon-1.0.15.jar" />
+				<pathelement path="${dist}/jar/lib/commons-dbcp2-2.1.1.jar" />
+				<pathelement path="${dist}/jar/lib/commons-lang3-3.5.jar" />
+				<pathelement path="${dist}/jar/lib/commons-logging-1.2.jar" />
+				<pathelement path="${dist}/jar/lib/commons-pool2-2.4.2.jar" />
+				<pathelement path="${dist}/jar/lib/dom4j-1.6.1.jar" />
+				<pathelement path="${dist}/jar/lib/log4j-1.2.17.jar" />
+				<pathelement path="${dist}/jar/lib/h2-1.4.193.jar" />
+			    <pathelement path="${build}" />
+				<pathelement path="${build}-tests" />
+				<pathelement path="lib/junit-4.10.jar" />
+			</classpath>
+			<test name="com.smartmarmot.dbforbix.tests.AllTests" haltonfailure="no" outfile="dist/testresult"/>
+		</junit>
+	</target>
+	
+</project>
