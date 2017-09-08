@@ -3,7 +3,7 @@
 	<property name="src" location="src" />
 	<property name="build" location="build" />
 	<property name="dist" location="dist" />
-	<property name="release" value="2.4" />
+	<property name="release" value="3.0" />
 
 	<target name="clear">
 		<delete dir="${build}" includes="**/*" includeemptydirs="true" />
@@ -73,12 +73,12 @@
 			</fileset>
 		</copy>
 		<copy todir="${dist}/linux/conf">
-			<fileset dir="conf">
+			<fileset dir="${dist}/conf">
 				<include name="*.sample" />
 			</fileset>
 		</copy>
 		<copy todir="${dist}/linux/items">
-			<fileset dir="items">
+			<fileset dir="${dist}/items">
 				<include name="*.dtd" />
 				<include name="*.xml" />
 			</fileset>
@@ -89,12 +89,12 @@
 			</fileset>
 		</copy>
 		<copy todir="${dist}/win/conf">
-			<fileset dir="conf">
+			<fileset dir="${dist}/conf">
 				<include name="*.sample" />
 			</fileset>
 		</copy>
 		<copy todir="${dist}/win/items">
-			<fileset dir="items">
+			<fileset dir="${dist}/items">
 				<include name="*.dtd" />
 				<include name="*.xml" />
 			</fileset>
