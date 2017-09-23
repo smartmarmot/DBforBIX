@@ -1,10 +1,9 @@
 # DBforBIX
 
 DBforBix is the DB monitoring tool for Zabbix. It works like an active Zabbix Proxy by getting configuration from Zabbix Server and sending results back.
+Just copy dist https://github.com/smartmarmot/DBforBIX/tree/master/dist/ to your server, edit configuration and run<br>
 
-Just copy dist https://github.com/vagabondan/DBforBIX/tree/master/dist/ to your server, edit configuration and run<br>
-
-See Wiki for DBforBix as Zabbix Proxy configuration instructions: https://github.com/vagabondan/DBforBIX/wiki<br>
+See Wiki for DBforBix as Zabbix Proxy configuration instructions: https://github.com/smartmarmot/DBforBIX/wiki<br>
 
 DBforBIX is licensed under the GNU General Public License  V.3. <br>
 You can obtain a full copy of the licese here: https://www.gnu.org/licenses/gpl-3.0.txt <br>

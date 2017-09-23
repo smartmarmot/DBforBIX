@@ -99,7 +99,7 @@ public class Config {
 		private Map<String,List<String>> hostsTemplates=null;
 		private Map<String,Map<String,String>> itemConfigs = new HashMap<>();
 		private String hashZabbixConfig		=null;
-		private String zabbixItemConfigSuffix = "DB4bix.config";
+		private String zabbixItemConfigSuffix = "DBforBIX.config";
 		
 		
 		
