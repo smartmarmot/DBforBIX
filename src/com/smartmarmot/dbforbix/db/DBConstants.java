@@ -29,7 +29,7 @@ public class DBConstants {
 	public static final String MSSQL_VALIDATION_QUERY = "SELECT 1";
 	public static final String MSSQL_WHOAMI_QUERY	= "SELECT CURRENT_USER";
 	public static final String MSSQL_DBNAME_QUERY	= "SELECT db_name()";
-	public static final String MSSQL_DRIVER     	= "net.sourceforge.jtds.jdbc.Driver";
+	public static final String MSSQL_DRIVER     	= "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
 	public static final String SQLANY = "SQLANY" ;
 	public static final String SQLANY_VALIDATION_QUERY = "SELECT 1";

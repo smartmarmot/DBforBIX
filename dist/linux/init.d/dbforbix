@@ -1,0 +1,75 @@
+#!/bin/sh
+# This is the init script for starting up the
+# Orabbix daemon
+#
+# chkconfig: 345 91 10
+# description: Starts and stops the orabbix daemon.
+# processname: orabbix
+#
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Get config.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+dbforbix=/opt/dbforbix
+startup=${dbforbix}/dbforbix.sh start
+
+start(){
+        echo -n "Starting DBforBIX service:"
+        cd ${dbforbix}
+        $startup
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/dbforbix
+        return $RETVAL
+}
+
+stop(){
+        echo -n "Stopping DBforBIX service:"
+        pid=`ps -ef  |grep java |grep -1 dbforbix | awk '{ print $2 }'`
+        kill `cat ${dbforbix}/logs/dbforbix.pid`
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f  /var/lock/subsys/dbforbix
+        return $RETVAL
+}
+
+restart(){
+        stop
+        start
+}
+
+status(){
+        numproc=`ps -ef | grep java | grep -i dbforbix | grep -v grep  | wc -l`
+        if [ "$numproc" -gt 0 ]; then
+        echo "DBforBIX is running"
+        else
+        echo "DBforBIX is stopped"
+        fi
+}
+
+# See how we were called.
+case "$1" in
+        start)
+                start
+                ;;
+        stop)
+                stop
+                ;;
+        status)
+                status
+                ;;
+        restart)
+                restart
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|status|restart}"
+                exit 1
+esac
+exit $RETVAL
+
+                                                                                               
