@@ -51,7 +51,7 @@ public interface Adapter {
     /**
 	 * Exception if database that came from Zabbix Web has not been defined in local file config yet.
 	 */
-	public class DBNotDefinedException extends Exception
+	public class DBNotDefinedException extends RuntimeException
 	{
 		private static final long serialVersionUID = -106570768147815384L;
 		//Parameterless Constructor

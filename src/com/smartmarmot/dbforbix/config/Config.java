@@ -59,6 +59,8 @@ import org.dom4j.Element;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.smartmarmot.common.utils.SAXParserDBforBIX;
+import com.smartmarmot.common.utils.XMLDBforBIXUnrecoverableException;
 import com.smartmarmot.dbforbix.db.DBManager;
 import com.smartmarmot.dbforbix.db.DBType;
 import com.smartmarmot.dbforbix.db.adapter.Adapter;
@@ -1219,8 +1221,7 @@ public class Config {
 			String resp=new String();
 			resp=requestZabbix(zs.zbxServerHost, zs.zbxServerPort,zs.getProxyConfigRequest());
 			zs.setHashZabbixConfig(Config.calculateMD5Sum(resp));
-
-			
+					
 			try{//parse json
 				//resp=resp.substring(resp.indexOf("{"));
 				//resp=resp.substring(13);
@@ -1364,6 +1365,16 @@ public class Config {
 	}
 
 
+	/**
+	 * Substitute > and < characters on & gt; and & lt; if they are not XML tags. Used to prepare statement for standard JSON parser.
+	 * XML should contain DTD file because we need to know the template and your XML language keywords!
+	 * @param inputString - configuration from Zabbix configuration item
+	 * @return String - preprocessed configuration
+	 */
+	private String preprocessZabbixConfig(String inputString) {		
+		return SAXParserDBforBIX.replaceSpecialChars(inputString);
+	}
+
 	public static String calculateMD5Sum(String inStr) {
 		MessageDigest hasher = null;
 		try{
@@ -1431,9 +1442,19 @@ public class Config {
 			for(Entry<String, Map<String, String>> ic:zs.getItemConfigs().entrySet()){
 				LOG.debug("buildItems: "+zs+" --> "+ic.getKey());
 				try {					
-					String param=ic.getValue().get("param");					
+					String param=ic.getValue().get("param");
+					//add constant header
 					param="<!DOCTYPE parms SYSTEM \""+getBasedir()+"/items/param.dtd\">"+param;
+					
+					try{
+						//substitute special chars >, < for XML DOM parser
+						param=preprocessZabbixConfig(param);
+					}catch(Exception e){
+						LOG.error("Exception while preprocessing "+ic+": "+e.getLocalizedMessage()+"\nBut we are still trying to construct XML DOM...");
+					}
+					
 					Document doc = DocumentHelper.parseText(param);
+					
 					Element root = doc.getRootElement();
 					String prefix = root.attributeValue("prefix");			
 					for (Object srv: root.elements("server")) {
