@@ -27,7 +27,7 @@ public class SAXParserDBforBIX {
 	}};
 
 	/**
-	 * Parses input XML string trying to fix "<" or ">" signs. Iterates 1000 times and then exits.
+	 * Parses input XML string trying to fix "<" or ">" signs. Iterates maximum 1000 times and then exits.
 	 * Throws XMLSyntaxUnrecoverableException
 	 * @param inputXMLString
 	 * @return
@@ -72,7 +72,7 @@ public class SAXParserDBforBIX {
 			}
 		}
 		
-		if (i>=maxIterations) 
+		if (i>maxIterations) 
 			throw new XMLDBforBIXUnrecoverableException("Found more than "+maxIterations+" '>', '<' signs (outside of tags!) in XML. Please change them to &gt; or &lt; manually or contact developer.");
 
 		return result;
@@ -84,21 +84,17 @@ public class SAXParserDBforBIX {
 		
 		//find starting position of lineNumber
 		int fromIndex=0;
-		for(int i=0; i++<lineNumber-1; ){
-			fromIndex=result.indexOf('\n', ++fromIndex);
-		}
-		//getting exact bad character position 
+		for(int i=0; i++<lineNumber-1; fromIndex=result.indexOf('\n', ++fromIndex));
+		//getting exact bad character position
 		fromIndex+=columnNumber-1;
 		//If special char found then replace it and get out
 		for(String s:mStringToReplace.keySet()){
-			String strTmp=result.substring(fromIndex, fromIndex+s.length());
-			System.out.println(strTmp);
 			if(result.regionMatches(fromIndex, s, 0, s.length())){
 				specialCharsNotFound=false;
 				result=result.substring(0, fromIndex)+mStringToReplace.get(s)+result.substring(fromIndex+s.length());
 				break;
 			}
-		}		
+		}
 		
 		if(specialCharsNotFound)
 			throw new XMLDBforBIXUnrecoverableException("Couldn't identified any of special char that I'm able to replace. Please check XML correctness manually!");
