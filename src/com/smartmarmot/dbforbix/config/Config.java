@@ -1147,7 +1147,7 @@ public class Config {
 		try {
 			zabbix = new Socket();
 			//TODO socket timeout has to be read from config file
-			zabbix.setSoTimeout(5000);
+			zabbix.setSoTimeout(30000);
 			
 			zabbix.connect(new InetSocketAddress(host, port));
 			OutputStream os = zabbix.getOutputStream();
@@ -1181,7 +1181,7 @@ public class Config {
 			LOG.error(respEx.getLocalizedMessage());
 		}
 		catch (Exception ex) {
-			LOG.error("Error getting data from Zabbix server - " + ex.getMessage());
+			LOG.error("Error getting data from Zabbix server ("+host+":"+port+"): " + ex.getMessage());
 		}
 		finally {
 			if (in != null)
@@ -1214,7 +1214,7 @@ public class Config {
 		try{
 			zServers = getZabbixServers();
 		}catch (Exception ex) {
-			LOG.error("Error getting Zabbix server config - " + ex.getMessage());
+			LOG.error("Error getting list of all valid Zabbix server configurations: " + ex.getMessage());
 		}
 		
 		for (ZServer zs: zServers){
@@ -1265,7 +1265,7 @@ public class Config {
 				LOG.error(respEx.getLocalizedMessage());
 			}
 			catch (Exception ex){
-				LOG.error("Error parsing json objects: " + ex.getLocalizedMessage());
+				LOG.error("Error parsing json objects from Zabbix Server ("+zs+"): " + ex.getLocalizedMessage());
 			}
 			
 			//references
@@ -1359,7 +1359,7 @@ public class Config {
 				LOG.debug("Got item config from Zabbix Server "+zs);
 			}
 			catch (Exception ex){
-				LOG.error("Error getting item Zabbix Config from "+zs+": " + ex.getLocalizedMessage());
+				LOG.error("Error getting item Zabbix Config from Zabbix Server ("+zs+"): " + ex.getLocalizedMessage());
 			}
 		}		
 	}
@@ -1381,7 +1381,7 @@ public class Config {
 			hasher = java.security.MessageDigest.getInstance("MD5");
 		}
 		catch(NoSuchAlgorithmException e){
-			LOG.error("Wrong algorithm nameFC provided while getiing instance of MessageDigest: " + e.getLocalizedMessage());
+			LOG.error("Wrong hashing algorithm name provided while getting instance of MessageDigest: " + e.getLocalizedMessage());
 		}
 		return (new HexBinaryAdapter()).marshal(hasher.digest(inStr.getBytes()));
 	}
@@ -1408,7 +1408,7 @@ public class Config {
 			}
 		}
 		catch (Exception ex){
-			LOG.error("Error substituting macros - " + ex.getLocalizedMessage());
+			LOG.error("Error substituting macros for Zabbix Server "+zs+",hostid = "+hostid+". String: "+ inStr + "\nException:\n" + ex.getLocalizedMessage());
 		}
 		return result;
 	}
