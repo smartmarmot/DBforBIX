@@ -99,9 +99,9 @@ public class Config {
 		private Map<String,List<String> > items=null;
 		private Map<String,List<String> > hostmacro=null;
 		private Map<String,List<String>> hostsTemplates=null;
-		private Map<String,Map<String,String>> itemConfigs = new HashMap<>();
+		private Map<String,Map<String,String>> configurationItems = new HashMap<>();
 		private String hashZabbixConfig		=null;
-		private String zabbixItemConfigSuffix = "DBforBIX.config";
+		private String zabbixConfigurationItemSuffix = "DBforBIX.config";
 		
 		
 		
@@ -115,8 +115,8 @@ public class Config {
 		}
 		
 		
-		public Map<String, Map<String, String>> getItemConfigs() {
-			return itemConfigs;
+		public Map<String, Map<String, String>> getConfigurationItems() {
+			return configurationItems;
 		}
 		
 		public String getHashZabbixConfig() {
@@ -141,7 +141,7 @@ public class Config {
 		
 
 		public void setItemConfigs(Map<String,Map<String,String>> itemConfigs) {
-			this.itemConfigs=itemConfigs;
+			this.configurationItems=itemConfigs;
 		}
 		
 		public void setHosts(Map<String,List<String> > hosts) {
@@ -201,12 +201,12 @@ public class Config {
 			this.proxy = proxy;
 		}
 
-		public void addItemConfig(String itemGroupName, Map<String, String> m) {
-			itemConfigs.put(itemGroupName, m);
+		public void addConfigurationItem(String itemGroupName, Map<String, String> m) {
+			configurationItems.put(itemGroupName, m);
 		}
 		
 		public void removeItemConfig(String itemGroupName) {
-			itemConfigs.remove(itemGroupName);
+			configurationItems.remove(itemGroupName);
 		}
 
 		/**
@@ -214,7 +214,7 @@ public class Config {
 		 * @return set of item group names of this Zabbix Server
 		 */
 		public Collection<String> getItemGroupNames() {			
-			return itemConfigs.keySet();
+			return configurationItems.keySet();
 		}
 
 		/**
@@ -224,7 +224,7 @@ public class Config {
 		 * @throws NullPointerException
 		 */
 		public Map<String,String> getItemConfigByItemGroupName(String itemGroupName){
-			return itemConfigs.get(itemGroupName);
+			return configurationItems.get(itemGroupName);
 		}
 		
 		
@@ -293,8 +293,8 @@ public class Config {
 			return result;
 		}
 
-		public String getZabbixItemConfigSuffix() {
-			return zabbixItemConfigSuffix;
+		public String getZabbixConfigurationItemSuffix() {
+			return zabbixConfigurationItemSuffix;
 		}	
 	}
 	
@@ -416,18 +416,18 @@ public class Config {
 	/**
 	 * 
 	 */
-	private static final Logger		LOG				= Logger.getLogger(Config.class);
+	private static final Logger		LOG					= Logger.getLogger(Config.class);
 	private static final String		GLOBAL_NAME			= "DBforBIX";
 	private static final String		GLOBAL_POOL			= "Pool";
 	private static final String		GLOBAL_ZBXSRV		= "ZabbixServer";
 	private static final String		GLOBAL_DB			= "DB";
-	private static final String		SET_UPDATECONFIG = GLOBAL_NAME + ".UpdateConfigTimeout";
+	private static final String		SET_UPDATECONFIG 	= GLOBAL_NAME + ".UpdateConfigTimeout";
 	private static final String		SET_POOL_MAXACTIVE	= GLOBAL_POOL + ".MaxActive";
 	private static final String		SET_POOL_MAXIDLE	= GLOBAL_POOL + ".MaxIdle";
-	private static final String 	SET_LOGIN_TIMEOUT = GLOBAL_POOL+ ".LoginTimeOut";
-	private static final String 	ZBX_HEADER_PREFIX="ZBXD\1";
+	private static final String 	SET_LOGIN_TIMEOUT 	= GLOBAL_POOL+ ".LoginTimeOut";
+	private static final String 	ZBX_HEADER_PREFIX	= "ZBXD\1";
 	private static final String		SET_PERSISTENCETYPE	= GLOBAL_NAME + ".PersistenceType";
-	private static final String		SET_PERSISTENCEDIR = GLOBAL_NAME + ".PersistenceDir";
+	private static final String		SET_PERSISTENCEDIR 	= GLOBAL_NAME + ".PersistenceDir";
 	
 	
 	
@@ -484,7 +484,7 @@ public class Config {
 	
 	//itemGroupName -> ZServer
 	//itemGroupName:ZServer = N:1
-	private Set<ZServer>	zbxServers;
+	private Set<ZServer>	_zabbixServers;
 	
 	//itemGroupName -> Database
 	//itemGroupName:Database = N:1
@@ -522,7 +522,7 @@ public class Config {
 	}
 
 	private Config() {
-		zbxServers = new HashSet<Config.ZServer>();
+		_zabbixServers = new HashSet<Config.ZServer>();
 		databases = new HashSet<Config.Database>();
 	}
 	
@@ -638,24 +638,24 @@ public class Config {
 	 * Read configuration value as zabbix server config
 	 */
 	private void readConfigZSRV(String group, String name, String key, String value) {
-		ZServer zsrv = getZServerByNameFC(name);
-		if (zsrv == null) {
-			zsrv = new ZServer();
-			zsrv.setZbxServerNameFC(name);
-			zbxServers.add(zsrv);
+		ZServer zabbixServer = getZServerByNameFC(name);
+		if (zabbixServer == null) {
+			zabbixServer = new ZServer();
+			zabbixServer.setZbxServerNameFC(name);
+			_zabbixServers.add(zabbixServer);
 		}
-		if ("Address".equalsIgnoreCase(key)) zsrv.zbxServerHost = value;
+		if ("Address".equalsIgnoreCase(key)) zabbixServer.zbxServerHost = value;
 		else if ("Port".equalsIgnoreCase(key)) {
 			try {
-				zsrv.zbxServerPort = Integer.parseInt(value);
+				zabbixServer.zbxServerPort = Integer.parseInt(value);
 			}
 			catch (NumberFormatException ex) {
 				LOG.error("Could not parse zbxServerPort number", ex);
 			}
 		}
-		else if("ProxyName".equalsIgnoreCase(key)) zsrv.proxy=value;
-		else if("ConfigSuffix".equalsIgnoreCase(key)) zsrv.zabbixItemConfigSuffix=value;
-		else if("DBList".equalsIgnoreCase(key)) zsrv.setDefinedDBNames((new ArrayList<String>(Arrays.asList(value.replaceAll("\\s","").toUpperCase().split(",")))));		
+		else if("ProxyName".equalsIgnoreCase(key)) zabbixServer.proxy=value;
+		else if("ConfigSuffix".equalsIgnoreCase(key)) zabbixServer.zabbixConfigurationItemSuffix=value;
+		else if("DBList".equalsIgnoreCase(key)) zabbixServer.setDefinedDBNames((new ArrayList<String>(Arrays.asList(value.replaceAll("\\s","").toUpperCase().split(",")))));		
 		else
 			LOG.info("Invalid config item: " + group + "." + name + "." + key);		
 	}
@@ -668,7 +668,7 @@ public class Config {
 	 */
 	private ZServer getZServerByNameFC(String nameFC) {
 		ZServer result=null;
-		for(ZServer zs:zbxServers){
+		for(ZServer zs:_zabbixServers){
 			if(zs.getZbxServerNameFC().equals(nameFC)){
 				result=zs;
 				break;
@@ -750,7 +750,7 @@ public class Config {
 		 /**
 		  * Update configuration from Zabbix Servers
 		  */
-		 newconfig.getItemConfigFromZabbix();
+		 newconfig.getZabbixConfigurationItems();
 		 
 		 
 		 Set<String> itemGroupNames=oldconfig.getSetOfItemGroupNames();
@@ -898,7 +898,7 @@ public class Config {
 				if (null == zabbixServer){// just add
 					LOG.error("Can't find ZServer by nameFC: "+newZabbixServer.getZbxServerNameFC());
 					zabbixServer=newZabbixServer;
-					zbxServers.add(zabbixServer);
+					_zabbixServers.add(zabbixServer);
 				}else{// update since pointer to existing ZServer may appear in code
 					Map<String,String> newItemConfig=newZabbixServer.getItemConfigByItemGroupName(newItemGroupName);
 					zabbixServer.setHashZabbixConfig(newZabbixServer.getHashZabbixConfig());
@@ -906,7 +906,7 @@ public class Config {
 					zabbixServer.setItems(newZabbixServer.getItems());
 					zabbixServer.setHostmacro(newZabbixServer.getHostmacro());
 					zabbixServer.setHostsTemplates(newZabbixServer.getHostsTemplates());
-					zabbixServer.addItemConfig(newItemGroupName, newItemConfig);
+					zabbixServer.addConfigurationItem(newItemGroupName, newItemConfig);
 				}
 				
 				/**
@@ -1117,15 +1117,15 @@ public class Config {
 	/**
 	 * Exception if response from Zabbix is empty.
 	 */
-	public class ZBXBadResp extends Exception
+	public class ZBXBadResponseException extends Exception
 	{
 		private static final long serialVersionUID = 6490352403263167340L;
 		//Parameterless Constructor
-	    public ZBXBadResp() {super("Zabbix Server returned empty response!");}
+	    public ZBXBadResponseException() {super("Zabbix Server returned empty response!");}
 	    //Constructors that accept parameters
-	    public ZBXBadResp(String msg) { super(msg); }  
-	    public ZBXBadResp(Throwable cause) { super(cause); }  
-	    public ZBXBadResp(String msg, Throwable cause) { super(msg, cause); } 
+	    public ZBXBadResponseException(String msg) { super(msg); }  
+	    public ZBXBadResponseException(Throwable cause) { super(cause); }  
+	    public ZBXBadResponseException(String msg, Throwable cause) { super(msg, cause); } 
 	}
 	
 	/**
@@ -1161,6 +1161,7 @@ public class Config {
 			//read response
 			in = zabbix.getInputStream();
 			
+			//convert response to string (expecting json)
 			int pos1=13;
 			int bRead=0;
 			while(true){
@@ -1174,10 +1175,10 @@ public class Config {
 			//LOG.debug("requestZabbix(): resp: "+ resp);
 			//resp=resp.substring(13);//remove binary header
 			if(resp.isEmpty())
-				throw new ZBXBadResp("Zabbix Server ("+host+":"+port+") has returned empty response for request:\n"+json);
+				throw new ZBXBadResponseException("Zabbix Server ("+host+":"+port+") has returned empty response for request:\n"+json);
 			
 		}
-		catch (ZBXBadResp respEx){
+		catch (ZBXBadResponseException respEx){
 			LOG.error(respEx.getLocalizedMessage());
 		}
 		catch (Exception ex) {
@@ -1207,28 +1208,31 @@ public class Config {
 	
 	
 	/**
-	 * Fill item configs for all configured Zabbix Servers
+	 * Read configuration items from all configured Zabbix Servers
 	 */
-	public void getItemConfigFromZabbix(){
-		Collection<ZServer> zServers=null;		
+	public void getZabbixConfigurationItems(){
+		//Get collection of all Zabbix Server instances that we should fill
+		Collection<ZServer> zabbixServers=null;
 		try{
-			zServers = getZabbixServers();
+			zabbixServers = getZabbixServers();
 		}catch (Exception ex) {
 			LOG.error("Error getting list of all valid Zabbix server configurations: " + ex.getMessage());
 		}
-		
-		for (ZServer zs: zServers){
-			String resp=new String();
-			resp=requestZabbix(zs.zbxServerHost, zs.zbxServerPort,zs.getProxyConfigRequest());
-			zs.setHashZabbixConfig(Config.calculateMD5Sum(resp));
-					
-			try{//parse json
-				//resp=resp.substring(resp.indexOf("{"));
-				//resp=resp.substring(13);
-				//LOG.debug(resp);
-				JSONObject o=JSON.parseObject(resp);
-				if(o.containsKey("response") && o.getString("response").contains("failed"))
-					throw new ZBXBadResp("Zabbix Server ("+zs+") has returned failed response with reason: "+o.getString("info")+"\nRequest: "+zs.getProxyConfigRequest());
+
+
+		//filling cycle
+		for (ZServer zabbixServer: zabbixServers){
+			String zabbixResponse=new String();
+			zabbixResponse=requestZabbix(zabbixServer.zbxServerHost, zabbixServer.zbxServerPort,zabbixServer.getProxyConfigRequest());
+			zabbixServer.setHashZabbixConfig(Config.calculateMD5Sum(zabbixResponse));
+
+			try{
+				//get and parse json data into json object
+				JSONObject zabbixResponseJSON=JSON.parseObject(zabbixResponse);
+
+				//check response validity
+				if(zabbixResponseJSON.containsKey("response") && zabbixResponseJSON.getString("response").contains("failed"))
+					throw new ZBXBadResponseException("Zabbix Server ("+zabbixServer+") has returned failed response with reason: "+zabbixResponseJSON.getString("info")+"\nRequest: "+zabbixServer.getProxyConfigRequest());
 
 				/**result for hosts:
 				 * {ipmi_privilege=[2], tls_psk_identity=[], tls_accept=[1], hostid=[11082], tls_issuer=[],
@@ -1253,43 +1257,42 @@ public class Config {
 				 * 
 				 * 
 				 * */
-				
-				zs.setHosts(zJSONObject2Map(o.getJSONObject("hosts")));
-				zs.setItems(zJSONObject2Map(o.getJSONObject("items")));
-				zs.setHostmacro(zJSONObject2Map(o.getJSONObject("hostmacro")));
-				zs.setHostsTemplates(zJSONObject2Map(o.getJSONObject("hosts_templates")));
-				
-				
+
+				//fill ZServer structures with data
+				zabbixServer.setHosts(zJSONObject2Map(zabbixResponseJSON.getJSONObject("hosts")));
+				zabbixServer.setItems(zJSONObject2Map(zabbixResponseJSON.getJSONObject("items")));
+				zabbixServer.setHostmacro(zJSONObject2Map(zabbixResponseJSON.getJSONObject("hostmacro")));
+				zabbixServer.setHostsTemplates(zJSONObject2Map(zabbixResponseJSON.getJSONObject("hosts_templates")));				
+
 			}
-			catch (ZBXBadResp respEx){
-				LOG.error(respEx.getLocalizedMessage());
+			catch (ZBXBadResponseException e){
+				LOG.error(e.getLocalizedMessage());
 			}
 			catch (Exception ex){
-				LOG.error("Error parsing json objects from Zabbix Server ("+zs+"): " + ex.getLocalizedMessage());
+				LOG.error("Error parsing json objects from Zabbix Server ("+zabbixServer+"): " + ex.getLocalizedMessage());
 			}
 			
-			//references
-			Map<String,List<String> > hosts=zs.getHosts();
-			Map<String,List<String> > items=zs.getItems();
-			//Map<String,List<String> > hostmacro=zs.getHostmacro();
-
+			
+			//get short references on internal data structures of current ZServer
+			//hosts structure (example):
+			//hostid=[11082], host=[APISQL], nameFC=[APISQL], status=[0]
+			//
+			//items structure (example):
+			//status=[0, 0], 
+			//type=[11, 11], value_type=[4, 3],
+			//hostid=[11082, 11082], itemid=[143587, 143588],  
+			//key_=[DBforBix.config[mysql.database.discovery], db.odbc.select[sessions,{$DSN}]], 
+			//params=[<XML config>, sessions], 
+			//delay=[120, 120]
+			//			
+			Map<String,List<String> > hosts=zabbixServer.getHosts();
+			Map<String,List<String> > items=zabbixServer.getItems();			
 			
 
 			try{
-				//result for hosts:
-				// hostid=[11082], host=[APISQL], nameFC=[APISQL], status=[0]
-				//
-				//result for items:
-				//status=[0, 0], 
-				//type=[11, 11], value_type=[4, 3],
-				//hostid=[11082, 11082], itemid=[143587, 143588],  
-				//key_=[DBforBix.config[mysql.database.discovery], db.odbc.select[sessions,{$DSN}]], 
-				//params=[<XML config>, sessions], 
-				//delay=[120, 120],
-				//			
 				
 				/**
-				 * Get disabled hosts
+				 * Filter out disabled hosts
 				 */
 				Set<String> hostFilter=new HashSet<>();
 				List<String> statuses=hosts.get("status");
@@ -1300,66 +1303,81 @@ public class Config {
 				
 				
 				/**
-				 * fill itemConfigs collection
+				 * fill configuration items collection for current zabbixServer:
+				 * iterate over all items looking for configuration item suffixes (DBforBIX.config by default, can be redefined in DBforBix configuration file on per Zabbix Server principle)
 				 */
+				boolean foundConfigurationItemSuffix=false;
 				for(int it=0;it<items.get("key_").size();++it){
 					String key=items.get("key_").get(it);
-					if(key.contains(zs.getZabbixItemConfigSuffix())){
+					if(key.contains(zabbixServer.getZabbixConfigurationItemSuffix())){
+						foundConfigurationItemSuffix=true;
 						String hostid=items.get("hostid").get(it);
 						if(hostFilter.contains(hostid)) 
 							continue;
-						String host=zs.getHostByHostId(hostid);						
+						String host=zabbixServer.getHostByHostId(hostid);
+						
 						/**
 						 * substitute macro for getting db name
 						 */
 						String db=key.split(",")[1].split("]")[0].trim().toUpperCase();						
 						if(isMacro(db)){
-							db=zs.getMacroValue(hostid,db);
+							db=zabbixServer.getMacroValue(hostid,db);
 						}
-						//if(zs.definedDBNames.contains(db)){
-							Map<String,String> m = new HashMap<String,String>();
-							String param=items.get("params").get(it);//Map->List[it]
-							m.put("param", param);
-							/**
-							 * Getting text representation of md5 hash of substituted
-							 */							
-							m.put("hashParam", Config.calculateMD5Sum(param)+Config.calculateMD5Sum(substituteMacros(param,zs,hostid)));
-							m.put("hostid", hostid);
-							m.put("host", host);
-							m.put("db", db);
-							m.put("key_", key);
-							/**
-							 * Construct itemGroupName
-							 */
-							String itemGroupName=constructItemGroupName(zs,host,db,key);
-							
-							m.put("itemGroupName",itemGroupName);
-							zs.addItemConfig(itemGroupName,m);// shortcut for itemConfig
-							
-							/**
-							 * fill Dbs config with itemGroupName Set<String> itemGrouName.
-							 */							
-							Database dbFC=this.getDatabaseByNameFC(db);
-							/**
-							 * propagate abcense of DB in file config to Zabbix Web
-							 */
-							if(null==dbFC){
-								dbFC=new Database();
-								dbFC.setDBNameFC(db);
-								dbFC.url="---propagate error---";
-								dbFC.user="---propagate error---";
-								dbFC.password="---propagate error---";
-								dbFC.type=DBType.DB_NOT_DEFINED;
-								databases.add(dbFC);
-							}
-							dbFC.addItemGroupName(itemGroupName);
-						//}
+						
+						
+						/**
+						 * Construct itemGroupName - stands for Name of Group of Items - unique identifier for configuration item across all Zabbix Servers within DbforBIX instance
+						 * Why we need new name for this entity:
+						 * 1. It's the important key identifier across the whole DBforBIX instance. We should uniquely identify each configuration item from all Zabbix Servers within whole DBforBIX instance!
+						 * 2. Why not use configurationItemName or something like this?  It is ambiguous because items in Zabbix have their own defined names.						 * 
+						 * So let it be itemGroupName.
+						 */
+						String itemGroupName=constructConfigurationItemGroupName(zabbixServer,host,db,key);
+						
+						/**
+						 * Register configuration item
+						 */
+						Map<String,String> mConfigurationItem = new HashMap<String,String>();
+						String param=items.get("params").get(it);//Hint for items structure: Map->List[it]
+						mConfigurationItem.put("param", param);						
+						//Note! Hash together: configuration item XML as is and the result of macros substitution in XML						 							
+						mConfigurationItem.put("hashParam", Config.calculateMD5Sum(param)+Config.calculateMD5Sum(substituteMacros(param,zabbixServer,hostid)));
+						mConfigurationItem.put("hostid", hostid);
+						mConfigurationItem.put("host", host);
+						mConfigurationItem.put("db", db);
+						mConfigurationItem.put("key_", key);
+						mConfigurationItem.put("itemGroupName",itemGroupName);
+						zabbixServer.addConfigurationItem(itemGroupName,mConfigurationItem);
+						
+
+						/**
+						 * Fill Dbs config with itemGroupName Set<String> itemGrouName.
+						 * FC stnds for File Config (DBforBIX configuration file).
+						 * Propagate absence of DB in file config to Zabbix Web interface
+						 */
+						Database dbFC=this.getDatabaseByNameFC(db);
+						if(null==dbFC){
+							dbFC=new Database();
+							dbFC.setDBNameFC(db);
+							dbFC.url="---propagate error---";
+							dbFC.user="---propagate error---";
+							dbFC.password="---propagate error---";
+							dbFC.type=DBType.DB_NOT_DEFINED;
+							databases.add(dbFC);
+						}
+						dbFC.addItemGroupName(itemGroupName);						
 					}
 				}
-				LOG.debug("Got item config from Zabbix Server "+zs);
+				
+				if(!foundConfigurationItemSuffix) LOG.warn("No items with configuration suffix (DBforBIX.config by default) were found on Zabbix Server "+zabbixServer+"! "
+						+ "Please check DBforBIX configuration file for string ZabbixServer.<YourZabbixInstanceName>.ConfigSuffix=<YourConfigSuffix> and define it correctly. "
+						+ "Then check configuration items in your Zabbix Server web interface: they should contain <YourConfigSuffix> in their item keys, e.g.item key: discovery.<YourConfigSuffix>[tralala,<DBDataSourceName>]."
+						+ "Also check that host-owner of configuration item is monitored through Zabbix Proxy name corresponding your DBforBIX parameter "
+						+ "ZabbixServer.<YourZabbixInstanceName>.ProxyName=... in DBforBIX configuration file.");
+				LOG.debug("Done reading configuration items from Zabbix Server "+zabbixServer);
 			}
 			catch (Exception ex){
-				LOG.error("Error getting item Zabbix Config from Zabbix Server ("+zs+"): " + ex.getLocalizedMessage());
+				LOG.error("Error getting item Zabbix Config from Zabbix Server ("+zabbixServer+"): " + ex.getLocalizedMessage());
 			}
 		}		
 	}
@@ -1413,8 +1431,16 @@ public class Config {
 		return result;
 	}
 
-	private String constructItemGroupName(ZServer zs, String host, String db, String key) {
-		return new String(zs.toString()+"/"+zs.getProxy()+"/"+host+"/"+db+"/"+key);
+	/**
+	 * Constructs itemGroupName - unique identifier for configuration item across all Zabbix Servers within DbforBIX instance
+	 * @param zabbixServer - ZServer instance
+	 * @param host - host within Zabbix Server
+	 * @param db - database name (Data Source Name)
+	 * @param key - configuration item key (should contain suffix like DBforBIX.config or other that you've defined in DBforBIX configuration file for this Zabbix Server)
+	 * @return string - itemGroupName - cross Zabbix Server unique identifier of Zabbix configuration item
+	 */
+	private String constructConfigurationItemGroupName(ZServer zabbixServer, String host, String db, String key) {
+		return new String(zabbixServer.toString()+"/"+zabbixServer.getProxy()+"/"+host+"/"+db+"/"+key);
 	}
 
 
@@ -1431,16 +1457,16 @@ public class Config {
 		//delay=[120, 120],
 
 
-		Collection<ZServer> zServers=null;
+		Collection<ZServer> zabbixServers=null;
 		try{
-			zServers = getZabbixServers();
+			zabbixServers = getZabbixServers();
 		}catch (Exception ex) {
-			LOG.error("Error getting Zabbix servers collection - " + ex.getLocalizedMessage());
+			LOG.error("Error getting Zabbix servers collection: " + ex.getLocalizedMessage());
 		}
 		
-		for (ZServer zs: zServers){			
-			for(Entry<String, Map<String, String>> ic:zs.getItemConfigs().entrySet()){
-				LOG.debug("buildItems: "+zs+" --> "+ic.getKey());
+		for (ZServer zabbixServer: zabbixServers){			
+			for(Entry<String, Map<String, String>> ic:zabbixServer.getConfigurationItems().entrySet()){
+				LOG.debug("buildItems: "+zabbixServer+" --> "+ic.getKey());
 				try {					
 					String param=ic.getValue().get("param");
 					//add constant header
@@ -1458,7 +1484,7 @@ public class Config {
 					Element root = doc.getRootElement();
 					String prefix = root.attributeValue("prefix");			
 					for (Object srv: root.elements("server")) {
-						if (srv instanceof Element) buildItemsAndSchedulers((Element) srv, ic.getValue(), prefix , zs);
+						if (srv instanceof Element) buildItemsAndSchedulers((Element) srv, ic.getValue(), prefix , zabbixServer);
 					}
 	//				for (Object db: root.elements("database")) {
 	//					if (db instanceof Element) buildDatabaseElements((Element) db, itemGroupName, prefix);
@@ -1473,8 +1499,8 @@ public class Config {
 	}
 	
 	
-	private void buildItemsAndSchedulers(Element e, Map<String,String> itemConfig, String prefix,ZServer zs) {
-		String itemGroupName=itemConfig.get("itemGroupName");
+	private void buildItemsAndSchedulers(Element e, Map<String,String> configurationItem, String prefix,ZServer zabbixServer) {
+		String itemGroupName=configurationItem.get("itemGroupName");
 		Map<Integer,Scheduler> schedulers=getSchedulersByItemGroupName(itemGroupName);
 		for (Object itm: e.elements()) {
 			if (itm instanceof Element) {
@@ -1493,10 +1519,10 @@ public class Config {
 				Scheduler itemSch = schedulers.get(time);
 				String query=itmE.getTextTrim();
 				
-				query=substituteMacros(query,zs,itemConfig.get("hostid"));
+				query=substituteMacros(query,zabbixServer,configurationItem.get("hostid"));
 				switch (itmE.getName()) {
 					case "discovery": {
-						Discovery item = new Discovery(prefix + itmE.attributeValue("item"), query, itemConfig, zs);
+						Discovery item = new Discovery(prefix + itmE.attributeValue("item"), query, configurationItem, zabbixServer);
 						String nameList = itmE.attributeValue("names", "");
 						String names[] = nameList.split("\\|");
 						if (names != null && names.length > 0)
@@ -1507,7 +1533,7 @@ public class Config {
 					break;
 					
 					case "query": {
-						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), query,itmE.attributeValue("nodata"), itemConfig, zs);
+						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), query,itmE.attributeValue("nodata"), configurationItem, zabbixServer);
 						itemSch.addItem(itemGroupName, item);
 					}
 					break;
@@ -1516,9 +1542,9 @@ public class Config {
 						String itemList = itmE.attributeValue("items", "");
 						Item item;
 						if (itmE.attributeValue("type", "column").equalsIgnoreCase("column"))
-							item = new MultiColumnItem(prefix, itemList, query, itemConfig, zs);
+							item = new MultiColumnItem(prefix, itemList, query, configurationItem, zabbixServer);
 						else
-							item = new MultiRowItem(prefix, itemList, query, itemConfig, zs);
+							item = new MultiRowItem(prefix, itemList, query, configurationItem, zabbixServer);
 						itemSch.addItem(itemGroupName, item);
 					}
 					break;
@@ -1562,7 +1588,7 @@ public class Config {
 	 * @return a list of all VALID zabbix server configurations
 	 */
 	public Collection<ZServer> getZabbixServers() {
-		Collection<ZServer> validServers = zbxServers;
+		Collection<ZServer> validServers = _zabbixServers;
 		CollectionUtils.filter(validServers, new Predicate <Config.ZServer>() {
 			
 			@Override
@@ -1594,7 +1620,7 @@ public class Config {
 		builder.append("Config:\n");
 		builder.append("\n");
 		builder.append("BaseDir:\t").append(getBasedir()).append("\n");
-		for (ZServer zsrv: zbxServers)
+		for (ZServer zsrv: _zabbixServers)
 			builder.append("-- Zabbix:\t").append(zsrv).append("\n");
 		for (Database db: databases)
 			builder.append("-- Database:\t").append(db).append("\n");

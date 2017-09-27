@@ -101,7 +101,7 @@ public class DBforBix implements Daemon {
 		LOG.debug(config);							
 		
 		// read config from Zabbix Server
-		config.getItemConfigFromZabbix();// fill itemConfigs collection
+		config.getZabbixConfigurationItems();// fill itemConfigs collection
 		config.buildItems();
 	} 
 	
