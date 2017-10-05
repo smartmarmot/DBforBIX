@@ -26,4 +26,4 @@ The template and items are available within the distributions files but also in 
 ## Object Model
 Constructed with ![ObjectAid](http://www.objectaid.com/) (Eclipse plug-in)
 ![Object Model current diagram](https://github.com/vagabondan/DBforBIX/blob/master/src/ObjectModel.png)
-![Object Model source](https://github.com/vagabondan/DBforBIX/blob/master/src/ObjectModel.xml)
+![Object Model source](https://github.com/vagabondan/DBforBIX/blob/master/src/ObjectModel.ucls)
