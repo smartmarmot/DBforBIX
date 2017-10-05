@@ -24,7 +24,7 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
  * 
  * @author Andrey Denisov
  */
-public class Sender32 implements SenderProtocol {
+public class Sender32 implements ISenderProtocol {
 	
 	
 
@@ -117,7 +117,7 @@ public class Sender32 implements SenderProtocol {
 	
 	private String encodeItems(ZabbixItem[] items, String type) {
 		String result=new String();		
-		String proxyName=items.length>0?items[0].getConfItem().getZServer().getProxy():"none";
+		String proxyName=items.length>0?items[0].getConfigurationElement().getZabbixServer().getProxy():"none";
 		result+=openJson(type,proxyName);
 		for(ZabbixItem it:items){
 			result+=buildJsonData(it);

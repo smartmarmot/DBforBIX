@@ -24,7 +24,7 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
  * 
  * @author Andrea Dalle Vacche
  */
-public class Sender14 implements SenderProtocol { 
+public class Sender14 implements ISenderProtocol { 
 
 	@Override
 	public boolean isMultiValueSupported() {

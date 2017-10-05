@@ -22,7 +22,7 @@ import java.util.Set;
 import com.smartmarmot.dbforbix.db.DBType;
 
 
-public class Oracle extends AbstractAdapter {
+public class Oracle extends AbstractDBAdapter {
 	
 	//Error codes
 	//ORA-12537 - connection closed
@@ -37,7 +37,7 @@ public class Oracle extends AbstractAdapter {
 		this.maxwaitmillis = maxwaitmillis;
 		this.queryTimeout = queryTimeout.intValue();
 		this.maxidle = maxidle;
-		this.itemGroupNames = set;
+		this.configurationUIDs = set;
 		this.persistence = pers;
 	}
 	

@@ -41,377 +41,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.Map.Entry;
-
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-
-
-//import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.smartmarmot.common.utils.SAXParserDBforBIX;
-import com.smartmarmot.common.utils.XMLDBforBIXUnrecoverableException;
+import com.smartmarmot.dbforbix.config.element.IConfigurationElement;
+import com.smartmarmot.dbforbix.config.item.ConfigurationItem;
+import com.smartmarmot.dbforbix.config.item.ConfigurationItemParserFactory;
+import com.smartmarmot.dbforbix.config.item.IConfigurationItem;
+import com.smartmarmot.dbforbix.config.item.IConfigurationItemParser;
 import com.smartmarmot.dbforbix.db.DBManager;
 import com.smartmarmot.dbforbix.db.DBType;
-import com.smartmarmot.dbforbix.db.adapter.Adapter;
-import com.smartmarmot.dbforbix.scheduler.Discovery;
-import com.smartmarmot.dbforbix.scheduler.Item;
-import com.smartmarmot.dbforbix.scheduler.MultiColumnItem;
-import com.smartmarmot.dbforbix.scheduler.MultiRowItem;
+import com.smartmarmot.dbforbix.db.adapter.DBAdapter;
 import com.smartmarmot.dbforbix.scheduler.Scheduler;
-import com.smartmarmot.dbforbix.scheduler.SimpleItem;
-import com.smartmarmot.dbforbix.zabbix.ZabbixSender.PROTOCOL;
+import com.smartmarmot.common.utils.DBforBIXHelper;
 
 public class Config {
 
-	private interface Validable {
+	interface Validable {
 
 		public boolean isValid();
 	}
-	
-	/**
-	 * Zabbix server config entry
-	 */
-	public static class ZServer implements Validable {
-		
-		private String		zbxServerHost		= null;
-		private int			zbxServerPort		= 10051;
-		private String 		zbxServerNameFC		= null;
-		private String		proxy		= null;
-		private PROTOCOL	protocol	= PROTOCOL.V32;		
-		private Collection<String> definedDBNames  = null;
-		
-		
-		/**
-		 * reinit 
-		 */
-		private Map<String,List<String> > hosts=null;
-		private Map<String,List<String> > items=null;
-		private Map<String,List<String> > hostmacro=null;
-		private Map<String,List<String>> hostsTemplates=null;
-		private Map<String,Map<String,String>> configurationItems = new HashMap<>();
-		private String hashZabbixConfig		=null;
-		private String zabbixConfigurationItemSuffix = "DBforBIX.config";
-		
-		
-		
-		/////////////////////////////////////////////////////////
-		public String getZbxServerNameFC() {
-			return zbxServerNameFC;
-		}
-
-		public void setZbxServerNameFC(String zbxServerNameFC) {
-			this.zbxServerNameFC = zbxServerNameFC;
-		}
-		
-		
-		public Map<String, Map<String, String>> getConfigurationItems() {
-			return configurationItems;
-		}
-		
-		public String getHashZabbixConfig() {
-			return hashZabbixConfig;
-		}
-		
-		public Map<String,List<String> > getHosts() {
-			return hosts;
-		}
-		
-		public Map<String,List<String> > getItems() {
-			return items;
-		}
-		
-		public Map<String,List<String> > getHostmacro() {
-			return hostmacro;
-		}		
-		////////////////////////
-		public void setHashZabbixConfig(String inStr) {
-			this.hashZabbixConfig=inStr;
-		}
-		
-
-		public void setItemConfigs(Map<String,Map<String,String>> itemConfigs) {
-			this.configurationItems=itemConfigs;
-		}
-		
-		public void setHosts(Map<String,List<String> > hosts) {
-			this.hosts = hosts;
-		}		
-
-		public void setItems(Map<String,List<String> > items) {
-			this.items = items;
-		}		
-
-		public void setHostmacro(Map<String,List<String> > hostmacro) {
-			this.hostmacro = hostmacro;
-		}		
-		//////////////////////////////////////////////////////////////////
-		
-
-		public Collection<String> getDefinedDBNames() {
-			return definedDBNames;
-		}
-		
-		public void setDefinedDBNames(Collection<String> definedDBNames) {
-			this.definedDBNames = definedDBNames;
-		}
-		
-		public String getZServerHost() {
-			return zbxServerHost;
-		}
-		
-		public int getZServerPort() {
-			return zbxServerPort;
-		}
-		
-		public PROTOCOL getProtocol() {
-			return protocol;
-		}
-		
-		@Override
-		public boolean isValid() {
-			return (zbxServerPort > 0) && (zbxServerHost != null);
-		}
-		
-		@Override
-		public String toString() {
-			return zbxServerHost + ":" + zbxServerPort;
-		}
-
-		
-		public String getProxyConfigRequest(){
-			return new String("{\"request\":\"proxy config\",\"host\":\""+getProxy()+"\"}");
-		}
-
-		public String getProxy() {
-			return proxy;
-		}
-
-		public void setProxy(String proxy) {
-			this.proxy = proxy;
-		}
-
-		public void addConfigurationItem(String itemGroupName, Map<String, String> m) {
-			configurationItems.put(itemGroupName, m);
-		}
-		
-		public void removeItemConfig(String itemGroupName) {
-			configurationItems.remove(itemGroupName);
-		}
-
-		/**
-		 * 
-		 * @return set of item group names of this Zabbix Server
-		 */
-		public Collection<String> getItemGroupNames() {			
-			return configurationItems.keySet();
-		}
-
-		/**
-		 * 
-		 * @param itemGroupName
-		 * @return item config
-		 * @throws NullPointerException
-		 */
-		public Map<String,String> getItemConfigByItemGroupName(String itemGroupName){
-			return configurationItems.get(itemGroupName);
-		}
-		
-		
-		
-		public String getHostByHostId(String hostid) {
-			String host=null;
-			for(int hid=0;hid<hosts.get("hostid").size();++hid){
-				if(hostid.equals(hosts.get("hostid").get(hid))){
-					host=hosts.get("host").get(hid);
-					break;
-				}
-			}
-			return host;
-		}
-
-		private String getHostMacroValue(String hostid, String macro) {
-			for(int hm=0;hm<hostmacro.get("hostid").size();++hm){
-				if(hostmacro.get("hostid").get(hm).equals(hostid) 
-					&& hostmacro.get("macro").get(hm).equals(macro)){
-					return hostmacro.get("value").get(hm);
-				}
-			}
-			return null;
-		}
-		
-		private String getTemplateMacroValue(String hostid, String macro) {
-			// TODO Check macro resolving method in Zabbix
-			String result=null;
-			/**
-			 * hostmacro:
-			 * "hostmacro":{"fields":["hostmacroid","hostid","macro","value"],"data":[[450,11082,"{$DSN}","APISQL"],[457,11084,"{$PERF_SCHEMA}","'performance_schema'"]]},
-			 * 
-			 * hosts_templates:
-			 * "hosts_templates":{"fields":["hosttemplateid","hostid","templateid"],"data":[[2195,11082,11084]]},
-			 * */
-			Set<String> templateIds=new HashSet<>();			
-			for(int hm=0;hm<hostsTemplates.get("hostid").size();++hm){
-				if(hostsTemplates.get("hostid").get(hm).equals(hostid)){					
-					templateIds.add(hostsTemplates.get("templateid").get(hm));
-				}
-			}
-			for (String tid:templateIds){
-				 result=getHostMacroValue(tid,macro);
-				 if(null!=result) break;
-			}
-			return result;
-		}
-
-		
-		
-
-		public void setHostsTemplates(Map<String, List<String>> hostsTemplates) {
-			this.hostsTemplates=hostsTemplates;			
-		}
-
-		public Map<String, List<String>> getHostsTemplates() {			
-			return hostsTemplates;
-		}
-
-		public String getMacroValue(String hostid, String macro) {
-			String result=null;
-			result=getHostMacroValue(hostid,macro);
-			if(null==result){
-				result=this.getTemplateMacroValue(hostid, macro);
-			}
-			return result;
-		}
-
-		public String getZabbixConfigurationItemSuffix() {
-			return zabbixConfigurationItemSuffix;
-		}	
-	}
-	
-	/**
-	 * Monitored database config entry
-	 */
-	public static class Database implements Validable {
-		
-		private DBType	type;
-		private String	nameFC;
-		private String	url;
-		private String	user;
-		private String	password;
-		private String	instance;
-		private Integer maxactive = new Integer(15);
-		private Integer maxidle = new Integer(2);
-		private Integer maxwaitmillis = new Integer (10000);
-		private Boolean persistent = false;
-		private Integer	queryTimeout = new Integer(15);
-		private Set<String>  itemGroupNames=new HashSet<String>();
-		
-		public DBType getType() {
-			return type;
-		}
-		
-		public String getDBNameFC() {
-			return nameFC;
-		}
-		
-		public void setDBNameFC(String nameFC) {
-			this.nameFC=nameFC;
-		}
-		
-		public String getURL() {
-			return url;
-		}
-		
-		
-		public String getUser() {
-			return user;
-		}
-		
-		public String getPassword() {
-			return password;
-		}
-		
-		public String getInstance() {
-			return instance;
-		}
-		
-		@Override
-		public boolean isValid() {
-			return (nameFC != null) && (url != null) && (user != null) && (password != null);
-		}
-		
-		@Override
-		public String toString() {
-			return "DSN:"+this.getDBNameFC()+",\ttype:"+getType() + ",\tURL:" + getURL() + ",\tInstance:" + getInstance();
-		}
-
-		public Integer getMaxWaitMillis() {
-			return maxwaitmillis;
-		}
-
-		public void setMaxWaitMillis(Integer maxwaitmillis) {
-			this.maxwaitmillis = maxwaitmillis;
-		}
-
-		public Integer getMaxIdle() {
-			return maxidle;
-		}
-
-		public void setMaxIdle(Integer maxidle) {
-			this.maxidle = maxidle;
-		}
-
-
-		public void setPersistence(String pers) {
-			if (pers.equalsIgnoreCase("true")) {
-				this.persistent = true;
-			}
-		}
-		public Boolean getPersistence(){
-			return this.persistent;
-		}
-
-		public void setMaxActive(Integer maxactive) {
-			this.maxactive= maxactive;
-		}
-
-		public Integer getMaxActive() {
-			return maxactive;
-		}
-		public int getQueryTimeout() {
-			return queryTimeout;
-		}
-		
-		public void setQueryTimeout(int queryTimeout) {
-			this.queryTimeout = queryTimeout;
-		}
-
-		public Set<String> getItemGroupNames() {
-			return itemGroupNames;
-		}
-
-		public void addItemGroupName(String itemGroupName) {
-			itemGroupNames.add(itemGroupName);
-		}
-		
-		public void removeItemGroupName(String itemGroupName) {
-			itemGroupNames.remove(itemGroupName);
-		}
-
-	}
-
-		
-	
 	
 	/**
 	 * 
@@ -472,39 +127,39 @@ public class Config {
 	 * 
 	 * databases:
 	 * 1. readConfigDB: 
-	 * 2. loadItemConfigFromZabbix: itemGroupName
+	 * 2. loadItemConfigFromZabbix: configurationUID
 	 * 2. main: add db to dbmanager
 	 * 3. 
 	 * 
 	 * schedulers:
-	 * 1. buildServerElements: itemGroupName, time, new Scheduler(time), scheduler.addItem(itemGroupName, item)
+	 * 1. buildServerElements: configurationUID, time, new Scheduler(time), scheduler.addItem(configurationUID, item)
 	 * 2. main: schedulers -> worktimers
 	 * 3. 
 	 */
 	
-	//itemGroupName -> ZServer
-	//itemGroupName:ZServer = N:1
-	private Set<ZServer>	_zabbixServers;
+	//configurationUID -> ZServer
+	//configurationUID:ZServer = N:1
+	private Set<ZabbixServer>	_zabbixServers;
 	
-	//itemGroupName -> Database
-	//itemGroupName:Database = N:1
+	//configurationUID -> Database
+	//configurationUID:Database = N:1
 	private Set<Database>	databases;
 	
-	//itemGroupName->time->Scheduler
-	//itemGroupName:Scheduler = 1:N
+	//configurationUID->time->Scheduler
+	//configurationUID:Scheduler = 1:N
 	private Map<String, Map<Integer, Scheduler>> schedulers  = new HashMap<String,Map<Integer, Scheduler>>();
 	
-	//itemGroupName->Timer
-	//itemGroupName:workTimer = 1:1
+	//configurationUID->Timer
+	//configurationUID:workTimer = 1:1
 	private static Map<String,Timer> workTimers = new HashMap<String, Timer>();
 
-	public Map<Integer, Scheduler> getSchedulersByItemGroupName(String itemGroupName) {
-		if(!schedulers.containsKey(itemGroupName)) schedulers.put(itemGroupName,new HashMap<Integer,Scheduler>());
-		return schedulers.get(itemGroupName);
+	public Map<Integer, Scheduler> getSchedulersByConfigurationUID(String configurationUID) {
+		if(!schedulers.containsKey(configurationUID)) schedulers.put(configurationUID,new HashMap<Integer,Scheduler>());
+		return schedulers.get(configurationUID);
 	}
 
-	public void addScheduler(String itemGroupName, HashMap<Integer, Scheduler> scheduler) {
-		this.schedulers.put(itemGroupName,scheduler);
+	public void addScheduler(String configurationUID, HashMap<Integer, Scheduler> scheduler) {
+		this.schedulers.put(configurationUID,scheduler);
 	}
 	
 	public void clearSchedulers(){
@@ -522,8 +177,8 @@ public class Config {
 	}
 
 	private Config() {
-		_zabbixServers = new HashSet<Config.ZServer>();
-		databases = new HashSet<Config.Database>();
+		_zabbixServers = new HashSet<ZabbixServer>();
+		databases = new HashSet<Database>();
 	}
 	
 	/**
@@ -638,9 +293,9 @@ public class Config {
 	 * Read configuration value as zabbix server config
 	 */
 	private void readConfigZSRV(String group, String name, String key, String value) {
-		ZServer zabbixServer = getZServerByNameFC(name);
+		ZabbixServer zabbixServer = getZServerByNameFC(name);
 		if (zabbixServer == null) {
-			zabbixServer = new ZServer();
+			zabbixServer = new ZabbixServer();
 			zabbixServer.setZbxServerNameFC(name);
 			_zabbixServers.add(zabbixServer);
 		}
@@ -666,9 +321,9 @@ public class Config {
 	 * @param nameFC - nameFC of Zabbix Server in File Config
 	 * @return ZServer instance with given nameFC or null
 	 */
-	private ZServer getZServerByNameFC(String nameFC) {
-		ZServer result=null;
-		for(ZServer zs:_zabbixServers){
+	private ZabbixServer getZServerByNameFC(String nameFC) {
+		ZabbixServer result=null;
+		for(ZabbixServer zs:_zabbixServers){
 			if(zs.getZbxServerNameFC().equals(nameFC)){
 				result=zs;
 				break;
@@ -753,34 +408,34 @@ public class Config {
 		 newconfig.getZabbixConfigurationItems();
 		 
 		 
-		 Set<String> itemGroupNames=oldconfig.getSetOfItemGroupNames();
-		 Set<String> newItemGroupNames=newconfig.getSetOfItemGroupNames();
+		 Set<String> configurationUIDs=oldconfig.getSetOfConfigurationUIDs();
+		 Set<String> newConfigurationUIDs=newconfig.getSetOfConfigurationUIDs();
 		 
 		 /**
 		  * candidates for update:
 		  * i.e. zbxServerHost:zbxServerPort, proxy, host, db, item key 
 		  * are the same
 		  */
-		 Set<String> toUpdate=new HashSet<>(itemGroupNames);		 
-		 toUpdate.retainAll(newItemGroupNames);
+		 Set<String> toUpdate=new HashSet<>(configurationUIDs);		 
+		 toUpdate.retainAll(newConfigurationUIDs);
 		 Set<String> toRemoveFromUpdate=new HashSet<>();
-		 for (String itemGroupName:toUpdate){
-			ZServer zabbixServer=oldconfig.getZabbixServerByItemGroupName(itemGroupName);
-			ZServer newZabbixServer=newconfig.getZabbixServerByItemGroupName(itemGroupName);
-			Map<String,String> itemConfig=zabbixServer.getItemConfigByItemGroupName(itemGroupName);
-			Map<String,String> newItemConfig=newZabbixServer.getItemConfigByItemGroupName(itemGroupName);
-			String hashParam=itemConfig.get("hashParam");
-			String newHashParam=newItemConfig.get("hashParam");
+		 for (String configurationUID:toUpdate){
+			ZabbixServer zabbixServer=oldconfig.getZabbixServerByConfigurationUID(configurationUID);
+			ZabbixServer newZabbixServer=newconfig.getZabbixServerByConfigurationUID(configurationUID);
+			IConfigurationItem configurationItem=zabbixServer.getConfigurationItemByConfigurationUID(configurationUID);
+			IConfigurationItem newConfigurationItem=newZabbixServer.getConfigurationItemByConfigurationUID(configurationUID);
+			String hashParam=configurationItem.getHashParam();
+			String newHashParam=newConfigurationItem.getHashParam();
 			if(hashParam.equals(newHashParam)) 
-				toRemoveFromUpdate.add(itemGroupName);
+				toRemoveFromUpdate.add(configurationUID);
 		 }
 		 toUpdate.removeAll(toRemoveFromUpdate);
 		 
-		 Set<String> toDelete=new HashSet<String>(itemGroupNames);
-		 toDelete.removeAll(newItemGroupNames);
+		 Set<String> toDelete=new HashSet<String>(configurationUIDs);
+		 toDelete.removeAll(newConfigurationUIDs);
 		 
-		 Set<String> toAdd=new HashSet<String>(newItemGroupNames);
-		 toAdd.removeAll(itemGroupNames);
+		 Set<String> toAdd=new HashSet<String>(newConfigurationUIDs);
+		 toAdd.removeAll(configurationUIDs);
 		 
 		
 		 if(!toUpdate.isEmpty()||!toAdd.isEmpty()||!toDelete.isEmpty()){
@@ -793,7 +448,7 @@ public class Config {
 			 /**
 			  * Build new Items
 			  */
-			 newconfig.buildItems();
+			 newconfig.buildConfigurationElementsAndSchedulers();
 			 
 			 
 			 /**
@@ -804,7 +459,7 @@ public class Config {
 			 /**
 			  * add item configs
 			  */
-			 addItemConfigs(newconfig,toAdd);
+			 addConfigurationItems(newconfig,toAdd);
 	
 			 /**
 			  * update item configs
@@ -820,8 +475,8 @@ public class Config {
 		 return false;
 	}
 
-	private void stopSchedulers(Set<String> itemGroupNames) {
-		for(String ign:itemGroupNames){
+	private void stopSchedulers(Set<String> configurationUIDs) {
+		for(String ign:configurationUIDs){
 			/**
 			 * clean workTimers
 			 */
@@ -831,7 +486,7 @@ public class Config {
 			/**
 			 * Clean schedulers
 			 */
-			for(Entry<Integer, Scheduler> s:getSchedulersByItemGroupName(ign).entrySet()){
+			for(Entry<Integer, Scheduler> s:getSchedulersByConfigurationUID(ign).entrySet()){
 				s.getValue().cancel();
 			}
 			try {
@@ -849,8 +504,8 @@ public class Config {
 			/**
 			 * Create adapter only if there are items for this DB
 			 */
-			if( 0 < db.getItemGroupNames().size() ){
-				Adapter adapter=manager.getDatabaseByName(db.getDBNameFC());
+			if( 0 < db.getConfigurationUIDs().size() ){
+				DBAdapter adapter=manager.getDatabaseByName(db.getDBNameFC());
 				if(null==adapter){
 					manager.addDatabase(db);
 					adapter=manager.getDatabaseByName(db.getDBNameFC());
@@ -860,20 +515,20 @@ public class Config {
 //						e.printStackTrace();
 //					}
 				}
-				launchSchedulers(db.getItemGroupNames());
+				launchSchedulers(db.getConfigurationUIDs());
 			}
 		}
 	}
 
 	
-	private void launchSchedulers(Set<String> itemGroupNames) {
-		for (String itemGroupName:itemGroupNames){
-			if(!workTimers.containsKey(itemGroupName)){
-				Timer workTimer=new Timer(itemGroupName);
-				workTimers.put(itemGroupName,workTimer);
+	private void launchSchedulers(Set<String> configurationUIDs) {
+		for (String configurationUID:configurationUIDs){
+			if(!workTimers.containsKey(configurationUID)){
+				Timer workTimer=new Timer(configurationUID);
+				workTimers.put(configurationUID,workTimer);
 				int i = 0;								
-				for (Entry<Integer, Scheduler> element: getSchedulersByItemGroupName(itemGroupName).entrySet()) {
-					LOG.info("creating worker("+itemGroupName+") for timing: " + element.getKey());
+				for (Entry<Integer, Scheduler> element: getSchedulersByConfigurationUID(configurationUID).entrySet()) {
+					LOG.info("creating worker("+configurationUID+") for timing: " + element.getKey());
 					i++;
 					workTimer.scheduleAtFixedRate(element.getValue(), 500 + i * 500, (long)(element.getKey() * 1000));									
 				}				
@@ -887,45 +542,45 @@ public class Config {
 	}
 	
 	
-	private void addItemConfigs(Config newconfig, Set<String> newItemGroupNames) {
-		for (String newItemGroupName:newItemGroupNames){
+	private void addConfigurationItems(Config newconfig, Set<String> newConfigurationUIDs) {
+		for (String newConfigurationUID:newConfigurationUIDs){
 			if(this!=newconfig){	
 				/**
 				 * Add/update ZServers
 				 */
-				ZServer newZabbixServer=newconfig.getZabbixServerByItemGroupName(newItemGroupName);
-				ZServer zabbixServer=this.getZServerByNameFC(newZabbixServer.getZbxServerNameFC());
+				ZabbixServer newZabbixServer=newconfig.getZabbixServerByConfigurationUID(newConfigurationUID);
+				ZabbixServer zabbixServer=this.getZServerByNameFC(newZabbixServer.getZbxServerNameFC());
 				if (null == zabbixServer){// just add
 					LOG.error("Can't find ZServer by nameFC: "+newZabbixServer.getZbxServerNameFC());
 					zabbixServer=newZabbixServer;
 					_zabbixServers.add(zabbixServer);
 				}else{// update since pointer to existing ZServer may appear in code
-					Map<String,String> newItemConfig=newZabbixServer.getItemConfigByItemGroupName(newItemGroupName);
+					IConfigurationItem newConfigurationItem=newZabbixServer.getConfigurationItemByConfigurationUID(newConfigurationUID);
 					zabbixServer.setHashZabbixConfig(newZabbixServer.getHashZabbixConfig());
 					zabbixServer.setHosts(newZabbixServer.getHosts());
 					zabbixServer.setItems(newZabbixServer.getItems());
 					zabbixServer.setHostmacro(newZabbixServer.getHostmacro());
 					zabbixServer.setHostsTemplates(newZabbixServer.getHostsTemplates());
-					zabbixServer.addConfigurationItem(newItemGroupName, newItemConfig);
+					zabbixServer.addConfigurationItem(newConfigurationItem);
 				}
 				
 				/**
 				 * Add/update Databases
 				 */
-				Database newDatabase=newconfig.getDatabaseByItemGroupName(newItemGroupName);
+				Database newDatabase=newconfig.getDatabaseByConfigurationUID(newConfigurationUID);
 				Database database = this.getDatabaseByNameFC(newDatabase.getDBNameFC());
 				if(null==database){//add
 					LOG.debug("Add new DB to databases: "+newDatabase.getDBNameFC());
 					database=newDatabase;
 					databases.add(database);
 				}else{//update
-					database.addItemGroupName(newItemGroupName);
+					database.addConfigurationUID(newConfigurationUID);
 				}
 				
 				/**
 				 * Add schedulers
 				 */
-				schedulers.put(newItemGroupName, newconfig.getSchedulersByItemGroupName(newItemGroupName));
+				schedulers.put(newConfigurationUID, newconfig.getSchedulersByConfigurationUID(newConfigurationUID));
 			}
 		}
 	}
@@ -933,76 +588,55 @@ public class Config {
 
 	/**
 	 * Delete item group names entities from configuration 
-	 * @param itemGroupNames set of item group names to delete
+	 * @param configurationUIDs set of item group names to delete
 	 */
-	private void deleteItemConfigs(Collection<String> itemGroupNames) {
+	private void deleteItemConfigs(Collection<String> configurationUIDs) {
 		/**
 		 * zbxServers:
-		 * 4. Config.getItemConfigFromZabbix: itemsJSON, hosts, items, hostmacro, itemConfigs
+		 * 4. Config.getConfigurationItemsFromZabbix: itemsJSON, hosts, configurationElements, hostmacro, configurationItems
 		 * 5. 
 		 * 
 		 * databases:
-		 * 1. loadItemConfigFromZabbix: itemGroupName
+		 * 1. loadConfigurationItemFromZabbix: configurationUID
 		 * 2. 
 		 * 
 		 * schedulers:
-		 * 1. buildServerElements: itemConfig -> Schedulers, itemGroupName, time, new Scheduler(time), scheduler.addItem(itemGroupName, item)
+		 * 1. buildServerElements: configurationItem -> Schedulers, configurationUID, time, new Scheduler(time), scheduler.addConfigurationElement(configurationUID, configurationElement)
 		 * 2. 
 		 */		
 		
-		for(String ign:itemGroupNames){
-//			/**
-//			 * clean workTimers
-//			 */
-//			workTimers.get(ign).cancel();
-//			workTimers.remove(ign);
-//
-//			/**
-//			 * Clean schedulers
-//			 */
-//			for(Entry<Integer, Scheduler> s:getSchedulersByItemGroupName(ign).entrySet()){
-//				s.getValue().cancel();
-//			}
-//			try {
-//				Thread.sleep(100);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//			schedulers.remove(ign);
-			
+		for(String configurationUID:configurationUIDs){			
 			/**
 			 * Clean zbxServers
 			 */
-			ZServer zs=	this.getZabbixServerByItemGroupName(ign);
-			zs.removeItemConfig(ign);
-			//if(zs.getItemConfigs().isEmpty()) zbxServers.remove(zs);
-			
+			ZabbixServer zs=	this.getZabbixServerByConfigurationUID(configurationUID);
+			zs.removeConfigurationItem(configurationUID);			
 			
 			/**
 			 * Clean databases
 			 */
-			Database db=this.getDatabaseByItemGroupName(ign);
-			db.removeItemGroupName(ign);
+			Database db=this.getDatabaseByConfigurationUID(configurationUID);
+			db.removeConfigurationUID(configurationUID);
 		}
 		
 		/**
 		 * Update DBManager
 		 */
-		DBManager.getInstance().clean(itemGroupNames);
+		DBManager.getInstance().clean(configurationUIDs);
 		
 		/**
-		 * find databases without any itemGroupName and remove them from collection
+		 * find databases without any configurationUID and remove them from collection
 		 */
-		java.util.function.Predicate<Database> dbPredicate=(Database db)-> db.getItemGroupNames().isEmpty();
+		java.util.function.Predicate<Database> dbPredicate=(Database db)-> db.getConfigurationUIDs().isEmpty();
 		databases.removeIf(dbPredicate);
 		
 	
 	}
 
-	private Database getDatabaseByItemGroupName(String itemGroupName) {
+	private Database getDatabaseByConfigurationUID(String configurationUID) {
 		Database result=null;
 		for(Database db:databases){
-			if(db.getItemGroupNames().contains(itemGroupName)) {
+			if(db.getConfigurationUIDs().contains(configurationUID)) {
 				result=db;
 				break;
 			}
@@ -1011,13 +645,13 @@ public class Config {
 	}
 
 	/**
-	 * Update changed item Configs
+	 * Update changed configuration items
 	 * @param newconfig config instance to launch schedulers from
-	 * @param itemGroupNames set of group names which have to be updated
+	 * @param configurationUIDs set of group names which have to be updated
 	 */
-	private void updateItemConfigs(Config newConfig, Set<String> itemGroupNames) {
-		deleteItemConfigs(itemGroupNames);
-		addItemConfigs(newConfig,itemGroupNames);
+	private void updateItemConfigs(Config newConfig, Set<String> configurationUIDs) {
+		deleteItemConfigs(configurationUIDs);
+		addConfigurationItems(newConfig,configurationUIDs);
 	}
 
 	/**
@@ -1025,23 +659,23 @@ public class Config {
 	 * @param zabbixServers collection of Zabbix Servers
 	 * @return set of strings representing item group names
 	 */
-	private Set<String> getSetOfItemGroupNames() {
+	private Set<String> getSetOfConfigurationUIDs() {
 		Set<String> result=new HashSet<String>();
-		for(ZServer zs:getZabbixServers()) result.addAll(zs.getItemGroupNames());
+		for(ZabbixServer zs:getZabbixServers()) result.addAll(zs.getConfigurationUIDs());
 		return result;
 	}
 
 	
 	
-	private ZServer getZabbixServerByItemGroupName(String itemGroupName){
-		ZServer result=null;		
-		for(ZServer zs:getZabbixServers()){
-			if(zs.getItemGroupNames().contains(itemGroupName)){
+	private ZabbixServer getZabbixServerByConfigurationUID(String configurationUID){
+		ZabbixServer result=null;		
+		for(ZabbixServer zs:getZabbixServers()){
+			if(zs.getConfigurationUIDs().contains(configurationUID)){
 				result=zs;
 				break;
 			}
 		}				
-		if(null==result) throw new NullPointerException("Failed to find Zabbix Server for given item group nameFC: "+itemGroupName);		
+		if(null==result) throw new NullPointerException("Failed to find Zabbix Server for given configuration UID: "+configurationUID);		
 		return result;
 	}
 	
@@ -1212,7 +846,7 @@ public class Config {
 	 */
 	public void getZabbixConfigurationItems(){
 		//Get collection of all Zabbix Server instances that we should fill
-		Collection<ZServer> zabbixServers=null;
+		Collection<ZabbixServer> zabbixServers=null;
 		try{
 			zabbixServers = getZabbixServers();
 		}catch (Exception ex) {
@@ -1221,7 +855,7 @@ public class Config {
 
 
 		//filling cycle
-		for (ZServer zabbixServer: zabbixServers){
+		for (ZabbixServer zabbixServer: zabbixServers){
 			String zabbixResponse=new String();
 			zabbixResponse=requestZabbix(zabbixServer.zbxServerHost, zabbixServer.zbxServerPort,zabbixServer.getProxyConfigRequest());
 			zabbixServer.setHashZabbixConfig(Config.calculateMD5Sum(zabbixResponse));
@@ -1309,7 +943,7 @@ public class Config {
 				boolean foundConfigurationItemSuffix=false;
 				for(int it=0;it<items.get("key_").size();++it){
 					String key=items.get("key_").get(it);
-					if(key.contains(zabbixServer.getZabbixConfigurationItemSuffix())){
+					if(key.contains(zabbixServer.getConfigurationItemSuffix())){
 						foundConfigurationItemSuffix=true;
 						String hostid=items.get("hostid").get(it);
 						if(hostFilter.contains(hostid)) 
@@ -1320,23 +954,25 @@ public class Config {
 						 * substitute macro for getting db name
 						 */
 						String db=key.split(",")[1].split("]")[0].trim().toUpperCase();						
-						if(isMacro(db)){
+						if(DBforBIXHelper.isMacro(db)){
 							db=zabbixServer.getMacroValue(hostid,db);
 						}
 						
 						
 						/**
-						 * Construct itemGroupName - stands for Name of Group of Items - unique identifier for configuration item across all Zabbix Servers within DbforBIX instance
+						 * Construct configurationUID - stands for Unique IDentifier of Zabbix CONFIGURATION item - unique identifier for configuration item across all Zabbix Servers within DbforBIX instance
 						 * Why we need new name for this entity:
 						 * 1. It's the important key identifier across the whole DBforBIX instance. We should uniquely identify each configuration item from all Zabbix Servers within whole DBforBIX instance!
 						 * 2. Why not use configurationItemName or something like this?  It is ambiguous because items in Zabbix have their own defined names.						 * 
-						 * So let it be itemGroupName.
+						 * So let it be configurationUID.
 						 */
-						String itemGroupName=constructConfigurationItemGroupName(zabbixServer,host,db,key);
+						String configurationUID=constructConfigurationUID(zabbixServer,host,db,key);
 						
 						/**
 						 * Register configuration item
 						 */
+						/*
+						//TODO refactor the container of configuration item data from Map to ZabbixItem! Using Map is dangerous because of misprints!
 						Map<String,String> mConfigurationItem = new HashMap<String,String>();
 						String param=items.get("params").get(it);//Hint for items structure: Map->List[it]
 						mConfigurationItem.put("param", param);						
@@ -1346,12 +982,23 @@ public class Config {
 						mConfigurationItem.put("host", host);
 						mConfigurationItem.put("db", db);
 						mConfigurationItem.put("key_", key);
-						mConfigurationItem.put("itemGroupName",itemGroupName);
-						zabbixServer.addConfigurationItem(itemGroupName,mConfigurationItem);
+						mConfigurationItem.put("configurationUID",configurationUID);
+						*/
+						String param=items.get("params").get(it);//Hint for items structure: Map->List[it]
+						//Note! Hash together: configuration item XML as is and the result of macros substitution in XML
+						String hashParam = Config.calculateMD5Sum(param)+Config.calculateMD5Sum(DBforBIXHelper.substituteMacros(param,zabbixServer,hostid));
+						//prefix is not necessary part of configuration item, and will be added some later
+						IConfigurationItem configurationItem = new ConfigurationItem(
+								configurationUID,
+								zabbixServer,
+								host, hostid, db, key,
+								param, hashParam
+								);
+						zabbixServer.addConfigurationItem(configurationItem);
 						
 
 						/**
-						 * Fill Dbs config with itemGroupName Set<String> itemGrouName.
+						 * Fill Dbs config with configurationUID Set<String> itemGrouName.
 						 * FC stnds for File Config (DBforBIX configuration file).
 						 * Propagate absence of DB in file config to Zabbix Web interface
 						 */
@@ -1365,7 +1012,7 @@ public class Config {
 							dbFC.type=DBType.DB_NOT_DEFINED;
 							databases.add(dbFC);
 						}
-						dbFC.addItemGroupName(itemGroupName);						
+						dbFC.addConfigurationUID(configurationUID);						
 					}
 				}
 				
@@ -1383,16 +1030,6 @@ public class Config {
 	}
 
 
-	/**
-	 * Substitute > and < characters on & gt; and & lt; if they are not XML tags. Used to prepare statement for standard JSON parser.
-	 * XML should contain DTD file because we need to know the template and your XML language keywords!
-	 * @param inputString - configuration from Zabbix configuration item
-	 * @return String - preprocessed configuration
-	 */
-	private String preprocessZabbixConfig(String inputString) {		
-		return SAXParserDBforBIX.replaceSpecialChars(inputString);
-	}
-
 	public static String calculateMD5Sum(String inStr) {
 		MessageDigest hasher = null;
 		try{
@@ -1404,48 +1041,22 @@ public class Config {
 		return (new HexBinaryAdapter()).marshal(hasher.digest(inStr.getBytes()));
 	}
 
-	private String substituteMacros(String inStr, ZServer zs, String hostid) {
-		String result=new String(inStr);
-		try{// substitute macro
-			int iStart=0;
-			int iEnd=0;
-			iStart=result.indexOf("{$");
-			while (-1!=iStart){
-				iEnd=result.indexOf('}', iStart);
-				if(-1!=iEnd){							
-					String macro=result.substring(iStart, ++iEnd);
-					if(isMacro(macro)){
-						String macroValue=zs.getMacroValue(hostid,macro);
-						if(null!=macroValue){
-							result=result.replace(macro, macroValue);
-							iEnd=iEnd-macro.length()+macroValue.length();
-						}
-					}							
-				} else	break;						
-				iStart=result.indexOf("{$",iEnd);
-			}
-		}
-		catch (Exception ex){
-			LOG.error("Error substituting macros for Zabbix Server "+zs+",hostid = "+hostid+". String: "+ inStr + "\nException:\n" + ex.getLocalizedMessage());
-		}
-		return result;
-	}
+
 
 	/**
-	 * Constructs itemGroupName - unique identifier for configuration item across all Zabbix Servers within DbforBIX instance
+	 * Constructs configurationUID - unique identifier for configuration item across all Zabbix Servers within DbforBIX instance
 	 * @param zabbixServer - ZServer instance
 	 * @param host - host within Zabbix Server
 	 * @param db - database name (Data Source Name)
 	 * @param key - configuration item key (should contain suffix like DBforBIX.config or other that you've defined in DBforBIX configuration file for this Zabbix Server)
-	 * @return string - itemGroupName - cross Zabbix Server unique identifier of Zabbix configuration item
+	 * @return string - configurationUID - cross Zabbix Server unique identifier of Zabbix configuration item
 	 */
-	private String constructConfigurationItemGroupName(ZServer zabbixServer, String host, String db, String key) {
+	private String constructConfigurationUID(ZabbixServer zabbixServer, String host, String db, String key) {
 		return new String(zabbixServer.toString()+"/"+zabbixServer.getProxy()+"/"+host+"/"+db+"/"+key);
 	}
 
 
-	public void buildItems() {
-			
+	public void buildConfigurationElementsAndSchedulers() {			
 		//result for hosts:
 		// hostid=[11082], host=[APISQL], nameFC=[APISQL], status=[0]
 		//result for items:
@@ -1456,108 +1067,50 @@ public class Config {
 		//params=[select machine, count(1) N from v$session, sessions], 
 		//delay=[120, 120],
 
-
-		Collection<ZServer> zabbixServers=null;
+		Collection<ZabbixServer> zabbixServers=null;
 		try{
 			zabbixServers = getZabbixServers();
 		}catch (Exception ex) {
 			LOG.error("Error getting Zabbix servers collection: " + ex.getLocalizedMessage());
 		}
 		
-		for (ZServer zabbixServer: zabbixServers){			
-			for(Entry<String, Map<String, String>> ic:zabbixServer.getConfigurationItems().entrySet()){
-				LOG.debug("buildItems: "+zabbixServer+" --> "+ic.getKey());
-				try {					
-					String param=ic.getValue().get("param");
-					//add constant header
-					param="<!DOCTYPE parms SYSTEM \""+getBasedir()+"/items/param.dtd\">"+param;
-					
-					try{
-						//substitute special chars >, < for XML DOM parser
-						param=preprocessZabbixConfig(param);
-					}catch(Exception e){
-						LOG.error("Exception while preprocessing "+ic+": "+e.getLocalizedMessage()+"\nBut we are still trying to construct XML DOM...");
-					}
-					
-					Document doc = DocumentHelper.parseText(param);
-					
-					Element root = doc.getRootElement();
-					String prefix = root.attributeValue("prefix");			
-					for (Object srv: root.elements("server")) {
-						if (srv instanceof Element) buildItemsAndSchedulers((Element) srv, ic.getValue(), prefix , zabbixServer);
-					}
-	//				for (Object db: root.elements("database")) {
-	//					if (db instanceof Element) buildDatabaseElements((Element) db, itemGroupName, prefix);
-	//				}
+		for (ZabbixServer zabbixServer: zabbixServers){
+			for(Entry<String, IConfigurationItem> configurationItemEntry:zabbixServer.getConfigurationItems().entrySet()){
+				String configurationUID=configurationItemEntry.getKey();
+				IConfigurationItem configurationItem=configurationItemEntry.getValue();
+				LOG.debug("Building configuration elements for "+configurationUID);
+				try {
+					String config=configurationItem.getParam();
+					config=DBforBIXHelper.substituteMacros(config,zabbixServer,configurationItem.getHostid());
+					IConfigurationItemParser configurationItemParser = ConfigurationItemParserFactory.getConfigurationItemParser(config);
+					Set<IConfigurationElement> configurationElements = configurationItemParser.buildConfigurationElements();					
+					configurationItem.addConfigurationElements(configurationElements);
+					buildSchedulers(configurationElements);
 				}
 				catch (Exception ex) {
-					LOG.error("Error while loading config item "+ic, ex);
-					LOG.error("Skipping "+ic);
+					LOG.error("Error while loading config item "+configurationItemEntry, ex);
+					LOG.error("Skipping "+configurationItemEntry);
 				}
 			}
 		}
+		
 	}
 	
 	
-	private void buildItemsAndSchedulers(Element e, Map<String,String> configurationItem, String prefix,ZServer zabbixServer) {
-		String itemGroupName=configurationItem.get("itemGroupName");
-		Map<Integer,Scheduler> schedulers=getSchedulersByItemGroupName(itemGroupName);
-		for (Object itm: e.elements()) {
-			if (itm instanceof Element) {
-				Element itmE = (Element) itm;
-				int time = 60;
-				try {
-					time = Integer.parseInt(itmE.attributeValue("time"));
-				}
-				catch (NumberFormatException ex) {
-					LOG.warn("invalid time value: " + itmE.attributeValue("time"));
-				}				
-				if (!schedulers.containsKey(time)) {
-					LOG.debug("creating item scheduler with time " + time);
-					schedulers.put(time, new Scheduler(time));
-				}
-				Scheduler itemSch = schedulers.get(time);
-				String query=itmE.getTextTrim();
-				
-				query=substituteMacros(query,zabbixServer,configurationItem.get("hostid"));
-				switch (itmE.getName()) {
-					case "discovery": {
-						Discovery item = new Discovery(prefix + itmE.attributeValue("item"), query, configurationItem, zabbixServer);
-						String nameList = itmE.attributeValue("names", "");
-						String names[] = nameList.split("\\|");
-						if (names != null && names.length > 0)
-							item.setAltNames(names);
-						//if(!item.setZServer(zs)) LOG.debug("buildServerElements: we haven't not actually registered ZServer "+zs.toString()+" for item "+item.getName());
-						itemSch.addItem(itemGroupName, item);
-					}
-					break;
-					
-					case "query": {
-						Item item = new SimpleItem(prefix + itmE.attributeValue("item"), query,itmE.attributeValue("nodata"), configurationItem, zabbixServer);
-						itemSch.addItem(itemGroupName, item);
-					}
-					break;
-					
-					case "multiquery": {
-						String itemList = itmE.attributeValue("items", "");
-						Item item;
-						if (itmE.attributeValue("type", "column").equalsIgnoreCase("column"))
-							item = new MultiColumnItem(prefix, itemList, query, configurationItem, zabbixServer);
-						else
-							item = new MultiRowItem(prefix, itemList, query, configurationItem, zabbixServer);
-						itemSch.addItem(itemGroupName, item);
-					}
-					break;
-				}
+	private void buildSchedulers(Set<IConfigurationElement> _configurationElements) {
+		for(IConfigurationElement configurationElement:_configurationElements){		
+			String configurationUID=configurationElement.getConfigurationUID();
+			Map<Integer,Scheduler> schedulers=getSchedulersByConfigurationUID(configurationUID);
+			int time=configurationElement.getTime();
+			if (!schedulers.containsKey(time)) {
+				LOG.debug("creating item scheduler with time " + time);
+				schedulers.put(time, new Scheduler(time));
 			}
-		}
+			Scheduler scheduler = schedulers.get(time);
+			scheduler.addConfigurationElement(configurationElement);			
+		}		
 	}
-
-	private boolean isMacro(String macro) {
-		String macroMask="^\\{\\$[a-zA-Z0-9_-]+\\}$";		
-		return macro.matches(macroMask);
-	}
-
+	
 	
 
 	public void setBasedir(String basedir) {
@@ -1587,13 +1140,12 @@ public class Config {
 	/**
 	 * @return a list of all VALID zabbix server configurations
 	 */
-	public Collection<ZServer> getZabbixServers() {
-		Collection<ZServer> validServers = _zabbixServers;
-		CollectionUtils.filter(validServers, new Predicate <Config.ZServer>() {
-			
+	public Collection<ZabbixServer> getZabbixServers() {
+		Collection<ZabbixServer> validServers = _zabbixServers;
+		CollectionUtils.filter(validServers, new Predicate <ZabbixServer>() {			
 			@Override
-			public boolean evaluate(Config.ZServer object) {
-				return ((ZServer) object).isValid();
+			public boolean evaluate(ZabbixServer object) {
+				return ((ZabbixServer) object).isValid();
 			}
 		});
 		return validServers;
@@ -1620,7 +1172,7 @@ public class Config {
 		builder.append("Config:\n");
 		builder.append("\n");
 		builder.append("BaseDir:\t").append(getBasedir()).append("\n");
-		for (ZServer zsrv: _zabbixServers)
+		for (ZabbixServer zsrv: _zabbixServers)
 			builder.append("-- Zabbix:\t").append(zsrv).append("\n");
 		for (Database db: databases)
 			builder.append("-- Database:\t").append(db).append("\n");
@@ -1663,5 +1215,4 @@ public class Config {
 		this.updateConfigTimeout = updateConfigTimeout;
 	}
 	
-
 }

@@ -26,9 +26,9 @@ import java.net.Socket;
 import org.apache.log4j.Logger;
 
 import com.smartmarmot.common.PersistentDB;
-import com.smartmarmot.dbforbix.config.Config;
+import com.smartmarmot.dbforbix.config.ZabbixServer;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender18;
-import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
+import com.smartmarmot.dbforbix.zabbix.protocol.ISenderProtocol;
 
 /**
  * Sender query handler
@@ -43,8 +43,8 @@ public class PersistentDBSender extends Thread {
 
 	private static final Logger	LOG					= Logger.getLogger(PersistentDBSender.class);
 	private boolean				terminate			= false;
-	private Config.ZServer[]	configuredServers	= new Config.ZServer[0];
-	private SenderProtocol		protocol;
+	private ZabbixServer[]	configuredServers	= new ZabbixServer[0];
+	private ISenderProtocol		protocol;
 
 	
 	public PersistentDBSender(PROTOCOL protVer) {
@@ -66,7 +66,7 @@ public class PersistentDBSender extends Thread {
 					Thread.sleep(60000);
 				}
 				else {
-					Config.ZServer[] servers;
+					ZabbixServer[] servers;
 					synchronized (configuredServers) {
 						servers = configuredServers;
 					}
@@ -75,7 +75,7 @@ public class PersistentDBSender extends Thread {
 					while (PersistentDB.getInstance().size() != 0L ){
 						LOG.info("PersistentDBSender - found "+PersistentDB.getInstance().size()+" persistent items to send");
 						ZabbixItem zx = (ZabbixItem) PersistentDB.getInstance().pop();
-						for (Config.ZServer serverConfig : servers) {
+						for (ZabbixServer serverConfig : servers) {
 							try {
 								Socket zabbix = null;
 								OutputStreamWriter out = null;
@@ -120,7 +120,7 @@ public class PersistentDBSender extends Thread {
 		}
 	}
 
-	synchronized public void updateServerList(Config.ZServer[] newServers) {
+	synchronized public void updateServerList(ZabbixServer[] newServers) {
 		synchronized (configuredServers) {
 			configuredServers = newServers;
 		}

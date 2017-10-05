@@ -15,54 +15,36 @@
  * DBforBix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.smartmarmot.dbforbix.scheduler;
+package com.smartmarmot.dbforbix.config.element;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
-public class Discovery extends AbstractItem {
+public class DiscoveryConfigurationElement extends AbstractConfigurationElement {
 	
-	private static final Logger		LOG				= Logger.getLogger(Discovery.class);
-
-	private String		name;
-	private String		query;
+	private static final Logger		LOG				= Logger.getLogger(DiscoveryConfigurationElement.class);
+	private String		discoveryItemKey;
 	private String[]	altNames;
 
-	public Discovery(String name, String query, Map<String, String> itemConfig, ZServer zs) {
-		super(itemConfig,zs);
-		this.name = name;
-		this.query = query;
+	public DiscoveryConfigurationElement(String _prefix, int time, String _item, String _names, String _query) {		
+		super(_prefix, time, _item, "", _query);
+		discoveryItemKey = _prefix+_item;
+		altNames = _names.split("\\|");		
 	}
 	
 	@Override
-	public String getName() {
-		return name;
-	}
-
-	public void setAltNames(String[] altNames) {
-		this.altNames = altNames;
-	}
-
-	public String[] getAltNames() {
-		return altNames;
-	}
-
-	@Override
-	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
+	public ZabbixItem[] getZabbixItemsData(Connection con, int timeout) throws SQLException {
 		StringBuilder builder = new StringBuilder();
 		boolean first = true;
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 
-		try(PreparedStatement pstmt = con.prepareStatement(query)){
+		try(PreparedStatement pstmt = con.prepareStatement(getQuery())){
 			pstmt.setQueryTimeout(timeout);
 			try(ResultSet rs = pstmt.executeQuery()){
 				ResultSetMetaData meta = rs.getMetaData();
@@ -123,12 +105,12 @@ public class Discovery extends AbstractItem {
 				throw ex;
 			}
 		}catch(SQLException ex){
-			LOG.error("Cannot get data for item:\n" + name +"\nQuery:\n"+query, ex);
+			LOG.error("Cannot get data for item:\n" + getElementID() +"\nQuery:\n"+getQuery(), ex);
 			throw ex;
 		}
 
 		builder.append("]}");
-		return new ZabbixItem[] { new ZabbixItem(name, builder.toString(),ZabbixItem.ZBX_STATE_NORMAL,clock, this) };
+		return new ZabbixItem[] { new ZabbixItem(discoveryItemKey, builder.toString(),ZabbixItem.ZBX_STATE_NORMAL,clock, this) };
 	}
 
 }
