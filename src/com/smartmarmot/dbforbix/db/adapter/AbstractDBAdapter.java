@@ -29,9 +29,9 @@ import org.apache.log4j.Logger;
 import com.smartmarmot.dbforbix.config.Config;
 import com.smartmarmot.dbforbix.db.DBType;
 
-abstract class AbstractAdapter implements Adapter {
+abstract class AbstractDBAdapter implements DBAdapter {
 
-	private static final Logger		LOG	= Logger.getLogger(AbstractAdapter.class);
+	private static final Logger		LOG	= Logger.getLogger(AbstractDBAdapter.class);
 
 	private SharedPoolDataSource	datasrc;
 	
@@ -46,14 +46,14 @@ abstract class AbstractAdapter implements Adapter {
 
 
 	protected boolean persistence;
-	protected Set<String> itemGroupNames=new HashSet<String>();
+	protected Set<String> configurationUIDs=new HashSet<String>();
 
-	public Set<String> getItemGroupNames() {
-		return itemGroupNames;
+	public Set<String> getConfigurationUIDs() {
+		return configurationUIDs;
 	}
 
-	public void addItemGroupName(String itemGroupName) {
-		itemGroupNames.add(itemGroupName);
+	public void addConfigurationUID(String configurationUID) {
+		configurationUIDs.add(configurationUID);
 	}
 
 

@@ -23,7 +23,7 @@ import java.util.Set;
 
 import com.smartmarmot.dbforbix.db.DBType;
 
-public interface Adapter {
+public interface DBAdapter {
 
 	public DBType getType();
 	public String getName();
@@ -35,7 +35,7 @@ public interface Adapter {
 	public Integer getMaxWaitMillis();
 	public Integer getQueryTimeout();
 	//public String getItemFile();
-	public Set<String> getItemGroupNames();
+	public Set<String> getConfigurationUIDs();
 	
 	public String[] getDiscoveryItems();
 	public Object getDiscovery(String key);

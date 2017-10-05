@@ -15,7 +15,7 @@
  * DBforBix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.smartmarmot.dbforbix.scheduler;
+package com.smartmarmot.dbforbix.config.element;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,59 +24,51 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
 
-public class SimpleItem extends AbstractItem {
+public class SimpleConfigurationElement extends AbstractConfigurationElement {
 
-	private String query;
-	private String noData = "";
-
-	private static final Logger		LOG				= Logger.getLogger(SimpleItem.class);
-
+	private static final Logger		LOG				= Logger.getLogger(SimpleConfigurationElement.class);
+	private String simpleItemKey;
 	
-	public SimpleItem(String name, String query, String nodata, Map<String, String> itemConfig, ZServer zs) {
-		super(itemConfig,zs);
-		this.name = name;
-		this.query = query;
-		this.noData = nodata;
+	public SimpleConfigurationElement(String _prefix, int _time, String _item, String _noData, String _query) {
+		super(_prefix,_time,_item,_noData,_query);
+		simpleItemKey=_prefix+_item;
 	}
 	
 	@Override
-	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
+	public ZabbixItem[] getZabbixItemsData(Connection con, int timeout) throws SQLException {
 	 	List<ZabbixItem> values = new ArrayList<ZabbixItem>();
-	 	try(PreparedStatement pstmt = con.prepareStatement(query)){
+	 	try(PreparedStatement pstmt = con.prepareStatement(getQuery())){
 			pstmt.setQueryTimeout(timeout);
-			try(ResultSet rs = pstmt.executeQuery()){
-				String val = noData;
+			try(ResultSet resultSet = pstmt.executeQuery()){
+				String val = getNoData();
 				Long clock = new Long(System.currentTimeMillis() / 1000L);
 				
-				while (rs.next()) {
+				while (resultSet.next()) {
 					
 					/**
 					 * Get item value
 					 */
-					val=noData;
-					ResultSetMetaData meta = rs.getMetaData();
+					val=getNoData();
+					ResultSetMetaData meta = resultSet.getMetaData();
 					if (meta.getColumnCount() == 1) {
-						String fetchedVal = rs.getString(1);
+						String fetchedVal = resultSet.getString(1);
 						if (fetchedVal != null)
 							val = fetchedVal;
 					}
 					else {
 						int colNum = 1;
 						try {
-							colNum = rs.findColumn("value");
+							colNum = resultSet.findColumn("value");
 						}
 						catch (SQLException sqlex) {
 							colNum = meta.getColumnCount(); // to retrieve the last column
 						}
-						String fetchedVal = rs.getString(colNum);
+						String fetchedVal = resultSet.getString(colNum);
 						if (fetchedVal != null)
 							val = fetchedVal;
 					}
@@ -84,9 +76,9 @@ public class SimpleItem extends AbstractItem {
 					/**
 					 * Get item key
 					 */
-					String realName = name;
+					String realName = simpleItemKey;
 					for(int i = 1; i<= meta.getColumnCount(); i++){
-							realName = realName.replace("%"+i, (null != rs.getString(i)) ? rs.getString(i) : noData );
+							realName = realName.replace("%"+i, (null != resultSet.getString(i)) ? resultSet.getString(i) : getNoData() );
 					}
 					
 					
@@ -96,17 +88,10 @@ public class SimpleItem extends AbstractItem {
 				throw ex;
 			}
 		}catch(SQLException ex){
-			LOG.error("Cannot get data for item:\n" + name +"\nQuery:\n"+query, ex);
+			LOG.error("Cannot get data for item:\n" + getElementID() +"\nQuery:\n"+getQuery(), ex);
 			throw ex;
 		}
-		
-//		if (val == null)
-//			val = noData;
-//		if (val == noData){
-//			String realName = name;
-//			values.add(new ZabbixItem(realName, val,clock, this));
-//			}
-			
+				
 
 		return values.toArray(new ZabbixItem[0]);
 	}

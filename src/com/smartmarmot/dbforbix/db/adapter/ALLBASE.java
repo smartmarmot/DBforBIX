@@ -5,7 +5,7 @@ import java.util.Set;
 import com.smartmarmot.dbforbix.db.DBType;
 
 
-public class ALLBASE extends AbstractAdapter {
+public class ALLBASE extends AbstractDBAdapter {
 
 	public ALLBASE(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle,Integer maxwaitmillis,Integer queryTimeout, Set<String> set, Boolean pers) {
 		this.name = name;
@@ -17,7 +17,7 @@ public class ALLBASE extends AbstractAdapter {
 		this.maxwaitmillis=maxwaitmillis.intValue();
 		this.queryTimeout = queryTimeout.intValue();
 		this.persistence = pers;
-		this.itemGroupNames=set;
+		this.configurationUIDs=set;
 	}
 	
 	@Override

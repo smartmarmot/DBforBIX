@@ -30,9 +30,9 @@ import org.apache.log4j.Logger;
 import com.smartmarmot.common.PersistentDB;
 import com.smartmarmot.common.StackSingletonPersistent;
 import com.smartmarmot.dbforbix.config.Config;
-import com.smartmarmot.dbforbix.config.Config.ZServer;
+import com.smartmarmot.dbforbix.config.ZabbixServer;
 import com.smartmarmot.dbforbix.zabbix.protocol.Sender32;
-import com.smartmarmot.dbforbix.zabbix.protocol.SenderProtocol;
+import com.smartmarmot.dbforbix.zabbix.protocol.ISenderProtocol;
 
 /**
  * Sender query handler
@@ -49,8 +49,8 @@ public class ZabbixSender extends Thread {
 
 	private Queue<ZabbixItem>	items				= new LinkedBlockingQueue<ZabbixItem>(1000);
 	private boolean				terminate			= false;
-	private Config.ZServer[]	configuredServers	= new Config.ZServer[0];
-	private SenderProtocol		protocol;
+	private ZabbixServer[]	configuredServers	= new ZabbixServer[0];
+	private ISenderProtocol		protocol;
 
 	public ZabbixSender(PROTOCOL protVer) {
 		super("ZabbixSender");
@@ -80,7 +80,7 @@ public class ZabbixSender extends Thread {
 				/**
 				 * Put item to corresponding Zabbix Server
 				 */
-				Map<Config.ZServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<>();
+				Map<ZabbixServer,Collection<ZabbixItem>> mZServer2ZItems = new HashMap<>();
 				for(int i=0;(i<maxItems)&&(items.peek()!=null);++i){
 					ZabbixItem nextItem=items.poll();					
 					if(nextItem.getValue().isEmpty()) {
@@ -89,20 +89,20 @@ public class ZabbixSender extends Thread {
 						nextItem.setValue("Item "+nextItem+" has empty value!");
 						nextItem.setState(ZabbixItem.ZBX_STATE_NOTSUPPORTED);
 					}
-					Config.ZServer zs=nextItem.getConfItem().getZServer();
+					ZabbixServer zs=nextItem.getConfigurationElement().getZabbixServer();
 					if(null == mZServer2ZItems.get(zs))
 						mZServer2ZItems.put(zs, new HashSet<ZabbixItem>());
 					mZServer2ZItems.get(zs).add(nextItem);
 				}
 
-				for(Entry<ZServer, Collection<ZabbixItem>> m:mZServer2ZItems.entrySet()){
+				for(Entry<ZabbixServer, Collection<ZabbixItem>> m:mZServer2ZItems.entrySet()){
 					LOG.debug("ZabbixSender: Sending to " + m.getKey() + " Items[" + m.getValue().size() + "]=" + m.getValue());
 				}
 				
 				Config config = Config.getInstance();
 				
-				for (Entry<ZServer, Collection<ZabbixItem>> entry : mZServer2ZItems.entrySet()) {					
-					ZServer zs=entry.getKey();
+				for (Entry<ZabbixServer, Collection<ZabbixItem>> entry : mZServer2ZItems.entrySet()) {					
+					ZabbixServer zs=entry.getKey();
 					Collection<ZabbixItem> zItems=entry.getValue();
 //					Collection<ZabbixItem> zDiscoveries= new HashSet<ZabbixItem>();
 //					Collection<ZabbixItem> zHistories = new HashSet<ZabbixItem>();
@@ -148,7 +148,7 @@ public class ZabbixSender extends Thread {
 			items.offer(item);
 	}
 
-	synchronized public void updateServerList(Config.ZServer[] newServers) {
+	synchronized public void updateServerList(ZabbixServer[] newServers) {
 		synchronized (configuredServers) {
 			configuredServers = newServers;
 		}

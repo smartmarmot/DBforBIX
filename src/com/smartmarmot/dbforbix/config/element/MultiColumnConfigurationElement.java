@@ -15,7 +15,7 @@
  * DBforBix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.smartmarmot.dbforbix.scheduler;
+package com.smartmarmot.dbforbix.config.element;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,34 +24,32 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
 
-public class MultiColumnItem extends AbstractMultiItem {
-	
-	private static final Logger		LOG				= Logger.getLogger(MultiColumnItem.class);
+public class MultiColumnConfigurationElement extends AbstractMultiConfigurationElement {
 
-	public MultiColumnItem(String prefix, String itemList, String query, Map<String, String> itemConfig, ZServer zs) {
-		super(prefix, itemList, query, itemConfig, zs);
+	private static final Logger	LOG	= Logger.getLogger(MultiColumnConfigurationElement.class);
+
+	public MultiColumnConfigurationElement(String _prefix, int _time, String _items, String _noData, String _query) {
+		super(_prefix, _time, _items, _noData, _query);
 	}
 
 	@Override
-	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {
+	public ZabbixItem[] getZabbixItemsData(Connection con, int timeout) throws SQLException {
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 		List<ZabbixItem> values = new ArrayList<>();
 		/**
 		 * Statement has to be closed or "Error message: ORA-01000: maximum open cursors exceeded" occurs with time otherwise
 		 */
-		try(PreparedStatement pstmt = con.prepareStatement(query)){
+		try(PreparedStatement pstmt = con.prepareStatement(getQuery())){
 			pstmt.setQueryTimeout(timeout);
 			try(ResultSet rs = pstmt.executeQuery()){
 							
 				/**
+				 * Example:
 				 * <multiquery time="60" item="index[%1]|free[%1]" type="column">
 				 * SELECT table_schema "database", SUM(index_length) "size", SUM(data_free) "free" 
 				 * FROM INFORMATION_SCHEMA.TABLES 
@@ -61,21 +59,21 @@ public class MultiColumnItem extends AbstractMultiItem {
 				
 				while (rs.next()) {//it can be multirows
 					ResultSetMetaData meta = rs.getMetaData();
-					if (meta.getColumnCount() < items.length) {
-						LOG.error("Number of columns in select of item "+name+items+"\nof item config: "+this.getItemConfig().keySet()+
-								"\nis less than in item config");
+					if (meta.getColumnCount() < itemKeys.length) {
+						LOG.error("Number of columns in SQL select of configuration element "+getElementID()+"\nof configuration item: "+getConfigurationItem().getConfigurationUID()+
+								"\nis less than in configuration item");
 						break;
 					}
 					else {
 						//from the last column to first
-						for (int it=items.length-1, column=meta.getColumnCount();it>=0;--it,--column){
+						for (int it=itemKeys.length-1, column=meta.getColumnCount();it>=0;--it,--column){
 							//name[%1_%2_%5] -> name[one_two_three]
-							String realName = items[it];
+							String realName = itemKeys[it];
 							for(int i = 1; i<= meta.getColumnCount(); i++)
-								realName = realName.replace("%"+i, (null != rs.getString(i)) ? rs.getString(i) : noData );
+								realName = realName.replace("%"+i, (null != rs.getString(i)) ? rs.getString(i) : getNoData() );
 							//get value
-							values.add(new ZabbixItem(name+realName, 
-									(null != rs.getString(column)) ? rs.getString(column) : noData,
+							values.add(new ZabbixItem(getPrefix()+realName,
+									(null != rs.getString(column)) ? rs.getString(column) : getNoData(),
 									ZabbixItem.ZBX_STATE_NORMAL,clock, this));
 						}
 					}
@@ -88,7 +86,7 @@ public class MultiColumnItem extends AbstractMultiItem {
 				throw ex;
 			}
 		}catch(SQLException ex){
-			LOG.error("Cannot get data for items:\n" + name+itemList +"\nQuery:\n"+query, ex);
+			LOG.error("Cannot get data for configuration element: " + getElementID() +"\nQuery:\n"+getQuery(), ex);
 			throw ex;
 		}
 		return values.toArray(new ZabbixItem[0]);

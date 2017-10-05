@@ -15,25 +15,17 @@
  * DBforBix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.smartmarmot.dbforbix.scheduler;
+package com.smartmarmot.dbforbix.zabbix.protocol;
 
-import java.util.Map;
+import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
-import com.smartmarmot.dbforbix.config.Config.ZServer;
 
-abstract class AbstractMultiItem extends AbstractItem {
+public interface ISenderProtocol {
+	public boolean isMultiValueSupported();
 
-	protected String[] items;
-	protected String itemList;
-	protected String query;
-	protected String noData = "";
+	public String encodeItem(ZabbixItem item);
 	
-	AbstractMultiItem(String prefix, String itemList, String query, Map<String, String> itemConfig, ZServer zs) {
-		super(itemConfig, zs);
-		this.name = prefix;
-		this.itemList=itemList;
-		this.items = this.itemList.split("\\|");
-		this.query = query;
-	}
+	public String encodeItems(ZabbixItem[] items);
 	
+	public boolean isResponeOK(int readed, byte[] response);
 }
