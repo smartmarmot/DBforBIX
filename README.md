@@ -24,6 +24,6 @@ In the dists directory you find the source code package that has generated a spe
 The template and items are available within the distributions files but also in a separate location to make it easy to pull change requests as well as the src and conf.
 
 ## Object Model
-Constructed with ObjectAid (http://www.objectaid.com/) - Eclipse plug-in
+Constructed with ![ObjectAid](http://www.objectaid.com/) (Eclipse plug-in)
 ![Object Model current diagram](https://github.com/vagabondan/DBforBIX/blob/master/src/ObjectModel.png)
 ![Object Model source](https://github.com/vagabondan/DBforBIX/blob/master/src/ObjectModel.xml)
