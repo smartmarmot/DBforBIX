@@ -22,7 +22,7 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 /**
  * Zabbix 3.2 Proxy sender protocol, JSON based
  * 
- * @author Andrey Denisov
+ * @author Vagabondan
  */
 public class Sender32 implements ISenderProtocol {
 	

@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 /**
  * Factory for Zabbix configuration parser
- * @author andenis2
+ * @author Vagabondan
  *
  */
 public class ConfigurationItemParserFactory {
