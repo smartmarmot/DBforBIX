@@ -15,17 +15,14 @@
  * DBforBix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.smartmarmot.dbforbix.zabbix.protocol;
+package com.smartmarmot.dbforbix.config.element;
 
-import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
+abstract class AbstractMultiConfigurationElement extends AbstractConfigurationElement {
 
-
-public interface SenderProtocol {
-	public boolean isMultiValueSupported();
-
-	public String encodeItem(ZabbixItem item);
+	protected String[] itemKeys;
 	
-	public String encodeItems(ZabbixItem[] items);
-	
-	public boolean isResponeOK(int readed, byte[] response);
+	AbstractMultiConfigurationElement(String _prefix, int _time, String _items, String _noData, String _query) {
+		super(_prefix, _time, _items, _noData, _query);
+		itemKeys = _items.split("\\|");
+	}	
 }

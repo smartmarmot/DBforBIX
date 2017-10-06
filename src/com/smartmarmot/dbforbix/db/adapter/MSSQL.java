@@ -21,7 +21,7 @@ import java.util.Set;
 
 import com.smartmarmot.dbforbix.db.DBType;
 
-public class MSSQL extends AbstractAdapter {
+public class MSSQL extends AbstractDBAdapter {
 	public MSSQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Integer queryTimeout, Set<String> set, Boolean pers) {
 		this.name = name;
 		this.url = url;
@@ -31,7 +31,7 @@ public class MSSQL extends AbstractAdapter {
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
 		this.queryTimeout = queryTimeout.intValue();
-		this.itemGroupNames = set;
+		this.configurationUIDs = set;
 		this.persistence = pers;
 				
 	}

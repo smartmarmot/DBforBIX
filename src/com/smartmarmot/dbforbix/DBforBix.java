@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import com.smartmarmot.common.Constants;
 import com.smartmarmot.dbforbix.config.Config;
-import com.smartmarmot.dbforbix.config.Config.ZServer;
+import com.smartmarmot.dbforbix.config.ZabbixServer;
 import com.smartmarmot.dbforbix.db.DBManager;
 import com.smartmarmot.dbforbix.zabbix.PersistentDBSender;
 import com.smartmarmot.dbforbix.zabbix.ZabbixSender;
@@ -51,7 +51,7 @@ public class DBforBix implements Daemon {
 	
 	private static final Logger				LOG				= Logger.getLogger(DBforBix.class);
 	
-	private static ZabbixSender				zbxSender;
+	private static ZabbixSender				_zabbixSender;
 	private static PersistentDBSender	persSender;           
 	//private static boolean debug = false;
 	
@@ -102,7 +102,7 @@ public class DBforBix implements Daemon {
 		
 		// read config from Zabbix Server
 		config.getZabbixConfigurationItems();// fill itemConfigs collection
-		config.buildItems();
+		config.buildConfigurationElementsAndSchedulers();
 	} 
 	
 	
@@ -175,9 +175,9 @@ public class DBforBix implements Daemon {
 						LOG.info("Starting "+ Constants.BANNER);
 						// writePid(_pid, _pidfile);
 						
-						zbxSender = new ZabbixSender(ZabbixSender.PROTOCOL.V32);
-						zbxSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
-						zbxSender.start();
+						_zabbixSender = new ZabbixSender(ZabbixSender.PROTOCOL.V32);
+						_zabbixSender.updateServerList(config.getZabbixServers().toArray(new ZabbixServer[0]));
+						_zabbixSender.start();
 										
 						//persSender = new PersistentDBSender(PersistentDBSender.PROTOCOL.V18);
 						//persSender.updateServerList(config.getZabbixServers().toArray(new ZServer[0]));
@@ -198,13 +198,13 @@ public class DBforBix implements Daemon {
 					case "stop": {
 						LOG.info("Stopping DBforBix...");
 						config=config.reset();
-						if (zbxSender != null) {
-							zbxSender.terminate();
-							while (zbxSender.isAlive())
+						if (_zabbixSender != null) {
+							_zabbixSender.terminate();
+							while (_zabbixSender.isAlive())
 								Thread.yield();
 						}
 						//workTimers=new HashMap<String, Timer>();
-						zbxSender=null;
+						_zabbixSender=null;
 						
 						if (persSender != null) {
 							persSender.terminate();
@@ -373,8 +373,8 @@ public class DBforBix implements Daemon {
 	
 	
 	
-	public static ZabbixSender getZSender() {
-		return zbxSender;
+	public static ZabbixSender getZabbixSender() {
+		return _zabbixSender;
 	}
 	
 	

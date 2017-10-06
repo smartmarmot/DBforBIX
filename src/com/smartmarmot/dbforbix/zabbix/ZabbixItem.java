@@ -19,7 +19,7 @@ package com.smartmarmot.dbforbix.zabbix;
 
 import java.io.Serializable;
 
-import com.smartmarmot.dbforbix.scheduler.Item;
+import com.smartmarmot.dbforbix.config.element.IConfigurationElement;
 
 public final class ZabbixItem implements Serializable {
 
@@ -28,29 +28,29 @@ public final class ZabbixItem implements Serializable {
 	
 	private static final long	serialVersionUID	= 1374520722821228793L;
 
-	private String				key;
-	private String				value;
-	private String				host;
-	private int					state;
-	private Long				clock;
-	private String				lastlogsize;
-	private Item				confItem;
+	private String					key;
+	private String					value;
+	private String					host;
+	private int						state;
+	private Long					clock;
+	private String					lastlogsize;
+	private IConfigurationElement 	configurationElement;
 
 
 	//main case
-	public ZabbixItem(String key, String value, int state, Long clock, Item confItem) {
+	public ZabbixItem(String key, String value, int state, Long clock, IConfigurationElement configurationElement) {
 		if (key == null || "".equals(key.trim()))
 			throw new IllegalArgumentException("empty key");
 		if (value == null)
 			throw new IllegalArgumentException("null value for key '" + key + "'");
-		if (confItem == null)
-			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
+		if (configurationElement == null)
+			throw new IllegalArgumentException("null configuration element for '" + host + "." + key + "'");
 
 		this.key = key;
 		this.value = value;
 		this.clock = clock;
-		this.host=confItem.getItemConfig().get("host");
-		this.setConfItem(confItem);
+		this.host=configurationElement.getConfigurationItem().getHost();
+		this.setConfigurationElement(configurationElement);
 		this.setState(state);
 	}
 
@@ -61,14 +61,14 @@ public final class ZabbixItem implements Serializable {
 			throw new IllegalArgumentException("empty key");
 		if (value == null)
 			throw new IllegalArgumentException("null value for key '" + key + "'");
-		if (confItem == null)
-			throw new IllegalArgumentException("null configuration item for '" + host + "." + key + "'");
+		if (configurationElement == null)
+			throw new IllegalArgumentException("null configuration element for '" + host + "." + key + "'");
 
 		this.key = key;
 		this.value = value;
 		this.clock = clock;
 		this.host=host;
-		confItem=null;
+		this.configurationElement=null;
 	}
 
 
@@ -109,12 +109,12 @@ public final class ZabbixItem implements Serializable {
 		return getHost() + " " + getKey() + ": " + getValue();
 	}
 
-	public Item getConfItem() {
-		return confItem;
+	public IConfigurationElement getConfigurationElement() {
+		return configurationElement;
 	}
 
-	public void setConfItem(Item confItem) {	
-		this.confItem = confItem;
+	public void setConfigurationElement(IConfigurationElement configurationElement) {	
+		this.configurationElement = configurationElement;
 	}
 
 

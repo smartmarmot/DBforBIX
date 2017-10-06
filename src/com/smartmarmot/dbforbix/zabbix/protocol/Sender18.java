@@ -28,7 +28,7 @@ import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
  * 
  * @author Andrea Dalle Vacche
  */
-public class Sender18 implements SenderProtocol {
+public class Sender18 implements ISenderProtocol {
 	 private static final String data = "</key><data>";
  	
 	 private static final String time = "</data><timestamp>";

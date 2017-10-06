@@ -15,7 +15,7 @@
  * DBforBix. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.smartmarmot.dbforbix.scheduler;
+package com.smartmarmot.dbforbix.config.element;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,32 +23,31 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-import com.smartmarmot.dbforbix.config.Config.ZServer;
 import com.smartmarmot.dbforbix.zabbix.ZabbixItem;
 
-public class MultiRowItem extends AbstractMultiItem {
+public class MultiRowConfigurationElement extends AbstractMultiConfigurationElement {
 	
-	private static final Logger		LOG				= Logger.getLogger(MultiRowItem.class);
+	private static final Logger		LOG				= Logger.getLogger(MultiRowConfigurationElement.class);
 
-	public MultiRowItem(String prefix, String itemList, String query, Map<String, String> itemConfig, ZServer zs) {
-		super(prefix, itemList, query, itemConfig, zs);
+	public MultiRowConfigurationElement(String _prefix, int _time, String _items, String _noData, String _query) {
+		//noData shouldn't be null!!! Initialize by empty string at least!
+		super(_prefix, _time, _items, _noData==null?"":_noData, _query);
 	}
 
 	@Override
-	public ZabbixItem[] getItemData(Connection con, int timeout) throws SQLException {		
+	public ZabbixItem[] getZabbixItemsData(Connection con, int timeout) throws SQLException {		
 		Long clock = new Long(System.currentTimeMillis() / 1000L);
 		Map<String,ZabbixItem> values = new HashMap<>();
 		
-		try(PreparedStatement pstmt = con.prepareStatement(query)){		
+		try(PreparedStatement pstmt = con.prepareStatement(getQuery())){		
 			pstmt.setQueryTimeout(timeout);
 			try(ResultSet rs = pstmt.executeQuery()){
 			
 				// fill with base items
-				for (String item: items)
-					values.put(item, new ZabbixItem(name+item, noData,ZabbixItem.ZBX_STATE_NORMAL,clock, this));
+				for (String itemKey: itemKeys)
+					values.put(itemKey, new ZabbixItem(getPrefix()+itemKey, getNoData(), ZabbixItem.ZBX_STATE_NORMAL,clock, this));
 				
 				// now check if we find better values
 				while (rs.next()) {
@@ -56,7 +55,7 @@ public class MultiRowItem extends AbstractMultiItem {
 					String fetchedVal = rs.getString(2);
 					if (fetchedVal != null && values.containsKey(fetchedName)) {
 						clock = new Long(System.currentTimeMillis() / 1000L);
-						values.put(fetchedName, new ZabbixItem(name+fetchedName, fetchedVal,ZabbixItem.ZBX_STATE_NORMAL,clock,this));
+						values.put(fetchedName, new ZabbixItem(getPrefix()+fetchedName, fetchedVal,ZabbixItem.ZBX_STATE_NORMAL,clock,this));
 						
 					}
 				}
@@ -64,7 +63,7 @@ public class MultiRowItem extends AbstractMultiItem {
 				throw ex;
 			}
 		}catch(SQLException ex){
-			LOG.error("Cannot get data for items:\n" + name+itemList +"\nQuery:\n"+query, ex);
+			LOG.error("Cannot get data for items:\n" + getElementID() +"\nQuery:\n"+getQuery(), ex);
 			throw ex;
 		}
 

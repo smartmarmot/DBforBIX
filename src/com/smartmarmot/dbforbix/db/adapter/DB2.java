@@ -22,7 +22,7 @@ import java.util.Set;
 import com.smartmarmot.dbforbix.db.DBType;
 
 
-public class DB2 extends AbstractAdapter {
+public class DB2 extends AbstractDBAdapter {
 
 	public DB2(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle,Integer maxwaitmillis, Integer queryTimeout, Set<String> set, Boolean pers) {
 		this.name = name;
@@ -34,7 +34,7 @@ public class DB2 extends AbstractAdapter {
 		this.maxwaitmillis = maxwaitmillis.intValue();
 		this.queryTimeout = queryTimeout.intValue();
 		this.persistence = pers;
-		this.itemGroupNames=set;
+		this.configurationUIDs=set;
 				
 	}
 	

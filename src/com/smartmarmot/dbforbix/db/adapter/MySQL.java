@@ -21,9 +21,9 @@ import java.util.Set;
 
 import com.smartmarmot.dbforbix.db.DBType;
 
-public class MySQL extends AbstractAdapter {
+public class MySQL extends AbstractDBAdapter {
 
-	public MySQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Integer queryTimeout, Set<String> itemGroupNames,Boolean pers) {
+	public MySQL(String name, String url, String user, String passwd, Integer maxactive, Integer maxidle, Integer maxwaitmillis, Integer queryTimeout, Set<String> set,Boolean pers) {
 		this.name = name;
 		this.url = url;
 		this.user = user;
@@ -32,7 +32,7 @@ public class MySQL extends AbstractAdapter {
 		this.maxidle = maxidle.intValue();
 		this.maxwaitmillis=maxwaitmillis.intValue();
 		this.queryTimeout = queryTimeout.intValue();
-		this.itemGroupNames = itemGroupNames;
+		this.configurationUIDs = set;
 		this.persistence = pers;
 				
 	}

@@ -21,6 +21,7 @@ public class SAXParserDBforBIX {
 	private static final int maxIterations=1000;
 	
 	//special characters/strings to replace	
+	@SuppressWarnings("serial")
 	private static final Map<String,String> mStringToReplace =new HashMap<String, String>() {{
 	    put(">", "&gt;");
 	    put("<", "&lt;");
