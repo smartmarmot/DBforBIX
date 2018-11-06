@@ -4118,7 +4118,7 @@
                     <params>&lt;parms type=&quot;oracle&quot; prefix=&quot;oracle.&quot;&gt;&#13;
 	&lt;server&gt;&#13;
 		&lt;discovery time=&quot;600&quot; item=&quot;discovery.DBforBIX.config[tablespace,{$DSN}]&quot; names=&quot;TABLESPACE&quot;&gt;SELECT DISTINCT name FROM v$tablespace WHERE name NOT IN ('TEMP')&lt;/discovery&gt;&#13;
-		&lt;multiquery time=&quot;300&quot; items=&quot;tablespace.bytes[%1]|tablespace.maxbytes[%1]&quot; type=&quot;column&quot;&gt;SELECT tablespace_name,SUM(NVL(bytes,0)) AS bytes, SUM(maxbytes) AS maxbytes FROM dba_data_files GROUP BY tablespace_name&lt;/multiquery&gt;&#13;
+		&lt;multiquery time=&quot;300&quot; items=&quot;tablespace.bytes[%1]|tablespace.maxbytes[%1]&quot; type=&quot;column&quot;&gt;SELECT d.tablespace_name, SUM(d.bytes)-(SELECT SUM(bytes) FROM dba_free_space WHERE tablespace_name=d.tablespace_name) bytes, SUM(DECODE(d.autoextensible, 'YES', d.maxbytes, d.bytes)) maxbytes FROM dba_data_files d GROUP BY d.tablespace_name&lt;/multiquery&gt;&#13;
 	&lt;/server&gt;&#13;
 &lt;/parms&gt;</params>
                     <ipmi_sensor/>
